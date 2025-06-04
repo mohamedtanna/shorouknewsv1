@@ -9,7 +9,7 @@ import '../../providers/news_provider.dart';
 
 // Data models for news articles and columns
 import '../../models/news_model.dart';
-import '../../models/column_model.dart'; // Assuming this model exists for columns
+// Assuming this model exists for columns
 
 // Reusable widgets for displaying content and ads
 import '../../widgets/news_card.dart'; // Displays individual news articles

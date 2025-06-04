@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:provider/provider.dart'; // If you decide to use a provider for notifications state
+// If you decide to use a provider for notifications state
 import 'package:shimmer/shimmer.dart';
 
 import '../../services/notification_service.dart'; // Your main notification service

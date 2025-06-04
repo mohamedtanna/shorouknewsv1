@@ -3,15 +3,14 @@ import 'package:flutter_html/flutter_html.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:go_router/go_router.dart';
-import 'package:provider/provider.dart';
 
 import '../../models/additional_models.dart'; // Contains ColumnModel
-import '../../providers/news_provider.dart'; // For consistency, though columns might have their own provider
+// For consistency, though columns might have their own provider
 import '../../services/api_service.dart'; // To fetch column details
 import '../../widgets/ad_banner.dart';
 import '../../widgets/section_header.dart';
 import '../../core/theme.dart';
-import 'columns_module.dart'; // Assuming this module will fetch column details
+// Assuming this module will fetch column details
 
 class ColumnDetailScreen extends StatefulWidget {
   final String cdate;

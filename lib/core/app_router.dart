@@ -74,7 +74,7 @@ class AppRouter {
           GoRoute(
             path: '/videos',
             name: 'videos',
-            builder: (context, state) => VideosScreen(), // Removed const
+            builder: (context, state) => const VideosScreen(), // Removed const
           ),
           GoRoute(
             path: '/video/:videoId',
@@ -149,7 +149,7 @@ class AppRouter {
           GoRoute(
             path: '/terms',
             name: 'terms',
-            builder: (context, state) => TermsScreen(),
+            builder: (context, state) => const TermsScreen(),
           ),
           GoRoute(
             path: '/privacy',
