@@ -96,6 +96,12 @@ class ApiService {
     return '$endpoint?$queryString';
   }
 
+  /// Public wrapper around [_generateCacheKey] for testing purposes.
+  @visibleForTesting
+  String generateCacheKeyForTest(String endpoint, Map<String, dynamic>? queryParams) {
+    return _generateCacheKey(endpoint, queryParams);
+  }
+
 
   /// Generic GET request with caching.
   Future<T> _get<T>(
