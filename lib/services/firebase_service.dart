@@ -4,7 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'dart:io' show Platform;
-import 'package:package_info_plus/package_info_plus.dart'; // For app version
+// For app version
 
 import '../models/new_model.dart'; // For NewsSection if needed for default subscriptions
 import 'api_service.dart';
@@ -101,7 +101,7 @@ class FirebaseService {
       } else if (Platform.isIOS) {
         final iosInfo = await deviceInfoPlugin.iosInfo;
         deviceType = 'Apple'; // Manufacturer is Apple for iOS devices
-        deviceModel = iosInfo.model ?? 'Unknown Model';
+        deviceModel = iosInfo.model;
         os = 2;
       }
 

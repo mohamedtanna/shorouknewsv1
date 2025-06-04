@@ -6,10 +6,10 @@ class VideoDetailScreen extends StatefulWidget {
   final String videoTitle;
 
   const VideoDetailScreen({
-    Key? key,
+    super.key,
     required this.videoUrl,
     required this.videoTitle, required String videoId,
-  }) : super(key: key);
+  });
 
   @override
   _VideoDetailScreenState createState() => _VideoDetailScreenState();

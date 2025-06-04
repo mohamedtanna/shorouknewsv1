@@ -3,7 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 import '../providers/news_provider.dart';
-import '../models/news_model.dart';
+import '../models/new_model.dart';
 import '../core/theme.dart';
 
 class MainLayout extends StatefulWidget {

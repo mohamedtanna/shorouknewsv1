@@ -4,7 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:shimmer/shimmer.dart'; // For loading shimmer effect
 
 import '../../providers/settings_provider.dart'; // Manages settings state and logic
-import '../../models/new_model.dart'; // For NewsSection model
+// For NewsSection model
 import '../../widgets/ad_banner.dart'; // For displaying ads
 import '../../core/theme.dart'; // For consistent app styling
 

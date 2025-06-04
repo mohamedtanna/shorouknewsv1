@@ -1,14 +1,18 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+import 'package:flutter/services.dart'; // For HapticFeedback
 import 'package:go_router/go_router.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:pull_to_refresh/pull_to_refresh.dart';
+import 'package:pull_to_refresh/pull_to_refresh.dart'; // For SmartRefresher
+import 'package:shimmer/shimmer.dart'; // For loading shimmer
+import 'package:share_plus/share_plus.dart'; // Added import for Share
+import 'package:shorouk_news/models/new_model.dart';
+import 'package:shorouk_news/widgets/news_card.dart';
 
-import '../../models/additional_models.dart';
+import '../../models/additional_models.dart'; // Contains AuthorModel, ColumnModel
 import '../../widgets/ad_banner.dart';
 import '../../widgets/section_header.dart';
 import '../../core/theme.dart';
-import 'author_module.dart';
+import 'author_module.dart'; // Contains AuthorModule and its models like AuthorStats etc.
 
 class AuthorScreen extends StatefulWidget {
   final String authorId;
@@ -41,26 +45,27 @@ class _AuthorScreenState extends State<AuthorScreen>
   bool _hasMoreData = true;
   String? _errorMessage;
   int _currentPage = 1;
-  
+  final int _pageSize = 10; // Page size for fetching columns
+
   // Search and filters
   AuthorSearchFilters _filters = AuthorSearchFilters();
   bool _showFilters = false;
 
   // Animations
   late AnimationController _fadeController;
-  late AnimationController _slideController;
+  late AnimationController _slideController; // For search bar or filter panel
   late Animation<double> _fadeAnimation;
   late Animation<Offset> _slideAnimation;
 
   // UI State
   bool _isSearchExpanded = false;
-  bool _showStats = false;
+  bool _showStats = false; // To toggle stats panel visibility
 
   @override
   void initState() {
     super.initState();
     _setupAnimations();
-    _initializeModule();
+    _initializeModuleAndLoadData(); // Combined for clarity
     _scrollController.addListener(_onScroll);
   }
 
@@ -80,88 +85,81 @@ class _AuthorScreenState extends State<AuthorScreen>
       duration: const Duration(milliseconds: 600),
       vsync: this,
     );
-
     _slideController = AnimationController(
-      duration: const Duration(milliseconds: 800),
+      duration: const Duration(milliseconds: 300), // Faster for search/filter panel
       vsync: this,
     );
-
-    _fadeAnimation = Tween<double>(
-      begin: 0.0,
-      end: 1.0,
-    ).animate(CurvedAnimation(
-      parent: _fadeController,
-      curve: Curves.easeInOut,
-    ));
-
-    _slideAnimation = Tween<Offset>(
-      begin: const Offset(0, 0.1),
-      end: Offset.zero,
-    ).animate(CurvedAnimation(
-      parent: _slideController,
-      curve: Curves.easeOutCubic,
-    ));
+    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+        CurvedAnimation(parent: _fadeController, curve: Curves.easeInOut));
+    _slideAnimation = Tween<Offset>(begin: const Offset(0, -1), end: Offset.zero)
+        .animate(CurvedAnimation(parent: _slideController, curve: Curves.easeOut));
   }
 
-  Future<void> _initializeModule() async {
-    await _authorModule.initialize();
-    await _loadData();
+  Future<void> _initializeModuleAndLoadData() async {
+    await _authorModule.initialize(); // Initialize module first
+    await _loadData(isInitialLoad: true); // Then load data
   }
 
-  Future<void> _loadData() async {
+  Future<void> _loadData({bool refresh = false, bool isInitialLoad = false}) async {
+    if (!mounted) return;
+    setState(() {
+      _isLoading = isInitialLoad || refresh; // Show main loader only on initial or refresh
+      _errorMessage = null;
+      if (refresh) {
+         _currentPage = 1;
+         _columns.clear();
+         _hasMoreData = true;
+      }
+    });
+
     try {
-      setState(() {
-        _isLoading = true;
-        _errorMessage = null;
-      });
-
-      // Load author details
-      final author = await _authorModule.getAuthor(widget.authorId);
-      
-      // Load columns
-      final columns = await _authorModule.getAuthorColumns(
-        widget.authorId,
-        page: 1,
-        filters: _filters,
-      );
-
-      // Load additional data
-      final stats = await _authorModule.getAuthorStats(widget.authorId);
-      final socialLinks = await _authorModule.getAuthorSocialLinks(widget.authorId);
+      // Fetch all data concurrently
+      final results = await Future.wait([
+        _authorModule.getAuthor(widget.authorId, useCache: !refresh),
+        _authorModule.getAuthorColumns(
+          widget.authorId,
+          page: 1, // Always fetch page 1 on initial load/refresh
+          pageSize: _pageSize,
+          filters: _filters,
+          useCache: !refresh,
+        ),
+        _authorModule.getAuthorStats(widget.authorId, useCache: !refresh),
+        _authorModule.getAuthorSocialLinks(widget.authorId, useCache: !refresh),
+      ]);
 
       if (mounted) {
         setState(() {
-          _author = author;
-          _columns = columns;
-          _authorStats = stats;
-          _socialLinks = socialLinks;
-          _currentPage = 1;
-          _hasMoreData = columns.length >= 10;
-          _isLoading = false;
+          _author = results[0] as AuthorModel?;
+          _columns = results[1] as List<ColumnModel>;
+          _authorStats = results[2] as AuthorStats?;
+          _socialLinks = results[3] as AuthorSocialLinks?;
+          _currentPage = 1; // Reset current page after initial load/refresh
+          _hasMoreData = _columns.length >= _pageSize;
+          _isLoading = false; // Stop main loader
         });
-
-        _fadeController.forward();
-        _slideController.forward();
+        _fadeController.forward(from: 0.0); // Restart fade animation
       }
     } catch (e) {
       if (mounted) {
         setState(() {
-          _errorMessage = 'فشل في تحميل بيانات الكاتب';
+          _errorMessage = 'فشل في تحميل بيانات الكاتب: ${e.toString()}';
           _isLoading = false;
         });
+        debugPrint("Error in _loadData for author ${widget.authorId}: $e");
       }
     }
   }
 
   Future<void> _loadMoreData() async {
-    if (_isLoadingMore || !_hasMoreData) return;
+    if (_isLoadingMore || !_hasMoreData || !mounted) return;
 
+    setState(() => _isLoadingMore = true);
+    
     try {
-      setState(() => _isLoadingMore = true);
-
       final newColumns = await _authorModule.getAuthorColumns(
         widget.authorId,
-        page: _currentPage + 1,
+        page: _currentPage + 1, // Fetch next page
+        pageSize: _pageSize,
         filters: _filters,
       );
 
@@ -169,92 +167,88 @@ class _AuthorScreenState extends State<AuthorScreen>
         setState(() {
           _columns.addAll(newColumns);
           _currentPage++;
-          _hasMoreData = newColumns.length >= 10;
+          _hasMoreData = newColumns.length >= _pageSize;
           _isLoadingMore = false;
         });
       }
     } catch (e) {
       if (mounted) {
         setState(() => _isLoadingMore = false);
-        _showMessage('فشل في تحميل المزيد من المقالات');
+        _showMessage('فشل في تحميل المزيد من المقالات', isError: true);
+        debugPrint("Error in _loadMoreData for author ${widget.authorId}: $e");
       }
     }
   }
 
   void _onScroll() {
     if (_scrollController.position.pixels >=
-        _scrollController.position.maxScrollExtent * 0.8) {
+            _scrollController.position.maxScrollExtent * 0.8 && // Trigger a bit earlier
+        !_isLoading && !_isLoadingMore && _hasMoreData) {
       _loadMoreData();
     }
   }
 
   Future<void> _onRefresh() async {
-    _authorModule.clearCache();
-    await _loadData();
-    _refreshController.refreshCompleted();
+    _authorModule.clearCache(); // Clear module specific cache on pull-to-refresh
+    await _loadData(refresh: true);
+    if (mounted) _refreshController.refreshCompleted();
   }
 
-  void _onLoadMore() async {
-    await _loadMoreData();
-    _refreshController.loadComplete();
-  }
-
-  void _showMessage(String message) {
+  void _showMessage(String message, {bool isError = false}) {
+    if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),
-        backgroundColor: AppTheme.primaryColor,
+        backgroundColor: isError ? Colors.red[700] : AppTheme.primaryColor,
+        duration: const Duration(seconds: 2),
       ),
     );
   }
 
   Future<void> _toggleFavorite() async {
+    if (_author == null) return;
     try {
-      await _authorModule.toggleFavoriteAuthor(widget.authorId);
       await HapticFeedback.lightImpact();
-      
-      final isFavorite = _authorModule.isAuthorFavorite(widget.authorId);
-      _showMessage(isFavorite ? 'تم إضافة الكاتب للمفضلة' : 'تم إزالة الكاتب من المفضلة');
-      
-      setState(() {}); // Refresh to update favorite icon
+      await _authorModule.toggleFavoriteAuthor(widget.authorId);
+      if (mounted) {
+         final isFavorite = _authorModule.isAuthorFavorite(widget.authorId);
+        _showMessage(isFavorite ? 'تم إضافة الكاتب للمفضلة' : 'تم إزالة الكاتب من المفضلة');
+        setState(() {}); // Rebuild to update favorite icon
+      }
     } catch (e) {
-      _showMessage('فشل في تحديث المفضلة');
+      _showMessage('فشل في تحديث المفضلة', isError: true);
     }
   }
 
   Future<void> _shareAuthor() async {
     if (_author == null) return;
-
     try {
       await _authorModule.shareAuthor(_author!);
     } catch (e) {
-      _showMessage('فشل في مشاركة الكاتب');
+      _showMessage('فشل في مشاركة الكاتب', isError: true);
     }
   }
 
-  void _applyFilters() {
-    setState(() {
-      _showFilters = false;
-      _currentPage = 1;
-      _columns.clear();
-    });
-    _loadData();
+  void _applyFiltersAndSearch() { 
+    if (mounted) {
+      setState(() {
+        _showFilters = false; 
+        _isSearchExpanded = false; 
+        _currentPage = 1;
+        _columns.clear();
+      });
+    }
+    _loadData(refresh: true); 
   }
 
-  void _resetFilters() {
-    setState(() {
-      _filters = AuthorSearchFilters();
-      _searchController.clear();
-      _showFilters = false;
-    });
-    _applyFilters();
-  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: _buildAppBar(),
-      body: _isLoading ? _buildLoadingWidget() : _buildContent(),
+      body: _isLoading && _columns.isEmpty && _author == null 
+          ? _buildLoadingWidget() 
+          : _buildContent(),
       floatingActionButton: _buildFloatingActionButton(),
     );
   }
@@ -264,235 +258,273 @@ class _AuthorScreenState extends State<AuthorScreen>
       title: Text(_author?.arName ?? 'الكاتب'),
       leading: IconButton(
         icon: const Icon(Icons.arrow_back),
-        onPressed: () => context.go('/columns'),
+        onPressed: () {
+          if (context.canPop()) context.pop();
+          else context.go('/authors'); 
+        },
       ),
       actions: [
         if (_author != null) ...[
           IconButton(
             icon: Icon(
               _authorModule.isAuthorFavorite(widget.authorId)
-                  ? Icons.favorite
-                  : Icons.favorite_border,
+                  ? Icons.favorite_rounded 
+                  : Icons.favorite_border_outlined,
               color: _authorModule.isAuthorFavorite(widget.authorId)
-                  ? Colors.red
+                  ? Colors.redAccent
                   : null,
             ),
+            tooltip: 'إضافة للمفضلة',
             onPressed: _toggleFavorite,
           ),
           IconButton(
-            icon: const Icon(Icons.share),
+            icon: const Icon(Icons.share_outlined),
+            tooltip: 'مشاركة الكاتب',
             onPressed: _shareAuthor,
           ),
           PopupMenuButton<String>(
+            tooltip: 'خيارات إضافية',
             onSelected: (value) {
-              switch (value) {
-                case 'search':
-                  setState(() {
-                    _isSearchExpanded = !_isSearchExpanded;
-                  });
-                  break;
-                case 'filters':
-                  setState(() {
-                    _showFilters = !_showFilters;
-                  });
-                  break;
-                case 'stats':
-                  setState(() {
-                    _showStats = !_showStats;
-                  });
-                  break;
+              if (mounted) {
+                setState(() {
+                  switch (value) {
+                    case 'search':
+                      _isSearchExpanded = !_isSearchExpanded;
+                      if (_isSearchExpanded) _slideController.forward(); else _slideController.reverse();
+                      _showFilters = false; 
+                      break;
+                    case 'filters':
+                      _showFilters = !_showFilters;
+                       if (_showFilters) _slideController.forward(); else _slideController.reverse();
+                      _isSearchExpanded = false; 
+                      break;
+                    case 'stats':
+                      _showStats = !_showStats;
+                      break;
+                  }
+                });
               }
             },
             itemBuilder: (context) => [
               const PopupMenuItem(
                 value: 'search',
-                child: Row(
-                  children: [
-                    Icon(Icons.search),
-                    SizedBox(width: 8),
-                    Text('البحث'),
-                  ],
-                ),
+                child: Row(children: [ Icon(Icons.search_outlined), SizedBox(width: 8), Text('البحث في المقالات')]),
               ),
               const PopupMenuItem(
                 value: 'filters',
-                child: Row(
-                  children: [
-                    Icon(Icons.filter_list),
-                    SizedBox(width: 8),
-                    Text('الفلاتر'),
-                  ],
-                ),
+                child: Row(children: [ Icon(Icons.filter_alt_outlined), SizedBox(width: 8), Text('فرز وتصفية')]),
               ),
-              const PopupMenuItem(
+              PopupMenuItem(
                 value: 'stats',
-                child: Row(
-                  children: [
-                    Icon(Icons.analytics),
-                    SizedBox(width: 8),
-                    Text('الإحصائيات'),
-                  ],
-                ),
+                child: Row(children: [ Icon(_showStats ? Icons.analytics_rounded : Icons.analytics_outlined), SizedBox(width: 8), Text(_showStats ? 'إخفاء الإحصائيات' : 'عرض الإحصائيات')]),
               ),
             ],
           ),
         ],
       ],
-      bottom: _isSearchExpanded ? _buildSearchBar() : null,
+      bottom: (_isSearchExpanded || _showFilters) ? _buildSearchOrFilterBar() : null,
     );
   }
-
-  PreferredSizeWidget _buildSearchBar() {
+  
+  PreferredSizeWidget _buildSearchOrFilterBar() {
     return PreferredSize(
-      preferredSize: const Size.fromHeight(60),
-      child: Container(
-        padding: const EdgeInsets.all(8),
-        child: TextField(
-          controller: _searchController,
-          decoration: InputDecoration(
-            hintText: 'البحث في مقالات الكاتب...',
-            prefixIcon: const Icon(Icons.search),
-            suffixIcon: IconButton(
-              icon: const Icon(Icons.clear),
-              onPressed: () {
-                _searchController.clear();
-                _filters = _filters.copyWith(searchQuery: '');
-                _applyFilters();
-              },
-            ),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-            ),
-            filled: true,
-            fillColor: Colors.white,
-          ),
-          onSubmitted: (query) {
-            _filters = _filters.copyWith(searchQuery: query);
-            _applyFilters();
-          },
+      preferredSize: const Size.fromHeight(60), 
+      child: SlideTransition(
+        position: _slideAnimation,
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 6.0),
+          color: Theme.of(context).appBarTheme.backgroundColor?.withAlpha(25), // Corrected: withOpacity to withAlpha
+          child: _isSearchExpanded ? _buildColumnSearchBar() : (_showFilters ? _buildFilterChipsBar() : const SizedBox.shrink()),
         ),
       ),
     );
   }
 
+
+  Widget _buildColumnSearchBar() { 
+    return TextField(
+      controller: _searchController,
+      autofocus: true,
+      decoration: InputDecoration(
+        hintText: 'البحث في مقالات ${_author?.arName ?? "الكاتب"}...',
+        prefixIcon: const Icon(Icons.search, size: 20),
+        suffixIcon: _searchController.text.isNotEmpty ? IconButton(
+          icon: const Icon(Icons.clear, size: 20),
+          onPressed: () {
+            _searchController.clear();
+            _filters = _filters.copyWith(searchQuery: ''); 
+            _applyFiltersAndSearch();
+          },
+        ) : null,
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(30), borderSide: BorderSide.none),
+        filled: true,
+        fillColor: Theme.of(context).scaffoldBackgroundColor,
+        contentPadding: const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
+      ),
+      onChanged: (query) {
+      },
+      onSubmitted: (query) {
+        _filters = _filters.copyWith(searchQuery: query);
+        _applyFiltersAndSearch();
+      },
+    );
+  }
+  
+  Widget _buildFilterChipsBar() { 
+     return ListView(
+      scrollDirection: Axis.horizontal,
+      padding: const EdgeInsets.symmetric(vertical: 8.0), // Added padding
+      children: AuthorColumnSortBy.values.map((sortBy) {
+        bool isSelected = _filters.sortBy == sortBy;
+        return Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 4.0),
+          child: ChoiceChip(
+            label: Text(_getSortByLabel(sortBy)),
+            selected: isSelected,
+            onSelected: (selected) {
+              if (selected) {
+                if (mounted) {
+                  setState(() {
+                    if (_filters.sortBy == sortBy) { 
+                      _filters = _filters.copyWith(sortBy: sortBy, ascending: !_filters.ascending);
+                    } else {
+                      _filters = _filters.copyWith(sortBy: sortBy, ascending: false); 
+                    }
+                  });
+                }
+                _applyFiltersAndSearch();
+              }
+            },
+            avatar: isSelected ? Icon(_filters.ascending ? Icons.arrow_upward : Icons.arrow_downward, size: 16) : null,
+            selectedColor: AppTheme.tertiaryColor.withAlpha(50), // Corrected: withOpacity to withAlpha
+            backgroundColor: Theme.of(context).chipTheme.backgroundColor,
+            labelStyle: TextStyle(fontSize: 13, color: isSelected ? AppTheme.tertiaryColor : null),
+          ),
+        );
+      }).toList(),
+    );
+  }
+
+
   Widget _buildLoadingWidget() {
-    return const Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          CircularProgressIndicator(),
-          SizedBox(height: 16),
-          Text('جاري تحميل بيانات الكاتب...'),
-        ],
+    return Shimmer.fromColors(
+      baseColor: Colors.grey[300]!,
+      highlightColor: Colors.grey[100]!,
+      child: SingleChildScrollView(
+        physics: const NeverScrollableScrollPhysics(),
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(children: [
+              const CircleAvatar(radius: 40, backgroundColor: Colors.white),
+              const SizedBox(width: 16),
+              Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                Container(height: 20, width: 150, color: Colors.white, margin: const EdgeInsets.only(bottom: 8), decoration: BoxDecoration(borderRadius: BorderRadius.circular(4))),
+                Container(height: 14, width: 100, color: Colors.white, decoration: BoxDecoration(borderRadius: BorderRadius.circular(4))),
+              ])),
+            ]),
+            const SizedBox(height: 16),
+            Container(height: 60, width: double.infinity, color: Colors.white, decoration: BoxDecoration(borderRadius: BorderRadius.circular(8))),
+            const SizedBox(height: 24),
+            Container(height: 24, width: 200, color: Colors.white, margin: const EdgeInsets.only(bottom: 16), decoration: BoxDecoration(borderRadius: BorderRadius.circular(4))),
+            ...List.generate(3, (index) => Padding(
+              padding: const EdgeInsets.only(bottom: 12.0),
+              child: Container(height: 120, width: double.infinity, decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(8))),
+            )),
+          ],
+        ),
       ),
     );
   }
 
   Widget _buildContent() {
-    if (_errorMessage != null) {
+    if (_errorMessage != null && _author == null) { 
       return _buildErrorWidget();
     }
+    if (_author == null) return const SizedBox.shrink(); 
 
     return FadeTransition(
       opacity: _fadeAnimation,
       child: SlideTransition(
-        position: _slideAnimation,
+        // Corrected: position was _slideAnimation, but this is for the whole content.
+        // The search/filter bar uses _slideAnimation. For general content, it's usually not slid.
+        // If you intend to slide the whole content, keep it. Otherwise, remove.
+        // For now, assuming the slide is for the search/filter bar, not the main content.
+        position: Tween<Offset>(begin: Offset.zero, end: Offset.zero).animate(_slideController), // No slide for main content
         child: SmartRefresher(
           controller: _refreshController,
           enablePullDown: true,
-          enablePullUp: _hasMoreData,
+          enablePullUp: _hasMoreData && !_isLoadingMore, 
+          header: const WaterDropHeader(waterDropColor: AppTheme.primaryColor), 
+          footer: CustomFooter(
+            builder: (BuildContext context, LoadStatus? mode) {
+              Widget body;
+              if (mode == LoadStatus.idle) {
+                body = const Text("اسحب للأعلى لتحميل المزيد");
+              } else if (mode == LoadStatus.loading) {
+                body = const CircularProgressIndicator(strokeWidth: 2.0, color: AppTheme.primaryColor);
+              } else if (mode == LoadStatus.failed) {
+                body = const Text("فشل التحميل! انقر لإعادة المحاولة");
+              } else if (mode == LoadStatus.canLoading) {
+                body = const Text("اترك للتحميل");
+              } else { 
+                body = const Text("لا يوجد المزيد من المقالات");
+              }
+              return SizedBox(height: 55.0, child: Center(child: body));
+            },
+          ),
           onRefresh: _onRefresh,
-          onLoading: _onLoadMore,
+          onLoading: _loadMoreData, 
           child: CustomScrollView(
             controller: _scrollController,
             slivers: [
-              // Ad Banner
               const SliverToBoxAdapter(
                 child: AdBanner(adUnit: '/21765378867/ShorouknewsApp_LeaderBoard2'),
               ),
-
-              // Breadcrumb
-              SliverToBoxAdapter(
-                child: _buildBreadcrumb(),
-              ),
-
-              // Filters Panel
-              if (_showFilters)
-                SliverToBoxAdapter(
-                  child: _buildFiltersPanel(),
-                ),
-
-              // Author Info
-              SliverToBoxAdapter(
-                child: _buildAuthorInfo(),
-              ),
-
-              // Statistics Panel
+              SliverToBoxAdapter(child: _buildBreadcrumb()),
+              SliverToBoxAdapter(child: _buildAuthorInfo()),
               if (_showStats && _authorStats != null)
-                SliverToBoxAdapter(
-                  child: _buildStatsPanel(),
-                ),
-
-              // Columns Section Header
+                SliverToBoxAdapter(child: _buildStatsPanel()),
               SliverToBoxAdapter(
                 child: SectionHeader(
-                  title: 'أحدث مقالات الكاتب',
-                  icon: Icons.article,
-                  subtitle: '${_columns.length} مقال',
+                  title: 'مقالات الكاتب',
+                  icon: Icons.article_outlined,
+                  subtitle: '${_authorStats?.totalColumns ?? _columns.length} مقال',
                 ),
               ),
-
-              // Columns List
-              SliverList(
-                delegate: SliverChildBuilderDelegate(
-                  (context, index) {
-                    if (index < _columns.length) {
-                      return _buildColumnCard(_columns[index]);
-                    } else if (_isLoadingMore) {
-                      return const Center(
-                        child: Padding(
-                          padding: EdgeInsets.all(16),
-                          child: CircularProgressIndicator(),
-                        ),
-                      );
-                    }
-                    return null;
-                  },
-                  childCount: _columns.length + (_isLoadingMore ? 1 : 0),
-                ),
-              ),
-
-              // Empty State
-              if (_columns.isEmpty && !_isLoading)
-                const SliverToBoxAdapter(
+              if (_columns.isEmpty && !_isLoadingMore) 
+                 SliverFillRemaining( 
                   child: Center(
                     child: Padding(
-                      padding: EdgeInsets.all(32),
+                      padding: const EdgeInsets.all(32),
                       child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Icon(
-                            Icons.article_outlined,
-                            size: 64,
-                            color: Colors.grey,
-                          ),
-                          SizedBox(height: 16),
+                          Icon(Icons.article_outlined, size: 64, color: Colors.grey[400]),
+                          const SizedBox(height: 16),
                           Text(
-                            'لا توجد مقالات لهذا الكاتب',
-                            style: TextStyle(
-                              fontSize: 16,
-                              color: Colors.grey,
-                            ),
+                             _filters.searchQuery != null && _filters.searchQuery!.isNotEmpty ?
+                             'لا توجد مقالات تطابق بحثك' :
+                            'لا توجد مقالات لهذا الكاتب حالياً',
+                            style: TextStyle(fontSize: 16, color: Colors.grey[600]),
+                            textAlign: TextAlign.center,
                           ),
                         ],
                       ),
                     ),
                   ),
+                )
+              else
+                SliverList(
+                  delegate: SliverChildBuilderDelegate(
+                    (context, index) {
+                      return _buildColumnCard(_columns[index]);
+                    },
+                    childCount: _columns.length,
+                  ),
                 ),
-
-              // Bottom spacing
-              const SliverToBoxAdapter(
-                child: SizedBox(height: 80),
-              ),
+              const SliverToBoxAdapter(child: SizedBox(height: 80)), 
             ],
           ),
         ),
@@ -502,26 +534,27 @@ class _AuthorScreenState extends State<AuthorScreen>
 
   Widget _buildErrorWidget() {
     return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Icon(
-            Icons.error_outline,
-            size: 64,
-            color: Colors.grey,
-          ),
-          const SizedBox(height: 16),
-          Text(
-            _errorMessage!,
-            style: const TextStyle(fontSize: 16),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 16),
-          ElevatedButton(
-            onPressed: _loadData,
-            child: const Text('إعادة المحاولة'),
-          ),
-        ],
+      child: Padding(
+        padding: const EdgeInsets.all(20.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.error_outline_rounded, size: 70, color: Colors.red[600]),
+            const SizedBox(height: 20),
+            Text(
+              _errorMessage ?? 'حدث خطأ غير متوقع.',
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(color: Colors.black87),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 20),
+            ElevatedButton.icon(
+              icon: const Icon(Icons.refresh),
+              label: const Text('إعادة المحاولة'),
+              onPressed: () => _loadData(refresh: true),
+               style: ElevatedButton.styleFrom(backgroundColor: AppTheme.primaryColor, foregroundColor: Colors.white),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -530,381 +563,178 @@ class _AuthorScreenState extends State<AuthorScreen>
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        border: Border(
-          bottom: BorderSide(color: AppTheme.tertiaryColor, width: 4),
-        ),
+        color: Theme.of(context).canvasColor,
+        border: Border(bottom: BorderSide(color: AppTheme.tertiaryColor, width: 4)),
       ),
       child: Row(
         children: [
           GestureDetector(
             onTap: () => context.go('/home'),
-            child: const Text(
-              'الرئيسية',
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                color: AppTheme.primaryColor,
-              ),
-            ),
+            child: const Text('الرئيسية', style: TextStyle(fontWeight: FontWeight.bold, color: AppTheme.primaryColor)),
           ),
           const Text(' > ', style: TextStyle(fontWeight: FontWeight.bold)),
           GestureDetector(
-            onTap: () => context.go('/columns'),
-            child: const Text(
-              'رأي ومقالات',
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                color: AppTheme.primaryColor,
-              ),
-            ),
+            onTap: () => context.go('/authors'), 
+            child: const Text('الكتّاب', style: TextStyle(fontWeight: FontWeight.bold, color: AppTheme.primaryColor)),
           ),
           if (_author != null) ...[
             const Text(' > ', style: TextStyle(fontWeight: FontWeight.bold)),
-            Text(
-              _author!.arName,
-              style: const TextStyle(fontWeight: FontWeight.bold),
-            ),
+            Expanded(child: Text(_author!.arName, style: const TextStyle(fontWeight: FontWeight.bold), overflow: TextOverflow.ellipsis)),
           ],
         ],
       ),
     );
   }
-
-  Widget _buildFiltersPanel() {
-    return Container(
-      margin: const EdgeInsets.all(16),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey[300]!),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              const Expanded(
-                child: Text(
-                  'فلاتر البحث',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: AppTheme.primaryColor,
-                  ),
-                ),
-              ),
-              TextButton(
-                onPressed: _resetFilters,
-                child: const Text('إعادة تعيين'),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          
-          // Sort options
-          const Text('ترتيب بواسطة:', style: TextStyle(fontWeight: FontWeight.bold)),
-          const SizedBox(height: 8),
-          Wrap(
-            spacing: 8,
-            children: AuthorColumnSortBy.values.map((sortBy) {
-              return ChoiceChip(
-                label: Text(_getSortByLabel(sortBy)),
-                selected: _filters.sortBy == sortBy,
-                onSelected: (selected) {
-                  if (selected) {
-                    setState(() {
-                      _filters = _filters.copyWith(sortBy: sortBy);
-                    });
-                  }
-                },
-              );
-            }).toList(),
-          ),
-          
-          const SizedBox(height: 12),
-          
-          // Sort direction
-          SwitchListTile(
-            title: const Text('ترتيب تصاعدي'),
-            value: _filters.ascending,
-            onChanged: (value) {
-              setState(() {
-                _filters = _filters.copyWith(ascending: value);
-              });
-            },
-          ),
-          
-          const SizedBox(height: 16),
-          
-          Row(
-            children: [
-              Expanded(
-                child: ElevatedButton(
-                  onPressed: _applyFilters,
-                  child: const Text('تطبيق الفلاتر'),
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
+  
   String _getSortByLabel(AuthorColumnSortBy sortBy) {
     switch (sortBy) {
-      case AuthorColumnSortBy.date:
-        return 'التاريخ';
-      case AuthorColumnSortBy.title:
-        return 'العنوان';
-      case AuthorColumnSortBy.views:
-        return 'المشاهدات';
-      case AuthorColumnSortBy.rating:
-        return 'التقييم';
+      case AuthorColumnSortBy.date: return 'الأحدث';
+      case AuthorColumnSortBy.title: return 'العنوان';
+      case AuthorColumnSortBy.views: return 'الأكثر قراءة';
+      case AuthorColumnSortBy.rating: return 'التقييم الأعلى';
     }
   }
 
   Widget _buildAuthorInfo() {
     if (_author == null) return const SizedBox.shrink();
-
-    return Container(
-      margin: const EdgeInsets.all(16),
-      child: Column(
-        children: [
-          // Author Header
-          Container(
-            padding: const EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              color: AppTheme.tertiaryColor,
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
-            ),
-            child: Row(
-              children: [
-                // Author Avatar
-                Container(
-                  width: 80,
-                  height: 80,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    border: Border.all(color: Colors.white, width: 3),
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Card(
+        elevation: 3,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            children: [
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  CircleAvatar(
+                    radius: 40,
+                    backgroundImage: _author!.photoUrl.isNotEmpty 
+                        ? CachedNetworkImageProvider(_author!.photoUrl) 
+                        : null,
+                    onBackgroundImageError: (_,__){}, 
+                    child: _author!.photoUrl.isEmpty 
+                        ? const Icon(Icons.person_outline, size: 40) 
+                        : null,
                   ),
-                  child: ClipOval(
-                    child: CachedNetworkImage(
-                      imageUrl: _author!.photoUrl,
-                      fit: BoxFit.cover,
-                      placeholder: (context, url) => Container(
-                        color: Colors.grey[300],
-                        child: const Icon(Icons.person, size: 40),
-                      ),
-                      errorWidget: (context, url, error) => Container(
-                        color: Colors.grey[300],
-                        child: const Icon(Icons.person, size: 40),
-                      ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          _author!.arName,
+                          style: Theme.of(context).textTheme.headlineSmall?.copyWith(color: AppTheme.primaryColor),
+                        ),
+                        if (_authorStats != null)
+                          Padding(
+                            padding: const EdgeInsets.only(top: 4.0),
+                            child: Text(
+                              '${_authorStats!.totalColumns} مقال  •  ${_formatNumber(_authorStats!.totalViews)} مشاهدة',
+                              style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Colors.grey[700]),
+                            ),
+                          ),
+                      ],
                     ),
                   ),
-                ),
-                const SizedBox(width: 16),
-                
-                // Author Name and Quick Stats
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        _author!.arName,
-                        style: const TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                        ),
-                      ),
-                      if (_authorStats != null) ...[
-                        const SizedBox(height: 8),
-                        Text(
-                          '${_authorStats!.totalColumns} مقال',
-                          style: const TextStyle(
-                            color: Colors.white70,
-                            fontSize: 14,
-                          ),
-                        ),
-                      ],
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-          
-          // Author Description
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: const BorderRadius.vertical(bottom: Radius.circular(12)),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.05),
-                  blurRadius: 10,
-                  offset: const Offset(0, 2),
-                ),
-              ],
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
+                ],
+              ),
+              if (_author!.description.isNotEmpty) ...[
+                const SizedBox(height: 12),
                 Text(
                   _author!.description,
-                  style: const TextStyle(
-                    fontSize: 14,
-                    height: 1.6,
-                    color: Colors.black87,
-                  ),
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(height: 1.5, color: Colors.grey[800]),
+                  maxLines: 3, 
+                  overflow: TextOverflow.ellipsis,
                 ),
-                
-                // Social Links
-                if (_socialLinks?.hasAnyLink == true) ...[
-                  const SizedBox(height: 16),
-                  const Divider(),
-                  const SizedBox(height: 8),
-                  Wrap(
-                    spacing: 8,
-                    children: _socialLinks!.availableLinks.map((link) {
-                      return InkWell(
-                        onTap: () => _authorModule.openExternalLink(link['url']),
-                        child: Chip(
-                          avatar: Icon(
-                            _getSocialIcon(link['type']),
-                            size: 16,
-                          ),
-                          label: Text(
-                            link['label'],
-                            style: const TextStyle(fontSize: 12),
-                          ),
-                        ),
-                      );
-                    }).toList(),
-                  ),
-                ],
               ],
-            ),
+              if (_socialLinks?.hasAnyLink == true) ...[
+                const Divider(height: 24, thickness: 0.8),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 4,
+                  alignment: WrapAlignment.center,
+                  children: _socialLinks!.availableLinks.map((link) {
+                    return ActionChip(
+                      avatar: Icon(_getSocialIcon(link['type'] as String), size: 18, color: AppTheme.tertiaryColor),
+                      label: Text(link['label'] as String, style: const TextStyle(fontSize: 12)),
+                      onPressed: () => _authorModule.openExternalLink(link['url'] as String),
+                      backgroundColor: AppTheme.tertiaryColor.withAlpha(30), 
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                    );
+                  }).toList(),
+                ),
+              ],
+            ],
           ),
-        ],
+        ),
       ),
     );
   }
 
   IconData _getSocialIcon(String type) {
-    switch (type) {
-      case 'facebook':
-        return Icons.facebook;
-      case 'twitter':
-        return Icons.alternate_email;
-      case 'instagram':
-        return Icons.camera_alt;
-      case 'linkedin':
-        return Icons.work;
-      case 'website':
-        return Icons.web;
-      case 'email':
-        return Icons.email;
-      default:
-        return Icons.link;
+    switch (type.toLowerCase()) {
+      case 'facebook': return Icons.facebook_rounded;
+      case 'twitter': return Icons.flutter_dash_rounded; 
+      case 'instagram': return Icons.camera_alt_outlined;
+      case 'linkedin': return Icons.work_outline_rounded;
+      case 'website': return Icons.language_rounded;
+      case 'email': return Icons.email_outlined;
+      default: return Icons.link_rounded;
     }
   }
 
   Widget _buildStatsPanel() {
     if (_authorStats == null) return const SizedBox.shrink();
-
-    return Container(
-      margin: const EdgeInsets.all(16),
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [AppTheme.primaryColor, AppTheme.secondaryColor],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+      child: Card(
+        elevation: 2,
+        color: AppTheme.primaryColor.withAlpha(20), 
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'إحصائيات الكاتب',
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(color: AppTheme.primaryColor, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 12),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  _buildStatItem('المقالات', _authorStats!.totalColumns.toString(), Icons.article_outlined),
+                  _buildStatItem('المشاهدات', _formatNumber(_authorStats!.totalViews), Icons.visibility_outlined),
+                ],
+              ),
+              const SizedBox(height: 12),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  _buildStatItem('متوسط التقييم', '${_authorStats!.averageRating.toStringAsFixed(1)} ⭐', Icons.star_border_outlined),
+                  _buildStatItem('آخر نشر', _formatDate(_authorStats!.lastPublished), Icons.schedule_outlined),
+                ],
+              ),
+              if (_authorStats!.topTopics.isNotEmpty) ...[
+                const SizedBox(height: 16),
+                Text('أبرز المواضيع:', style: Theme.of(context).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600)),
+                const SizedBox(height: 8),
+                Wrap(
+                  spacing: 6, runSpacing: 6,
+                  children: _authorStats!.topTopics.map((topic) => Chip(
+                      label: Text(topic, style: const TextStyle(fontSize: 11)), 
+                      backgroundColor: AppTheme.tertiaryColor.withAlpha(50), 
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                  )).toList(),
+                ),
+              ],
+            ],
+          ),
         ),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
-            'إحصائيات الكاتب',
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
-            ),
-          ),
-          const SizedBox(height: 16),
-          
-          Row(
-            children: [
-              _buildStatItem(
-                'المقالات',
-                _authorStats!.totalColumns.toString(),
-                Icons.article,
-              ),
-              _buildStatItem(
-                'المشاهدات',
-                _formatNumber(_authorStats!.totalViews),
-                Icons.visibility,
-              ),
-            ],
-          ),
-          
-          const SizedBox(height: 12),
-          
-          Row(
-            children: [
-              _buildStatItem(
-                'التقييم',
-                '${_authorStats!.averageRating.toStringAsFixed(1)} ⭐',
-                Icons.star,
-              ),
-              _buildStatItem(
-                'آخر نشر',
-                _formatDate(_authorStats!.lastPublished),
-                Icons.schedule,
-              ),
-            ],
-          ),
-          
-          // Top Topics
-          if (_authorStats!.topTopics.isNotEmpty) ...[
-            const SizedBox(height: 16),
-            const Text(
-              'المواضيع الأكثر تناولاً:',
-              style: TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Wrap(
-              spacing: 6,
-              runSpacing: 6,
-              children: _authorStats!.topTopics.take(5).map((topic) {
-                return Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.2),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Text(
-                    topic,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 12,
-                    ),
-                  ),
-                );
-              }).toList(),
-            ),
-          ],
-        ],
       ),
     );
   }
@@ -912,156 +742,188 @@ class _AuthorScreenState extends State<AuthorScreen>
   Widget _buildStatItem(String label, String value, IconData icon) {
     return Expanded(
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, color: Colors.white, size: 24),
-          const SizedBox(height: 8),
-          Text(
-            value,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          Text(
-            label,
-            style: const TextStyle(
-              color: Colors.white70,
-              fontSize: 12,
-            ),
-          ),
+          Icon(icon, color: AppTheme.primaryColor, size: 26),
+          const SizedBox(height: 6),
+          Text(value, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppTheme.secondaryColor)),
+          const SizedBox(height: 2),
+          Text(label, style: TextStyle(fontSize: 11, color: Colors.grey[700]), textAlign: TextAlign.center),
         ],
       ),
     );
   }
 
   Widget _buildColumnCard(ColumnModel column) {
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-      child: Card(
-        elevation: 2,
-        child: InkWell(
-          onTap: () => context.go('/column/${column.cDate}/${column.id}'),
-          onLongPress: () => _showColumnPreview(column),
-          borderRadius: BorderRadius.circular(8),
+    final tempArticleForCard = NewsArticle(
+      id: column.id,
+      cDate: column.cDate,
+      title: column.title,
+      summary: column.summary,
+      body: '', 
+      photoUrl: column.columnistPhotoUrl, 
+      thumbnailPhotoUrl: column.columnistPhotoUrl,
+      sectionId: '', 
+      sectionArName: column.columnistArName, 
+      publishDate: column.creationDate,
+      publishDateFormatted: column.creationDateFormatted,
+      publishTimeFormatted: '', 
+      lastModificationDate: column.creationDate,
+      lastModificationDateFormatted: column.creationDateFormattedDateTime,
+      editorAndSource: column.columnistArName,
+      canonicalUrl: column.canonicalUrl,
+      relatedPhotos: [],
+      relatedNews: [],
+    );
+
+    return NewsCard(
+      article: tempArticleForCard,
+      isHorizontal: true, 
+      onTap: () => context.go('/column/${column.cDate}/${column.id}'),
+      showDate: true, 
+    );
+  }
+
+  Future<void> _shareColumn(ColumnModel column) async {
+    try {
+      final shareText = '''
+📝 ${column.title}
+بقلم: ${_author?.arName ?? 'غير محدد'}
+
+${column.summary.isNotEmpty ? column.summary : 'اقرأ المقال كاملاً على تطبيق الشروق.'}
+
+${column.canonicalUrl}
+#الشروق #مقال #رأي
+      ''';
+
+      await Share.share(shareText, subject: column.title);
+
+      // Corrected: Call the public method in AuthorModule
+      await _authorModule.logColumnShareFromAuthorScreen(
+        columnId: column.id,
+        authorId: widget.authorId,
+        columnTitle: column.title,
+      );
+    } catch (e) {
+      _showMessage('فشل في مشاركة المقال: ${e.toString()}', isError: true);
+    }
+  }
+
+  Widget? _buildFloatingActionButton() {
+    if (_columns.isEmpty && !_isLoading) return null; 
+    bool showFab = _scrollController.hasClients && _scrollController.offset > 300;
+
+    return AnimatedOpacity(
+      opacity: showFab ? 1.0 : 0.0,
+      duration: const Duration(milliseconds: 300),
+      child: FloatingActionButton.small( 
+        onPressed: () {
+          _scrollController.animateTo(
+            0,
+            duration: const Duration(milliseconds: 500),
+            curve: Curves.easeInOut,
+          );
+        },
+        backgroundColor: AppTheme.tertiaryColor,
+        tooltip: 'العودة للأعلى',
+        child: const Icon(Icons.arrow_upward_rounded, color: Colors.white),
+      ),
+    );
+  }
+  
+  void _showColumnPreview(ColumnModel column) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) => DraggableScrollableSheet(
+        initialChildSize: 0.6, 
+        minChildSize: 0.4,
+        maxChildSize: 0.9,
+        expand: false,
+        builder: (context, scrollController) => ClipRRect(
+           borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
           child: Container(
-            padding: const EdgeInsets.all(16),
+            color: Theme.of(context).scaffoldBackgroundColor,
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        column.title,
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: AppTheme.primaryColor,
+                Container(
+                  margin: const EdgeInsets.symmetric(vertical: 10),
+                  width: 40,
+                  height: 5,
+                  decoration: BoxDecoration(
+                    color: Colors.grey[300],
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                Expanded(
+                  child: SingleChildScrollView(
+                    controller: scrollController,
+                    padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          column.title,
+                          style: Theme.of(context).textTheme.headlineSmall?.copyWith(color: AppTheme.primaryColor),
                         ),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                    PopupMenuButton<String>(
-                      onSelected: (value) {
-                        switch (value) {
-                          case 'preview':
-                            _showColumnPreview(column);
-                            break;
-                          case 'share':
-                            _shareColumn(column);
-                            break;
-                        }
-                      },
-                      itemBuilder: (context) => [
-                        const PopupMenuItem(
-                          value: 'preview',
-                          child: Row(
-                            children: [
-                              Icon(Icons.visibility, size: 20),
-                              SizedBox(width: 8),
-                              Text('معاينة'),
-                            ],
-                          ),
+                        const SizedBox(height: 12),
+                        Row(
+                          children: [
+                            CircleAvatar(
+                              radius: 20,
+                              backgroundImage: _author?.photoUrl != null && _author!.photoUrl.isNotEmpty
+                                  ? CachedNetworkImageProvider(_author!.photoUrl)
+                                  : null,
+                              onBackgroundImageError: (_,__){},
+                              child: (_author?.photoUrl == null || _author!.photoUrl.isEmpty)
+                                  ? const Icon(Icons.person_outline, size: 20)
+                                  : null,
+                            ),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    _author?.arName ?? column.columnistArName, 
+                                    style: Theme.of(context).textTheme.titleMedium,
+                                  ),
+                                  Text(
+                                    column.creationDateFormattedDateTime,
+                                    style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Colors.grey[600]),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
                         ),
-                        const PopupMenuItem(
-                          value: 'share',
-                          child: Row(
-                            children: [
-                              Icon(Icons.share, size: 20),
-                              SizedBox(width: 8),
-                              Text('مشاركة'),
-                            ],
+                        const Divider(height: 24),
+                        Text(
+                          column.summary.isNotEmpty ? column.summary : "لا يتوفر ملخص لهذا المقال.",
+                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(height: 1.6),
+                        ),
+                        const SizedBox(height: 24),
+                        SizedBox(
+                          width: double.infinity,
+                          child: ElevatedButton.icon(
+                            icon: const Icon(Icons.read_more_outlined),
+                            label: const Text('قراءة المقال كاملاً'),
+                            onPressed: () {
+                              Navigator.pop(context); 
+                              context.go('/column/${column.cDate}/${column.id}');
+                            },
+                            style: ElevatedButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(vertical: 12)
+                            ),
                           ),
                         ),
                       ],
-                      child: Icon(
-                        Icons.more_vert,
-                        color: Colors.grey[400],
-                      ),
                     ),
-                  ],
-                ),
-                
-                const SizedBox(height: 8),
-                
-                Text(
-                  column.summary,
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: Colors.grey[600],
-                    height: 1.4,
                   ),
-                  maxLines: 3,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                
-                const SizedBox(height: 12),
-                
-                Row(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: AppTheme.tertiaryColor.withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(
-                            Icons.calendar_today,
-                            size: 12,
-                            color: AppTheme.tertiaryColor,
-                          ),
-                          const SizedBox(width: 4),
-                          Text(
-                            column.creationDateFormatted,
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: AppTheme.tertiaryColor,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const Spacer(),
-                    Text(
-                      'اضغط للقراءة',
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Colors.grey[500],
-                      ),
-                    ),
-                    const SizedBox(width: 4),
-                    Icon(
-                      Icons.arrow_forward_ios,
-                      size: 12,
-                      color: Colors.grey[400],
-                    ),
-                  ],
                 ),
               ],
             ),
@@ -1071,233 +933,24 @@ class _AuthorScreenState extends State<AuthorScreen>
     );
   }
 
-  Future<void> _shareColumn(ColumnModel column) async {
-    try {
-      final shareText = '''
-📝 ${column.title}
-
-بقلم: ${_author?.arName ?? 'غير محدد'}
-
-${column.summary}
-
-اقرأ المقال كاملاً على تطبيق الشروق
-
-#الشروق #مقال #رأي
-      ''';
-
-      await Share.share(
-        shareText,
-        subject: column.title,
-      );
-
-      // Log analytics
-      await _authorModule._firebaseService.logEvent('column_shared_from_author', {
-        'column_id': column.id,
-        'author_id': widget.authorId,
-        'column_title': column.title,
-      });
-    } catch (e) {
-      _showMessage('فشل في مشاركة المقال');
-    }
-  }
-
-  Widget? _buildFloatingActionButton() {
-    if (_columns.isEmpty) return null;
-
-    return FloatingActionButton.extended(
-      onPressed: () {
-        _scrollController.animateTo(
-          0,
-          duration: const Duration(milliseconds: 500),
-          curve: Curves.easeInOut,
-        );
-      },
-      backgroundColor: AppTheme.tertiaryColor,
-      icon: const Icon(Icons.keyboard_arrow_up, color: Colors.white),
-      label: const Text(
-        'أعلى الصفحة',
-        style: TextStyle(color: Colors.white),
-      ),
-    );
-  }
-
-  // Additional helper methods for enhanced functionality
-  void _showColumnPreview(ColumnModel column) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (context) => DraggableScrollableSheet(
-        initialChildSize: 0.7,
-        maxChildSize: 0.9,
-        minChildSize: 0.5,
-        builder: (context, scrollController) => Container(
-          decoration: const BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-          ),
-          child: Column(
-            children: [
-              // Handle bar
-              Container(
-                margin: const EdgeInsets.symmetric(vertical: 10),
-                width: 40,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: Colors.grey[300],
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
-              
-              // Content
-              Expanded(
-                child: SingleChildScrollView(
-                  controller: scrollController,
-                  padding: const EdgeInsets.all(20),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        column.title,
-                        style: const TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                          color: AppTheme.primaryColor,
-                        ),
-                      ),
-                      
-                      const SizedBox(height: 16),
-                      
-                      Row(
-                        children: [
-                          CircleAvatar(
-                            radius: 20,
-                            backgroundImage: _author?.photoUrl != null
-                                ? CachedNetworkImageProvider(_author!.photoUrl)
-                                : null,
-                            child: _author?.photoUrl == null
-                                ? const Icon(Icons.person)
-                                : null,
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  _author?.arName ?? 'غير محدد',
-                                  style: const TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                                Text(
-                                  column.creationDateFormatted,
-                                  style: TextStyle(
-                                    color: Colors.grey[600],
-                                    fontSize: 12,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                      
-                      const SizedBox(height: 20),
-                      
-                      Text(
-                        column.summary,
-                        style: const TextStyle(
-                          fontSize: 16,
-                          height: 1.6,
-                        ),
-                      ),
-                      
-                      const SizedBox(height: 30),
-                      
-                      SizedBox(
-                        width: double.infinity,
-                        child: ElevatedButton(
-                          onPressed: () {
-                            Navigator.pop(context);
-                            context.go('/column/${column.cDate}/${column.id}');
-                          },
-                          child: const Text('قراءة المقال كاملاً'),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  // Error handling with retry mechanism
-  void _handleError(String operation, dynamic error) {
-    debugPrint('Error in $operation: $error');
-    
-    String userMessage;
-    switch (operation) {
-      case 'load_author':
-        userMessage = 'فشل في تحميل بيانات الكاتب';
-        break;
-      case 'load_columns':
-        userMessage = 'فشل في تحميل مقالات الكاتب';
-        break;
-      case 'favorite':
-        userMessage = 'فشل في تحديث المفضلة';
-        break;
-      case 'share':
-        userMessage = 'فشل في مشاركة الكاتب';
-        break;
-      default:
-        userMessage = 'حدث خطأ غير متوقع';
-    }
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(userMessage),
-        backgroundColor: Colors.red,
-        action: operation.contains('load') ? SnackBarAction(
-          label: 'إعادة المحاولة',
-          textColor: Colors.white,
-          onPressed: _loadData,
-        ) : null,
-      ),
-    );
-  }
-
   String _formatNumber(int number) {
-    if (number >= 1000000) {
-      return '${(number / 1000000).toStringAsFixed(1)}M';
-    } else if (number >= 1000) {
-      return '${(number / 1000).toStringAsFixed(1)}K';
-    }
+    if (number >= 1000000) return '${(number / 1000000).toStringAsFixed(1)} مليون';
+    if (number >= 1000) return '${(number / 1000).toStringAsFixed(number % 1000 == 0 ? 0 : 1)} ألف';
     return number.toString();
   }
 
   String _formatDate(DateTime? date) {
     if (date == null) return 'غير محدد';
-    
     final now = DateTime.now();
-    final difference = now.difference(date).inDays;
-    
-    if (difference == 0) {
-      return 'اليوم';
-    } else if (difference == 1) {
-      return 'أمس';
-    } else if (difference < 7) {
-      return 'منذ $difference أيام';
-    } else if (difference < 30) {
-      return 'منذ ${(difference / 7).round()} أسبوع';
-    } else if (difference < 365) {
-      return 'منذ ${(difference / 30).round()} شهر';
-    } else {
-      return 'منذ ${(difference / 365).round()} سنة';
-    }
+    final difference = now.difference(date);
+
+    if (difference.inSeconds < 60) return 'الآن';
+    if (difference.inMinutes < 60) return 'منذ ${difference.inMinutes} د';
+    if (difference.inHours < 24) return 'منذ ${difference.inHours} س';
+    if (difference.inDays == 1) return 'أمس';
+    if (difference.inDays < 7) return 'منذ ${difference.inDays} أيام';
+    if (difference.inDays < 30) return 'منذ ${(difference.inDays / 7).floor()} أسابيع'; // Corrected typo
+    if (difference.inDays < 365) return 'منذ ${(difference.inDays / 30).floor()} شهر';
+    return 'منذ ${(difference.inDays / 365).floor()} سنة';
   }
 }

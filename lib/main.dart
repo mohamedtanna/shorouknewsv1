@@ -10,8 +10,6 @@ import 'core/theme.dart';
 import 'providers/news_provider.dart';
 import 'providers/settings_provider.dart';
 import 'providers/auth_provider.dart';
-import 'services/firebase_service.dart';
-import 'services/notification_service.dart';
 
 // Firebase background message handler
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {

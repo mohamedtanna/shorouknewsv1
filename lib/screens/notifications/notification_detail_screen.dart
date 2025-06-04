@@ -3,6 +3,7 @@ import 'package:flutter_html/flutter_html.dart'; // If body can contain HTML
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:go_router/go_router.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../services/notification_service.dart'; // For NotificationPayload
 import '../../core/theme.dart';
@@ -53,7 +54,7 @@ class NotificationDetailScreen extends StatelessWidget {
   Widget _buildBreadcrumb(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
+      decoration: const BoxDecoration(
         border: Border(
           bottom: BorderSide(color: AppTheme.tertiaryColor, width: 4),
         ),

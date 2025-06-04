@@ -1,10 +1,15 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+// import 'package:flutter/services.dart'; // Unused
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
-import 'dart:io';
+import 'dart:io' show Platform;
+import 'dart:typed_data'; // For Uint8List for images
+import 'package:http/http.dart' as http; // For downloading images
+
+// Timezone package for scheduled notifications
+import 'package:timezone/data/latest_all.dart' as tz;
+import 'package:timezone/timezone.dart' as tz;
 
 import '../core/app_router.dart';
 
@@ -27,12 +32,12 @@ class NotificationPayload {
 
   factory NotificationPayload.fromJson(Map<String, dynamic> json) {
     return NotificationPayload(
-      title: json['title'],
-      body: json['body'],
-      imageUrl: json['imageUrl'],
-      navigationPath: json['navigationPath'],
-      data: Map<String, dynamic>.from(json['data'] ?? {}),
-      timestamp: DateTime.parse(json['timestamp']),
+      title: json['title'] as String?,
+      body: json['body'] as String?,
+      imageUrl: json['imageUrl'] as String?,
+      navigationPath: json['navigationPath'] as String?,
+      data: Map<String, dynamic>.from(json['data'] as Map? ?? {}),
+      timestamp: DateTime.tryParse(json['timestamp'] as String? ?? '') ?? DateTime.now(),
     );
   }
 
@@ -48,6 +53,14 @@ class NotificationPayload {
   }
 }
 
+// Enum for notification priorities, matching flutter_local_notifications
+enum NotificationPriorityLevel {
+  low,
+  normal,
+  high,
+  urgent,
+}
+
 class NotificationService {
   static final NotificationService _instance = NotificationService._internal();
   factory NotificationService() => _instance;
@@ -58,62 +71,80 @@ class NotificationService {
 
   bool _isInitialized = false;
   List<NotificationPayload> _notificationHistory = [];
-  int _notificationId = 0;
+  int _notificationIdCounter = 0; // Renamed for clarity
 
-  // Notification channels
-  static const String _defaultChannelId = 'shorouk_news_default';
-  static const String _breakingNewsChannelId = 'shorouk_news_breaking';
-  static const String _updatesChannelId = 'shorouk_news_updates';
+  // Notification channels (IDs should be unique)
+  static const String _defaultChannelId = 'shorouk_news_default_channel';
+  static const String _breakingNewsChannelId = 'shorouk_news_breaking_channel';
+  static const String _updatesChannelId = 'shorouk_news_updates_channel';
+
+  // Helper to download image for BigPictureStyle
+  Future<Uint8List?> _getByteArrayFromUrl(String url) async {
+    try {
+      final http.Response response = await http.get(Uri.parse(url));
+      if (response.statusCode == 200) {
+        return response.bodyBytes;
+      } else {
+        debugPrint('Failed to load image from $url, status: ${response.statusCode}');
+        return null;
+      }
+    } catch (e) {
+      debugPrint('Error downloading image from $url: $e');
+      return null;
+    }
+  }
+
 
   // Initialize the notification service
   Future<void> initialize() async {
     if (_isInitialized) return;
 
     try {
+      // Initialize timezone database
+      tz.initializeTimeZones();
+      // Set a default local location (e.g., your app's primary user base)
+      // This can be updated later if you get user's specific timezone.
+      try {
+        tz.setLocalLocation(tz.getLocation('Africa/Cairo'));
+      } catch(e) {
+        debugPrint("Error setting default timezone, using UTC. $e");
+        // Fallback or handle as needed if location is not found
+      }
+
+
       // Android initialization settings
       const AndroidInitializationSettings initializationSettingsAndroid =
-          AndroidInitializationSettings('@mipmap/ic_launcher');
+          AndroidInitializationSettings('@mipmap/ic_launcher'); // Ensure this icon exists
 
-      // iOS initialization settings
-      const DarwinInitializationSettings initializationSettingsIOS =
+      // iOS & macOS initialization settings
+      const DarwinInitializationSettings initializationSettingsDarwin =
           DarwinInitializationSettings(
         requestAlertPermission: true,
         requestBadgePermission: true,
         requestSoundPermission: true,
-        onDidReceiveLocalNotification: _onDidReceiveLocalNotification,
+        // For older iOS (<=9) foreground notifications.
+        // For iOS 10+, onDidReceiveNotificationResponse is used.
+       // onDidReceiveLocalNotification: _onDidReceiveLocalNotificationForOldIOS,
       );
 
-      // MacOS initialization settings
-      const DarwinInitializationSettings initializationSettingsMacOS =
-          DarwinInitializationSettings(
-        requestAlertPermission: true,
-        requestBadgePermission: true,
-        requestSoundPermission: true,
-      );
-
-      // Combine initialization settings
       const InitializationSettings initializationSettings =
           InitializationSettings(
         android: initializationSettingsAndroid,
-        iOS: initializationSettingsIOS,
-        macOS: initializationSettingsMacOS,
+        iOS: initializationSettingsDarwin,
+        macOS: initializationSettingsDarwin, // Can use the same for macOS
       );
 
-      // Initialize the plugin
       await _flutterLocalNotificationsPlugin.initialize(
         initializationSettings,
         onDidReceiveNotificationResponse: _onDidReceiveNotificationResponse,
+        onDidReceiveBackgroundNotificationResponse: _onDidReceiveBackgroundNotificationResponse,
       );
 
-      // Create notification channels for Android
       if (Platform.isAndroid) {
         await _createNotificationChannels();
       }
 
-      // Request permissions
       await _requestPermissions();
-
-      // Load notification history
       await _loadNotificationHistory();
 
       _isInitialized = true;
@@ -123,172 +154,154 @@ class NotificationService {
     }
   }
 
-  // Create notification channels for Android
   Future<void> _createNotificationChannels() async {
-    final plugin = _flutterLocalNotificationsPlugin
-        .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>();
-
-    if (plugin != null) {
-      // Default channel
-      await plugin.createNotificationChannel(
+    final AndroidFlutterLocalNotificationsPlugin? androidImplementation =
+        _flutterLocalNotificationsPlugin.resolvePlatformSpecificImplementation<
+            AndroidFlutterLocalNotificationsPlugin>();
+    if (androidImplementation != null) {
+      await androidImplementation.createNotificationChannel(
         const AndroidNotificationChannel(
           _defaultChannelId,
-          'الأخبار العامة',
+          'الأخبار العامة', // General News
           description: 'إشعارات الأخبار العامة من الشروق',
           importance: Importance.defaultImportance,
-          playSound: true,
-          enableVibration: true,
         ),
       );
-
-      // Breaking news channel
-      await plugin.createNotificationChannel(
+      await androidImplementation.createNotificationChannel(
         const AndroidNotificationChannel(
           _breakingNewsChannelId,
-          'الأخبار العاجلة',
+          'الأخبار العاجلة', // Breaking News
           description: 'إشعارات الأخبار العاجلة والمهمة',
           importance: Importance.high,
           playSound: true,
           enableVibration: true,
-          enableLights: true,
           ledColor: Colors.red,
+          enableLights: true,
         ),
       );
-
-      // Updates channel
-      await plugin.createNotificationChannel(
+      await androidImplementation.createNotificationChannel(
         const AndroidNotificationChannel(
           _updatesChannelId,
-          'تحديثات التطبيق',
+          'تحديثات التطبيق', // App Updates
           description: 'إشعارات تحديثات التطبيق والمقالات الجديدة',
           importance: Importance.low,
-          playSound: false,
-          enableVibration: false,
         ),
       );
+      debugPrint("Android notification channels created.");
     }
   }
 
-  // Request notification permissions
   Future<bool> _requestPermissions() async {
+    bool? permissionsGranted = false;
     if (Platform.isIOS || Platform.isMacOS) {
-      final plugin = _flutterLocalNotificationsPlugin
-          .resolvePlatformSpecificImplementation<IOSFlutterLocalNotificationsPlugin>();
-      
-      if (plugin != null) {
-        final granted = await plugin.requestPermissions(
-          alert: true,
-          badge: true,
-          sound: true,
-        );
-        return granted ?? false;
-      }
+      permissionsGranted = await _flutterLocalNotificationsPlugin
+          .resolvePlatformSpecificImplementation<
+              IOSFlutterLocalNotificationsPlugin>()
+          ?.requestPermissions(
+            alert: true,
+            badge: true,
+            sound: true,
+          );
+      permissionsGranted ??= await _flutterLocalNotificationsPlugin
+          .resolvePlatformSpecificImplementation<
+              MacOSFlutterLocalNotificationsPlugin>()
+          ?.requestPermissions(
+            alert: true,
+            badge: true,
+            sound: true,
+          );
     } else if (Platform.isAndroid) {
-      final plugin = _flutterLocalNotificationsPlugin
-          .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>();
-      
-      if (plugin != null) {
-        final granted = await plugin.requestNotificationsPermission();
-        return granted ?? false;
-      }
+      final AndroidFlutterLocalNotificationsPlugin? androidImplementation =
+          _flutterLocalNotificationsPlugin.resolvePlatformSpecificImplementation<
+              AndroidFlutterLocalNotificationsPlugin>();
+      permissionsGranted = await androidImplementation?.requestNotificationsPermission();
     }
-    return true;
+    debugPrint("Notification permissions granted: $permissionsGranted");
+    return permissionsGranted ?? false;
   }
 
-  // Show a notification
   Future<void> showNotification({
     required String title,
     required String body,
     String? imageUrl,
     Map<String, dynamic>? data,
-    NotificationPriority priority = NotificationPriority.normal,
+    NotificationPriorityLevel priority = NotificationPriorityLevel.normal,
     bool isBreakingNews = false,
   }) async {
-    if (!_isInitialized) {
-      await initialize();
+    if (!_isInitialized) await initialize();
+
+    final payload = NotificationPayload(
+      title: title,
+      body: body,
+      imageUrl: imageUrl,
+      navigationPath: _extractNavigationPath(data),
+      data: data ?? {},
+      timestamp: DateTime.now(),
+    );
+
+    _notificationHistory.insert(0, payload);
+    await _saveNotificationHistory();
+
+    final int notificationId = _getNextNotificationId();
+    String channelId = isBreakingNews ? _breakingNewsChannelId : _defaultChannelId;
+
+    AndroidNotificationDetails? androidDetails;
+    ByteArrayAndroidBitmap? bigPictureBitmap;
+
+    if (imageUrl != null && imageUrl.isNotEmpty) {
+      final imageBytes = await _getByteArrayFromUrl(imageUrl);
+      if (imageBytes != null) {
+        bigPictureBitmap = ByteArrayAndroidBitmap(imageBytes);
+      }
     }
 
+    androidDetails = AndroidNotificationDetails(
+      channelId,
+      _getChannelName(channelId),
+      channelDescription: _getChannelDescription(channelId),
+      importance: _getImportance(priority),
+      priority: _getPriority(priority),
+      showWhen: true,
+      ticker: title,
+      styleInformation: bigPictureBitmap != null
+          ? BigPictureStyleInformation(
+              bigPictureBitmap,
+              largeIcon: bigPictureBitmap, // Can also use a different icon for largeIcon
+              contentTitle: title,
+              htmlFormatContentTitle: true,
+              summaryText: body,
+              htmlFormatSummaryText: true,
+            )
+          : BigTextStyleInformation( // Default to BigText if no image
+              body,
+              htmlFormatBigText: true,
+              contentTitle: title,
+              htmlFormatContentTitle: true,
+              summaryText: 'الشروق نيوز',
+              htmlFormatSummaryText: true,
+            ),
+      actions: <AndroidNotificationAction>[
+        const AndroidNotificationAction('read_action', 'قراءة', showsUserInterface: true),
+        const AndroidNotificationAction('dismiss_action', 'تجاهل', cancelNotification: true),
+      ],
+      ledColor: isBreakingNews ? Colors.red : null,
+      enableLights: isBreakingNews,
+    );
+
+    const DarwinNotificationDetails darwinDetails = DarwinNotificationDetails(
+      presentAlert: true,
+      presentBadge: true,
+      presentSound: true,
+      threadIdentifier: 'shorouk_news_thread',
+    );
+
+    final NotificationDetails notificationDetails = NotificationDetails(
+      android: androidDetails,
+      iOS: darwinDetails,
+      macOS: darwinDetails,
+    );
+
     try {
-      final payload = NotificationPayload(
-        title: title,
-        body: body,
-        imageUrl: imageUrl,
-        navigationPath: _extractNavigationPath(data),
-        data: data ?? {},
-        timestamp: DateTime.now(),
-      );
-
-      // Add to history
-      _notificationHistory.insert(0, payload);
-      await _saveNotificationHistory();
-
-      // Generate unique notification ID
-      final notificationId = _getNextNotificationId();
-
-      // Select appropriate channel
-      String channelId = _defaultChannelId;
-      if (isBreakingNews) {
-        channelId = _breakingNewsChannelId;
-      }
-
-      // Android notification details
-      AndroidNotificationDetails androidDetails = AndroidNotificationDetails(
-        channelId,
-        _getChannelName(channelId),
-        channelDescription: _getChannelDescription(channelId),
-        importance: _getImportance(priority),
-        priority: _getPriority(priority),
-        showWhen: true,
-        when: DateTime.now().millisecondsSinceEpoch,
-        usesChronometer: false,
-        playSound: priority != NotificationPriority.low,
-        enableVibration: priority != NotificationPriority.low,
-        enableLights: isBreakingNews,
-        ledColor: isBreakingNews ? Colors.red : null,
-        ledOnMs: isBreakingNews ? 1000 : null,
-        ledOffMs: isBreakingNews ? 500 : null,
-        ticker: title,
-        styleInformation: BigTextStyleInformation(
-          body,
-          htmlFormatBigText: true,
-          contentTitle: title,
-          htmlFormatContentTitle: true,
-          summaryText: 'الشروق',
-          htmlFormatSummaryText: true,
-        ),
-        actions: [
-          const AndroidNotificationAction(
-            'read_action',
-            'قراءة',
-            showsUserInterface: true,
-          ),
-          const AndroidNotificationAction(
-            'dismiss_action',
-            'تجاهل',
-            cancelNotification: true,
-          ),
-        ],
-      );
-
-      // iOS notification details
-      const DarwinNotificationDetails iosDetails = DarwinNotificationDetails(
-        presentAlert: true,
-        presentBadge: true,
-        presentSound: true,
-        sound: 'default',
-        badgeNumber: 1,
-        threadIdentifier: 'shorouk_news',
-        categoryIdentifier: 'shorouk_category',
-      );
-
-      // Combined notification details
-      NotificationDetails notificationDetails = NotificationDetails(
-        android: androidDetails,
-        iOS: iosDetails,
-        macOS: iosDetails,
-      );
-
-      // Show the notification
       await _flutterLocalNotificationsPlugin.show(
         notificationId,
         title,
@@ -296,196 +309,132 @@ class NotificationService {
         notificationDetails,
         payload: jsonEncode(payload.toJson()),
       );
-
-      // Show big picture notification if image URL is provided
-      if (imageUrl != null && imageUrl.isNotEmpty) {
-        await _showBigPictureNotification(
-          notificationId + 1000, // Offset to avoid conflicts
-          title,
-          body,
-          imageUrl,
-          payload,
-        );
-      }
-
-      debugPrint('Notification shown: $title');
+      debugPrint('Notification shown: ID $notificationId, Title: $title');
     } catch (e) {
       debugPrint('Error showing notification: $e');
     }
   }
 
-  // Show big picture notification with image
-  Future<void> _showBigPictureNotification(
-    int id,
-    String title,
-    String body,
-    String imageUrl,
-    NotificationPayload payload,
-  ) async {
-    try {
-      final BigPictureStyleInformation bigPictureStyleInformation =
-          BigPictureStyleInformation(
-        NetworkImage(imageUrl),
-        contentTitle: title,
-        htmlFormatContentTitle: true,
-        summaryText: body,
-        htmlFormatSummaryText: true,
-      );
+  // Note: _showBigPictureNotification is now integrated into showNotification.
 
-      final AndroidNotificationDetails androidDetails = AndroidNotificationDetails(
-        _defaultChannelId,
-        'الأخبار العامة',
-        channelDescription: 'إشعارات الأخبار العامة من الشروق',
-        importance: Importance.defaultImportance,
-        priority: Priority.defaultPriority,
-        styleInformation: bigPictureStyleInformation,
-      );
-
-      final NotificationDetails notificationDetails = NotificationDetails(
-        android: androidDetails,
-      );
-
-      await _flutterLocalNotificationsPlugin.show(
-        id,
-        title,
-        body,
-        notificationDetails,
-        payload: jsonEncode(payload.toJson()),
-      );
-    } catch (e) {
-      debugPrint('Error showing big picture notification: $e');
-    }
-  }
-
-  // Schedule a notification
   Future<void> scheduleNotification({
     required String title,
     required String body,
     required DateTime scheduledDate,
-    String? imageUrl,
+    String? imageUrl, // imageUrl for scheduled notifications might be complex due to caching/validity
     Map<String, dynamic>? data,
-    NotificationPriority priority = NotificationPriority.normal,
+    NotificationPriorityLevel priority = NotificationPriorityLevel.normal,
   }) async {
-    if (!_isInitialized) {
-      await initialize();
-    }
+    if (!_isInitialized) await initialize();
+
+    final payload = NotificationPayload(
+      title: title,
+      body: body,
+      imageUrl: imageUrl,
+      navigationPath: _extractNavigationPath(data),
+      data: data ?? {},
+      timestamp: scheduledDate,
+    );
+
+    final int notificationId = _getNextNotificationId();
+    final tz.TZDateTime tzScheduledDate = _convertToTZDateTime(scheduledDate);
+
+    // For scheduled notifications, BigPictureStyle might be less reliable if URL expires.
+    // Consider downloading image at schedule time if critical, or use simpler notification.
+    final AndroidNotificationDetails androidDetails = AndroidNotificationDetails(
+      _updatesChannelId, // Use updates channel or a specific scheduled channel
+      _getChannelName(_updatesChannelId),
+      channelDescription: _getChannelDescription(_updatesChannelId),
+      importance: _getImportance(priority),
+      priority: _getPriority(priority),
+    );
+    const DarwinNotificationDetails darwinDetails = DarwinNotificationDetails(presentSound: true);
+
+    final NotificationDetails notificationDetails = NotificationDetails(
+        android: androidDetails, iOS: darwinDetails, macOS: darwinDetails);
 
     try {
-      final payload = NotificationPayload(
-        title: title,
-        body: body,
-        imageUrl: imageUrl,
-        navigationPath: _extractNavigationPath(data),
-        data: data ?? {},
-        timestamp: scheduledDate,
-      );
-
-      final notificationId = _getNextNotificationId();
-
-      const AndroidNotificationDetails androidDetails = AndroidNotificationDetails(
-        _updatesChannelId,
-        'تحديثات التطبيق',
-        channelDescription: 'إشعارات تحديثات التطبيق والمقالات الجديدة',
-        importance: Importance.defaultImportance,
-        priority: Priority.defaultPriority,
-      );
-
-      const DarwinNotificationDetails iosDetails = DarwinNotificationDetails(
-        presentAlert: true,
-        presentBadge: true,
-        presentSound: true,
-      );
-
-      const NotificationDetails notificationDetails = NotificationDetails(
-        android: androidDetails,
-        iOS: iosDetails,
-        macOS: iosDetails,
-      );
-
       await _flutterLocalNotificationsPlugin.zonedSchedule(
         notificationId,
         title,
         body,
-        _convertToTZDateTime(scheduledDate),
+        tzScheduledDate,
         notificationDetails,
         androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-        uiLocalNotificationDateInterpretation:
-            UILocalNotificationDateInterpretation.absoluteTime,
+        uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.absoluteTime,
         payload: jsonEncode(payload.toJson()),
+        matchDateTimeComponents: DateTimeComponents.time, // Or .dateAndTime depending on needs
       );
-
-      debugPrint('Notification scheduled for: $scheduledDate');
+      debugPrint('Notification scheduled for: $tzScheduledDate, ID: $notificationId');
     } catch (e) {
       debugPrint('Error scheduling notification: $e');
     }
   }
-
-  // Show progress notification
+  
   Future<void> showProgressNotification({
     required String title,
     required String body,
     required int progress,
     required int maxProgress,
+    int id = 999, // Fixed ID for progress, or manage dynamically
   }) async {
-    if (!_isInitialized) {
-      await initialize();
-    }
+    if (!_isInitialized) await initialize();
 
+    final AndroidNotificationDetails androidDetails = AndroidNotificationDetails(
+      _updatesChannelId,
+      _getChannelName(_updatesChannelId),
+      channelDescription: _getChannelDescription(_updatesChannelId),
+      importance: Importance.low, // Progress usually low importance
+      priority: Priority.low,
+      showProgress: true,
+      maxProgress: maxProgress,
+      progress: progress,
+      indeterminate: maxProgress == 0, // Indeterminate if maxProgress is 0
+      autoCancel: progress == maxProgress, // Auto cancel when complete
+      ongoing: progress < maxProgress, // Ongoing until complete
+      onlyAlertOnce: true,
+    );
+    final NotificationDetails notificationDetails = NotificationDetails(android: androidDetails);
     try {
-      final AndroidNotificationDetails androidDetails = AndroidNotificationDetails(
-        _updatesChannelId,
-        'تحديثات التطبيق',
-        channelDescription: 'إشعارات تحديثات التطبيق والمقالات الجديدة',
-        importance: Importance.low,
-        priority: Priority.low,
-        showProgress: true,
-        maxProgress: maxProgress,
-        progress: progress,
-        indeterminate: false,
-        autoCancel: false,
-        ongoing: true,
-        onlyAlertOnce: true,
-      );
-
-      const NotificationDetails notificationDetails = NotificationDetails(
-        android: androidDetails,
-      );
-
-      await _flutterLocalNotificationsPlugin.show(
-        999, // Fixed ID for progress notifications
-        title,
-        body,
-        notificationDetails,
-      );
+      await _flutterLocalNotificationsPlugin.show(id, title, body, notificationDetails);
     } catch (e) {
       debugPrint('Error showing progress notification: $e');
     }
   }
 
-  // Cancel a specific notification
   Future<void> cancelNotification(int id) async {
     await _flutterLocalNotificationsPlugin.cancel(id);
   }
 
-  // Cancel all notifications
   Future<void> cancelAllNotifications() async {
     await _flutterLocalNotificationsPlugin.cancelAll();
   }
 
-  // Get pending notifications
   Future<List<PendingNotificationRequest>> getPendingNotifications() async {
     return await _flutterLocalNotificationsPlugin.pendingNotificationRequests();
   }
 
-  // Handle notification tap
+  static void _onDidReceiveBackgroundNotificationResponse(NotificationResponse response) {
+    debugPrint('Background Notification Tapped (payload: ${response.payload})');
+    // Handle navigation or other actions for background taps
+    // This might be where you initialize parts of your app if it was terminated
+     if (response.payload != null) {
+      try {
+        final Map<String, dynamic> data = jsonDecode(response.payload!);
+        final payload = NotificationPayload.fromJson(data);
+        _handleNotificationNavigation(payload, response.actionId);
+      } catch (e) {
+        debugPrint('Error parsing background notification payload: $e');
+      }
+    }
+  }
+
   static void _onDidReceiveNotificationResponse(NotificationResponse response) {
-    debugPrint('Notification tapped: ${response.payload}');
-    
+    debugPrint('Notification Tapped (payload: ${response.payload}) Action: ${response.actionId}');
     if (response.payload != null) {
       try {
         final Map<String, dynamic> data = jsonDecode(response.payload!);
         final payload = NotificationPayload.fromJson(data);
-        
         _handleNotificationNavigation(payload, response.actionId);
       } catch (e) {
         debugPrint('Error parsing notification payload: $e');
@@ -493,32 +442,17 @@ class NotificationService {
     }
   }
 
-  // Handle iOS foreground notification
-  static void _onDidReceiveLocalNotification(
-    int id,
-    String? title,
-    String? body,
-    String? payload,
-  ) {
-    debugPrint('iOS foreground notification: $title - $body');
-  }
+  // Callback for older iOS versions (<=9) when app is in foreground
 
-  // Handle notification navigation
-  static void _handleNotificationNavigation(
-    NotificationPayload payload,
-    String? actionId,
-  ) {
+  static void _handleNotificationNavigation(NotificationPayload payload, String? actionId) {
     if (actionId == 'dismiss_action') {
-      return; // Do nothing for dismiss action
+      debugPrint('Notification dismissed by user action.');
+      return;
     }
 
-    // Navigate to appropriate screen based on payload data
     String? navigationPath = payload.navigationPath;
-    
-    if (navigationPath == null) {
-      // Try to determine navigation path from data
+    if (navigationPath == null || navigationPath.isEmpty) {
       final data = payload.data;
-      
       if (data.containsKey('newsId') && data.containsKey('cdate')) {
         navigationPath = '/news/${data['cdate']}/${data['newsId']}';
       } else if (data.containsKey('videoId')) {
@@ -528,203 +462,150 @@ class NotificationService {
       } else if (data.containsKey('sectionId')) {
         navigationPath = '/news?sectionId=${data['sectionId']}';
       } else {
-        navigationPath = '/home';
+        navigationPath = '/home'; // Default fallback
       }
     }
-
-    // Use router to navigate
-    if (navigationPath != null) {
-      AppRouter.router.go(navigationPath);
+    
+    debugPrint('Attempting to navigate to: $navigationPath');
+    // Ensure AppRouter.router is accessible or pass it if needed
+    // For simplicity, assuming AppRouter.router is a static getter.
+    try {
+        AppRouter.router.go(navigationPath);
+    } catch (e) {
+        debugPrint("Error navigating from notification: $e. Path: $navigationPath");
+        // Fallback if specific navigation fails
+        AppRouter.router.go('/home');
     }
   }
 
-  // Extract navigation path from data
   String? _extractNavigationPath(Map<String, dynamic>? data) {
     if (data == null) return null;
-    
-    if (data.containsKey('link')) {
-      return data['link'];
-    } else if (data.containsKey('url')) {
-      return data['url'];
-    }
-    
-    return null;
+    return data['link']?.toString() ?? data['url']?.toString();
   }
 
-  // Get next notification ID
   int _getNextNotificationId() {
-    return ++_notificationId;
+    _notificationIdCounter++;
+    return _notificationIdCounter;
   }
 
-  // Convert DateTime to TZDateTime
-  TZDateTime _convertToTZDateTime(DateTime dateTime) {
-    // For simplicity, using UTC. In production, use proper timezone handling
-    return TZDateTime.from(dateTime, TZ.UTC);
+  tz.TZDateTime _convertToTZDateTime(DateTime dateTime) {
+    // Ensure tz.local is properly initialized (e.g., tz.setLocalLocation(tz.getLocation('Africa/Cairo')))
+    // If not, this will use UTC or whatever the default local location is.
+    return tz.TZDateTime.from(dateTime, tz.local);
   }
 
-  // Get channel name
   String _getChannelName(String channelId) {
     switch (channelId) {
-      case _defaultChannelId:
-        return 'الأخبار العامة';
-      case _breakingNewsChannelId:
-        return 'الأخبار العاجلة';
-      case _updatesChannelId:
-        return 'تحديثات التطبيق';
-      default:
-        return 'إشعارات الشروق';
+      case _defaultChannelId: return 'الأخبار العامة';
+      case _breakingNewsChannelId: return 'الأخبار العاجلة';
+      case _updatesChannelId: return 'تحديثات التطبيق';
+      default: return 'إشعارات الشروق';
     }
   }
 
-  // Get channel description
   String _getChannelDescription(String channelId) {
     switch (channelId) {
-      case _defaultChannelId:
-        return 'إشعارات الأخبار العامة من الشروق';
-      case _breakingNewsChannelId:
-        return 'إشعارات الأخبار العاجلة والمهمة';
-      case _updatesChannelId:
-        return 'إشعارات تحديثات التطبيق والمقالات الجديدة';
-      default:
-        return 'إشعارات عامة من تطبيق الشروق';
+      case _defaultChannelId: return 'إشعارات الأخبار العامة من الشروق';
+      case _breakingNewsChannelId: return 'إشعارات الأخبار العاجلة والمهمة';
+      case _updatesChannelId: return 'إشعارات تحديثات التطبيق والمقالات الجديدة';
+      default: return 'إشعارات عامة من تطبيق الشروق';
     }
   }
 
-  // Get Android importance level
-  Importance _getImportance(NotificationPriority priority) {
+  Importance _getImportance(NotificationPriorityLevel priority) {
     switch (priority) {
-      case NotificationPriority.low:
-        return Importance.low;
-      case NotificationPriority.normal:
-        return Importance.defaultImportance;
-      case NotificationPriority.high:
-        return Importance.high;
-      case NotificationPriority.urgent:
-        return Importance.max;
+      case NotificationPriorityLevel.low: return Importance.low;
+      case NotificationPriorityLevel.normal: return Importance.defaultImportance;
+      case NotificationPriorityLevel.high: return Importance.high;
+      case NotificationPriorityLevel.urgent: return Importance.max;
     }
   }
 
-  // Get Android priority level
-  Priority _getPriority(NotificationPriority priority) {
+  Priority _getPriority(NotificationPriorityLevel priority) {
     switch (priority) {
-      case NotificationPriority.low:
-        return Priority.low;
-      case NotificationPriority.normal:
-        return Priority.defaultPriority;
-      case NotificationPriority.high:
-        return Priority.high;
-      case NotificationPriority.urgent:
-        return Priority.max;
+      case NotificationPriorityLevel.low: return Priority.low;
+      case NotificationPriorityLevel.normal: return Priority.defaultPriority;
+      case NotificationPriorityLevel.high: return Priority.high;
+      case NotificationPriorityLevel.urgent: return Priority.max;
     }
   }
 
-  // Load notification history
   Future<void> _loadNotificationHistory() async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      final historyJson = prefs.getString('notification_history');
-      
+      final historyJson = prefs.getString('notification_history_v1'); // Versioned key
       if (historyJson != null) {
         final List<dynamic> historyList = jsonDecode(historyJson);
         _notificationHistory = historyList
-            .map((item) => NotificationPayload.fromJson(item))
+            .map((item) => NotificationPayload.fromJson(item as Map<String, dynamic>))
             .toList();
+        debugPrint('${_notificationHistory.length} notifications loaded from history.');
       }
     } catch (e) {
       debugPrint('Error loading notification history: $e');
+      _notificationHistory = []; // Ensure it's empty on error
     }
   }
 
-  // Save notification history
   Future<void> _saveNotificationHistory() async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      
-      // Keep only last 100 notifications
       if (_notificationHistory.length > 100) {
-        _notificationHistory = _notificationHistory.take(100).toList();
+        _notificationHistory = _notificationHistory.sublist(0, 100);
       }
-      
       final historyJson = jsonEncode(
-        _notificationHistory.map((notification) => notification.toJson()).toList(),
-      );
-      
-      await prefs.setString('notification_history', historyJson);
+          _notificationHistory.map((n) => n.toJson()).toList());
+      await prefs.setString('notification_history_v1', historyJson);
     } catch (e) {
       debugPrint('Error saving notification history: $e');
     }
   }
 
-  // Get notification history
   List<NotificationPayload> getNotificationHistory() {
     return List.unmodifiable(_notificationHistory);
   }
 
-  // Clear notification history
   Future<void> clearNotificationHistory() async {
     _notificationHistory.clear();
     await _saveNotificationHistory();
+    debugPrint('Notification history cleared.');
   }
 
-  // Check if notifications are enabled
-  Future<bool> areNotificationsEnabled() async {
+  Future<bool> arePlatformNotificationsEnabled() async {
     if (Platform.isAndroid) {
-      final plugin = _flutterLocalNotificationsPlugin
-          .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>();
-      
-      if (plugin != null) {
-        return await plugin.areNotificationsEnabled() ?? false;
-      }
+      final AndroidFlutterLocalNotificationsPlugin? androidImplementation =
+          _flutterLocalNotificationsPlugin.resolvePlatformSpecificImplementation<
+              AndroidFlutterLocalNotificationsPlugin>();
+      return await androidImplementation?.areNotificationsEnabled() ?? false;
     }
-    return true;
+    // For iOS, permission is requested. System-level check is different.
+    // This method primarily reflects Android's specific API.
+    return true; // Assume enabled or rely on permission request for iOS
   }
 
-  // Open notification settings
-  Future<void> openNotificationSettings() async {
+  Future<void> openPlatformNotificationSettings() async {
+    // This functionality is not directly provided by flutter_local_notifications.
+    // You might need another plugin like `app_settings` to open system settings.
+    // For Android, requesting permission again often takes user to settings if denied.
     if (Platform.isAndroid) {
-      final plugin = _flutterLocalNotificationsPlugin
-          .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>();
-      
-      if (plugin != null) {
-        await plugin.requestNotificationsPermission();
-      }
+       await _requestPermissions(); // Re-requesting can sometimes open settings
     }
+    debugPrint("Attempted to open platform notification settings (manual implementation may be needed via other plugins for direct navigation).");
   }
 
-  // Test notification
   Future<void> sendTestNotification() async {
     await showNotification(
-      title: 'اختبار الإشعارات',
-      body: 'هذا إشعار اختبار من تطبيق الشروق',
-      data: {'test': 'true'},
-      priority: NotificationPriority.normal,
+      title: 'اختبار الإشعارات من التطبيق',
+      body: 'هذا إشعار اختباري للتحقق من عمل خدمة الإشعارات المحلية.',
+      data: {'test_id': '123', 'type': 'test_notification'},
+      priority: NotificationPriorityLevel.high,
+      isBreakingNews: true, // To test breaking news channel
+      imageUrl: 'https://via.placeholder.com/400x200.png?text=Test+Image' // Test image
     );
   }
 
-  // Dispose
   void dispose() {
-    // Clean up resources if needed
+    // No specific resources to dispose in this singleton,
+    // but if you had streams, close them here.
   }
-}
-
-// Notification priority enum
-enum NotificationPriority {
-  low,
-  normal,
-  high,
-  urgent,
-}
-
-// Missing timezone import placeholder
-class TZ {
-  static get UTC => null;
-}
-
-class TZDateTime {
-  static TZDateTime from(DateTime dateTime, dynamic location) {
-    // Placeholder implementation
-    return TZDateTime._internal();
-  }
-  
-  TZDateTime._internal();
 }
