@@ -3,15 +3,26 @@ import 'package:flutter_html/flutter_html.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:go_router/go_router.dart';
-import 'package:photo_view/photo_view.dart';
-import 'package:photo_view/photo_view_gallery.dart';
+import 'package:shimmer/shimmer.dart'; // For loading effects
+import 'package:url_launcher/url_launcher.dart'; // For opening external links
 
-import '../../models/news_model.dart';
+// Models
+import '../../models/new_model.dart';
+
+// Services
 import '../../services/api_service.dart';
+// import '../../providers/auth_provider.dart'; // If you want to track news views
+
+// Widgets
 import '../../widgets/ad_banner.dart';
-import '../../widgets/section_header.dart';
-import '../../widgets/news_card.dart';
+import '../../widgets/section_header.dart'; // Corrected import path
+import '../../widgets/news_card.dart'; // For related news
+
+// Core
 import '../../core/theme.dart';
+
+// Note: The PhotoGalleryScreen is imported via app_router.dart when navigating.
+// We don't need a direct import here if using GoRouter for navigation to it.
 
 class NewsDetailScreen extends StatefulWidget {
   final String cdate;
@@ -30,12 +41,15 @@ class NewsDetailScreen extends StatefulWidget {
 class _NewsDetailScreenState extends State<NewsDetailScreen> {
   final ApiService _apiService = ApiService();
   final ScrollController _scrollController = ScrollController();
-  
+
   NewsArticle? _newsDetail;
-  List<NewsArticle> _relatedNews = [];
+  List<NewsArticle> _moreNewsFromSection = []; // For "More News" section
   bool _isLoading = true;
-  bool _isLoadingRelated = false;
-  double _fontSize = 16.0;
+  String? _loadingError; // To store error messages
+  // bool _isLoadingRelated = false; // This was unused, removed. Related news are part of _newsDetail or fetched in _loadMoreNewsFromSection
+  bool _isLoadingMoreNews = false; // For "More News from Section"
+
+  double _fontSize = 16.0; // Default font size for article body
   static const double _minFontSize = 12.0;
   static const double _maxFontSize = 24.0;
 
@@ -45,51 +59,87 @@ class _NewsDetailScreenState extends State<NewsDetailScreen> {
     _loadNewsDetail();
   }
 
-  Future<void> _loadNewsDetail() async {
-    setState(() => _isLoading = true);
-    
+  Future<void> _loadNewsDetail({bool refresh = false}) async {
+    if (!mounted) return;
+    setState(() {
+      _isLoading = true;
+      _loadingError = null;
+      if (refresh) {
+        _newsDetail = null; // Clear existing detail on refresh
+        _moreNewsFromSection.clear();
+      }
+    });
+
     try {
       final newsDetail = await _apiService.getNewsDetail(widget.cdate, widget.newsId);
-      if (newsDetail != null) {
-        setState(() => _newsDetail = newsDetail);
-        _loadRelatedNews();
+      if (mounted) {
+        setState(() {
+          _newsDetail = newsDetail;
+        });
+        if (newsDetail != null) {
+          _loadMoreNewsFromSection(newsDetail.sectionId, newsDetail.id);
+          // Example: Track news view using AuthProvider
+          // try {
+          //   context.read<AuthProvider>().trackNewsRead(widget.newsId);
+          // } catch (e) {
+          //   debugPrint("Error tracking news read: $e");
+          // }
+        } else {
+           if (mounted) {
+            setState(() {
+              _loadingError = 'لم يتم العثور على تفاصيل الخبر.';
+            });
+          }
+        }
       }
     } catch (e) {
       debugPrint('Error loading news detail: $e');
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('خطأ في تحميل الخبر')),
-        );
+        setState(() {
+          _loadingError = 'خطأ في تحميل الخبر. يرجى المحاولة مرة أخرى.';
+        });
       }
     } finally {
-      setState(() => _isLoading = false);
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
     }
   }
 
-  Future<void> _loadRelatedNews() async {
-    if (_newsDetail == null) return;
-    
-    setState(() => _isLoadingRelated = true);
-    
+  /// Loads more news from the same section, excluding the current article.
+  Future<void> _loadMoreNewsFromSection(String sectionId, String currentNewsId) async {
+    if (sectionId.isEmpty || !mounted) return;
+
+    if (mounted) setState(() => _isLoadingMoreNews = true);
     try {
-      final relatedNews = await _apiService.getNews(
-        sectionId: _newsDetail!.sectionId,
-        pageSize: 6,
+      final newsList = await _apiService.getNews(
+        sectionId: sectionId,
+        pageSize: 4, // Fetch a few articles for "More News"
       );
-      setState(() {
-        _relatedNews = relatedNews.where((news) => news.id != _newsDetail!.id).toList();
-      });
+      if (mounted) {
+        setState(() {
+          _moreNewsFromSection = newsList.where((news) => news.id != currentNewsId).toList();
+        });
+      }
     } catch (e) {
-      debugPrint('Error loading related news: $e');
+      debugPrint('Error loading more news from section: $e');
     } finally {
-      setState(() => _isLoadingRelated = false);
+      if (mounted) {
+        setState(() => _isLoadingMoreNews = false);
+      }
     }
   }
 
   void _shareNews() {
     if (_newsDetail != null) {
+      String shareText = '${_newsDetail!.title}\n\n';
+      if (_newsDetail!.summary.isNotEmpty) {
+        shareText += '${_newsDetail!.summary}\n\n';
+      }
+      shareText += _newsDetail!.canonicalUrl; // Link to the web version
+
       Share.share(
-        '${_newsDetail!.title}\n\n${_newsDetail!.summary}\n\n${_newsDetail!.canonicalUrl}',
+        shareText,
         subject: _newsDetail!.title,
       );
     }
@@ -97,134 +147,160 @@ class _NewsDetailScreenState extends State<NewsDetailScreen> {
 
   void _increaseFontSize() {
     if (_fontSize < _maxFontSize) {
-      setState(() => _fontSize += 1);
+      if (mounted) setState(() => _fontSize += 1);
     }
   }
 
   void _decreaseFontSize() {
     if (_fontSize > _minFontSize) {
-      setState(() => _fontSize -= 1);
+      if (mounted) setState(() => _fontSize -= 1);
     }
   }
 
+  /// Navigates to the photo gallery screen.
   void _showPhotoGallery(int initialIndex) {
     if (_newsDetail?.relatedPhotos.isEmpty ?? true) return;
-    
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => PhotoGalleryScreen(
-          photos: _newsDetail!.relatedPhotos,
-          initialIndex: initialIndex,
-        ),
-      ),
+
+    context.goNamed(
+      'image-viewer', 
+      extra: {
+        'photos': _newsDetail!.relatedPhotos,
+        'initialIndex': initialIndex,
+        'galleryTitle': 'صور متعلقة بالخبر: ${_newsDetail!.title}',
+      },
     );
   }
+
+  Future<void> _handleLinkTap(String? url) async {
+    if (url != null) {
+      final Uri? uri = Uri.tryParse(url);
+      if (uri != null && await canLaunchUrl(uri)) {
+        await launchUrl(uri, mode: LaunchMode.externalApplication);
+      } else {
+        debugPrint('Could not launch $url');
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('تعذر فتح الرابط: $url')),
+          );
+        }
+      }
+    }
+  }
+
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('تفاصيل الخبر'),
+        title: Text(_newsDetail?.sectionArName ?? 'تفاصيل الخبر'),
         actions: [
           if (_newsDetail != null)
             IconButton(
-              icon: const Icon(Icons.share),
+              icon: const Icon(Icons.share_outlined),
+              tooltip: 'مشاركة الخبر',
               onPressed: _shareNews,
             ),
         ],
       ),
       body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : _newsDetail == null
-              ? const Center(
-                  child: Text(
-                    'لم يتم العثور على الخبر',
-                    style: TextStyle(fontSize: 18),
-                  ),
-                )
-              : RefreshIndicator(
-                  onRefresh: _loadNewsDetail,
-                  child: CustomScrollView(
-                    controller: _scrollController,
-                    slivers: [
-                      // Ad Banner
-                      const SliverToBoxAdapter(
-                        child: AdBanner(adUnit: '/21765378867/ShorouknewsApp_LeaderBoard2'),
+          ? _buildLoadingShimmer() 
+          : _loadingError != null
+              ? _buildErrorState(_loadingError!) 
+              : _newsDetail == null
+                  ? _buildErrorState('لم يتم العثور على الخبر.') 
+                  : RefreshIndicator(
+                      onRefresh: () => _loadNewsDetail(refresh: true),
+                      color: AppTheme.primaryColor,
+                      child: CustomScrollView(
+                        controller: _scrollController,
+                        slivers: [
+                          const SliverToBoxAdapter(
+                            child: AdBanner(adUnit: '/21765378867/ShorouknewsApp_LeaderBoard2'),
+                          ),
+                          SliverToBoxAdapter(child: _buildBreadcrumb()),
+                          SliverToBoxAdapter(child: _buildMainContent()),
+                          if (_newsDetail!.editorAndSource.isNotEmpty)
+                            SliverToBoxAdapter(child: _buildEditorSource()),
+                          SliverToBoxAdapter(child: _buildDates()),
+                          SliverToBoxAdapter(child: _buildReadingTools()),
+                          SliverToBoxAdapter(child: _buildNewsBody()),
+                          SliverToBoxAdapter(child: _buildShareSection()),
+                          if (_newsDetail!.relatedPhotos.isNotEmpty)
+                            SliverToBoxAdapter(child: _buildRelatedPhotos()),
+                          if (_newsDetail!.relatedNews.isNotEmpty)
+                             SliverToBoxAdapter(child: _buildCuratedRelatedNews()),
+                          const SliverToBoxAdapter(
+                            child: AdBanner(adUnit: '/21765378867/ShorouknewsApp_Banner2'),
+                          ),
+                          if (_moreNewsFromSection.isNotEmpty || _isLoadingMoreNews)
+                            SliverToBoxAdapter(child: _buildMoreNewsFromSectionWidget()),
+                          const SliverToBoxAdapter(child: SizedBox(height: 20)),
+                        ],
                       ),
-                      
-                      // Breadcrumb
-                      SliverToBoxAdapter(
-                        child: _buildBreadcrumb(),
-                      ),
-                      
-                      // Main Image and Title
-                      SliverToBoxAdapter(
-                        child: _buildMainContent(),
-                      ),
-                      
-                      // Editor and Source
-                      if (_newsDetail!.editorAndSource.isNotEmpty)
-                        SliverToBoxAdapter(
-                          child: _buildEditorSource(),
-                        ),
-                      
-                      // Dates
-                      SliverToBoxAdapter(
-                        child: _buildDates(),
-                      ),
-                      
-                      // Reading Tools
-                      SliverToBoxAdapter(
-                        child: _buildReadingTools(),
-                      ),
-                      
-                      // News Body
-                      SliverToBoxAdapter(
-                        child: _buildNewsBody(),
-                      ),
-                      
-                      // Share Button
-                      SliverToBoxAdapter(
-                        child: _buildShareSection(),
-                      ),
-                      
-                      // Related Photos
-                      if (_newsDetail!.relatedPhotos.isNotEmpty)
-                        SliverToBoxAdapter(
-                          child: _buildRelatedPhotos(),
-                        ),
-                      
-                      // Related News
-                      if (_relatedNews.isNotEmpty)
-                        SliverToBoxAdapter(
-                          child: _buildRelatedNews(),
-                        ),
-                      
-                      // Ad Banner
-                      const SliverToBoxAdapter(
-                        child: AdBanner(adUnit: '/21765378867/ShorouknewsApp_Banner2'),
-                      ),
-                      
-                      // More News Section
-                      SliverToBoxAdapter(
-                        child: _buildMoreNewsSection(),
-                      ),
-                      
-                      // Bottom spacing
-                      const SliverToBoxAdapter(
-                        child: SizedBox(height: 20),
-                      ),
-                    ],
-                  ),
-                ),
+                    ),
+    );
+  }
+
+  Widget _buildLoadingShimmer() {
+    return SingleChildScrollView( 
+      physics: const NeverScrollableScrollPhysics(),
+      child: Shimmer.fromColors(
+        baseColor: Colors.grey[300]!,
+        highlightColor: Colors.grey[100]!,
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(width: double.infinity, height: 200.0, decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12))),
+              const SizedBox(height: 16.0),
+              Container(width: double.infinity, height: 24.0, decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(4))),
+              const SizedBox(height: 8.0),
+              Container(width: MediaQuery.of(context).size.width * 0.7, height: 20.0, decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(4))),
+              const SizedBox(height: 16.0),
+              Container(width: double.infinity, height: 100.0, decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(8))),
+              const SizedBox(height: 16.0),
+              Container(width: double.infinity, height: 100.0, decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(8))),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildErrorState(String message) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(20.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.error_outline_rounded, color: Colors.red[600], size: 70),
+            const SizedBox(height: 20),
+            Text(
+              message,
+              textAlign: TextAlign.center,
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(color: Colors.black87),
+            ),
+            const SizedBox(height: 20),
+            ElevatedButton.icon(
+              icon: const Icon(Icons.refresh),
+              label: const Text('إعادة المحاولة'),
+              onPressed: () => _loadNewsDetail(refresh: true),
+              style: ElevatedButton.styleFrom(backgroundColor: AppTheme.primaryColor, foregroundColor: Colors.white),
+            )
+          ],
+        ),
+      ),
     );
   }
 
   Widget _buildBreadcrumb() {
+    if (_newsDetail == null) return const SizedBox.shrink();
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
+        color: Theme.of(context).canvasColor,
         border: Border(
           bottom: BorderSide(color: AppTheme.tertiaryColor, width: 4),
         ),
@@ -235,60 +311,78 @@ class _NewsDetailScreenState extends State<NewsDetailScreen> {
             onTap: () => context.go('/home'),
             child: const Text(
               'الرئيسية',
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                color: AppTheme.primaryColor,
-              ),
+              style: TextStyle(fontWeight: FontWeight.bold, color: AppTheme.primaryColor),
             ),
           ),
           const Text(' > ', style: TextStyle(fontWeight: FontWeight.bold)),
-          if (_newsDetail!.sectionArName.isNotEmpty) ...[
-            GestureDetector(
-              onTap: () => context.go('/news?sectionId=${_newsDetail!.sectionId}&sectionName=${_newsDetail!.sectionArName}'),
-              child: Text(
-                _newsDetail!.sectionArName,
-                style: const TextStyle(
-                  fontWeight: FontWeight.bold,
-                  color: AppTheme.primaryColor,
+          // Corrected: Conditionally add GestureDetector only if sectionArName is not empty
+          if (_newsDetail!.sectionArName.isNotEmpty)
+            Expanded( 
+              child: GestureDetector(
+                onTap: () => context.go('/news?sectionId=${_newsDetail!.sectionId}&sectionName=${Uri.encodeComponent(_newsDetail!.sectionArName)}'),
+                child: Text(
+                  _newsDetail!.sectionArName,
+                  style: const TextStyle(fontWeight: FontWeight.bold, color: AppTheme.primaryColor),
+                  overflow: TextOverflow.ellipsis,
                 ),
               ),
+            )
+          else 
+            const Expanded( // Ensure Row children are properly expanded or sized
+              child: Text('خبر', style: TextStyle(fontWeight: FontWeight.bold), overflow: TextOverflow.ellipsis)
             ),
-          ],
         ],
       ),
     );
   }
 
   Widget _buildMainContent() {
+    if (_newsDetail == null) return const SizedBox.shrink();
     return Card(
-      margin: EdgeInsets.zero,
+      margin: const EdgeInsets.all(0), 
+      elevation: 0, 
       clipBehavior: Clip.antiAlias,
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero), 
       child: Stack(
         children: [
-          AspectRatio(
-            aspectRatio: 16 / 9,
-            child: CachedNetworkImage(
-              imageUrl: _newsDetail!.photoUrl,
-              fit: BoxFit.cover,
-              placeholder: (context, url) => Container(
-                color: Colors.grey[300],
-                child: const Center(child: CircularProgressIndicator()),
+          if (_newsDetail!.photoUrl.isNotEmpty)
+            AspectRatio(
+              aspectRatio: 16 / 9,
+              child: CachedNetworkImage(
+                imageUrl: _newsDetail!.photoUrl,
+                fit: BoxFit.cover,
+                placeholder: (context, url) => Shimmer.fromColors(
+                  baseColor: Colors.grey[300]!,
+                  highlightColor: Colors.grey[100]!,
+                  child: Container(color: Colors.white),
+                ),
+                errorWidget: (context, url, error) => Container(
+                  color: Colors.grey[200],
+                  child: const Icon(Icons.broken_image_outlined, color: Colors.grey, size: 50),
+                ),
               ),
-              errorWidget: (context, url, error) => Container(
-                color: Colors.grey[300],
-                child: const Icon(Icons.error),
+            )
+          else 
+            AspectRatio(
+              aspectRatio: 16 / 9,
+              child: Container(
+                color: Colors.grey[200],
+                child: const Icon(Icons.image_not_supported_outlined, color: Colors.grey, size: 50),
               ),
             ),
-          ),
-          Container(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: [
-                  Colors.transparent,
-                  Colors.black.withOpacity(0.7),
-                ],
+          Positioned.fill(
+            child: Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    Colors.transparent,
+                    Colors.black.withAlpha((255 * 0.1).round()), // Corrected withOpacity
+                    Colors.black.withAlpha((255 * 0.75).round()),// Corrected withOpacity
+                  ],
+                  stops: const [0.0, 0.4, 1.0],
+                ),
               ),
             ),
           ),
@@ -302,9 +396,10 @@ class _NewsDetailScreenState extends State<NewsDetailScreen> {
                 "body": Style(
                   margin: Margins.zero,
                   padding: HtmlPaddings.zero,
-                  fontSize: FontSize(20),
+                  fontSize: FontSize(20), 
                   fontWeight: FontWeight.bold,
                   color: Colors.white,
+                  textShadow: [const Shadow(blurRadius: 2.0, color: Colors.black54, offset: Offset(1,1))]
                 ),
               },
             ),
@@ -315,91 +410,96 @@ class _NewsDetailScreenState extends State<NewsDetailScreen> {
   }
 
   Widget _buildEditorSource() {
+    if (_newsDetail == null || _newsDetail!.editorAndSource.isEmpty) return const SizedBox.shrink();
     return Container(
-      padding: const EdgeInsets.all(16),
-      color: AppTheme.tertiaryColor,
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+      color: AppTheme.tertiaryColor.withAlpha((255 * 0.15).round()), // Corrected withOpacity
+      width: double.infinity,
       child: Text(
         _newsDetail!.editorAndSource,
-        style: const TextStyle(
-          color: Colors.white,
-          fontWeight: FontWeight.bold,
+        style: TextStyle(
+          // Corrected: Color does not have shade900. Using primary for contrast or a darker tertiary.
+          color: AppTheme.primaryColor, // Or: Color.fromRGBO((AppTheme.tertiaryColor.red * 0.6).round(), (AppTheme.tertiaryColor.green * 0.6).round(), (AppTheme.tertiaryColor.blue * 0.6).round(),1,),
+          fontWeight: FontWeight.w500,
+          fontSize: 13,
         ),
+        textAlign: TextAlign.center,
       ),
     );
   }
 
   Widget _buildDates() {
+    if (_newsDetail == null) return const SizedBox.shrink();
     return Container(
       padding: const EdgeInsets.all(16),
-      color: AppTheme.primaryColor,
+      color: AppTheme.primaryColor.withAlpha((255 * 0.05).round()), // Corrected withOpacity
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              const Icon(Icons.calendar_today, color: Colors.white, size: 16),
+              const Icon(Icons.calendar_today_outlined, color: AppTheme.primaryColor, size: 16),
               const SizedBox(width: 8),
               const Text(
                 'نشر في: ',
-                style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                style: TextStyle(color: AppTheme.primaryColor, fontWeight: FontWeight.bold, fontSize: 13),
               ),
               Text(
-                _newsDetail!.publishDateFormatted,
-                style: const TextStyle(color: Colors.white),
+                '${_newsDetail!.publishDateFormatted} - ${_newsDetail!.publishTimeFormatted}',
+                style: TextStyle(color: Colors.grey[800], fontSize: 13),
               ),
             ],
           ),
-          const SizedBox(height: 8),
-          Row(
-            children: [
-              const Icon(Icons.access_time, color: Colors.white, size: 16),
-              const SizedBox(width: 8),
-              const Text(
-                'آخر تحديث: ',
-                style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-              ),
-              Text(
-                _newsDetail!.lastModificationDateFormatted,
-                style: const TextStyle(color: Colors.white),
-              ),
-            ],
-          ),
+          if (_newsDetail!.lastModificationDateFormatted.isNotEmpty && _newsDetail!.lastModificationDateFormatted != _newsDetail!.publishDateFormatted) ...[ 
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                const Icon(Icons.access_time_outlined, color: AppTheme.primaryColor, size: 16),
+                const SizedBox(width: 8),
+                const Text(
+                  'آخر تحديث: ',
+                  style: TextStyle(color: AppTheme.primaryColor, fontWeight: FontWeight.bold, fontSize: 13),
+                ),
+                Text(
+                  _newsDetail!.lastModificationDateFormatted,
+                  style: TextStyle(color: Colors.grey[800], fontSize: 13),
+                ),
+              ],
+            ),
+          ]
         ],
       ),
     );
   }
 
   Widget _buildReadingTools() {
-    return Container(
-      padding: const EdgeInsets.all(16),
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
       child: Row(
         children: [
-          // Font size controls
-          Row(
-            children: [
-              IconButton(
-                onPressed: _increaseFontSize,
-                icon: const Text('+ع', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-              ),
-              IconButton(
-                onPressed: _decreaseFontSize,
-                icon: const Text('-ع', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-              ),
-            ],
+          const Text('حجم الخط:', style: TextStyle(fontSize: 14)),
+          IconButton(
+            icon: const Icon(Icons.text_increase_outlined),
+            onPressed: _increaseFontSize,
+            tooltip: 'تكبير الخط',
+            color: AppTheme.primaryColor,
           ),
-          
+          IconButton(
+            icon: const Icon(Icons.text_decrease_outlined),
+            onPressed: _decreaseFontSize,
+            tooltip: 'تصغير الخط',
+            color: AppTheme.primaryColor,
+          ),
           const Spacer(),
-          
-          // Share button
           ElevatedButton.icon(
             onPressed: _shareNews,
-            icon: const Icon(Icons.share, color: AppTheme.tertiaryColor),
-            label: const Text(
-              'مشاركة',
-              style: TextStyle(color: AppTheme.tertiaryColor),
-            ),
+            icon: const Icon(Icons.share_outlined, size: 18),
+            label: const Text('مشاركة'),
             style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.white,
-              side: const BorderSide(color: AppTheme.tertiaryColor),
+              backgroundColor: AppTheme.tertiaryColor,
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              textStyle: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
             ),
           ),
         ],
@@ -408,8 +508,9 @@ class _NewsDetailScreenState extends State<NewsDetailScreen> {
   }
 
   Widget _buildNewsBody() {
-    return Container(
-      padding: const EdgeInsets.all(16),
+    if (_newsDetail == null) return const SizedBox.shrink();
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
       child: Html(
         data: _newsDetail!.body,
         style: {
@@ -417,80 +518,105 @@ class _NewsDetailScreenState extends State<NewsDetailScreen> {
             margin: Margins.zero,
             padding: HtmlPaddings.zero,
             fontSize: FontSize(_fontSize),
-            lineHeight: const LineHeight(1.6),
+            lineHeight: const LineHeight(1.7), 
+            textAlign: TextAlign.justify,
           ),
           "p": Style(
             fontSize: FontSize(_fontSize),
-            lineHeight: const LineHeight(1.6),
+            lineHeight: const LineHeight(1.7),
             margin: Margins.only(bottom: 16),
           ),
           "a": Style(
-            color: AppTheme.primaryColor,
+            color: AppTheme.tertiaryColor, 
             textDecoration: TextDecoration.underline,
           ),
-        ),
-        onLinkTap: (url, attributes, element) {
-          // Handle link taps
-          debugPrint('Link tapped: $url');
+          "img": Style(
+            width: Width(MediaQuery.of(context).size.width - 32), 
+            padding: HtmlPaddings.symmetric(vertical: 8),
+          ),
         },
+        onLinkTap: (url, attributes, element) => _handleLinkTap(url),
+        // Corrected: onImageTap is not a direct parameter.
+        // Image taps can be handled by wrapping images in <a> tags in HTML
+        // or by using customRenders if more complex interaction is needed.
+        // For now, removing the onImageTap directly from Html widget.
+        // If images are wrapped in <a> tags, onLinkTap will handle them.
       ),
     );
   }
 
   Widget _buildShareSection() {
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.symmetric(vertical: 20.0, horizontal: 16.0),
       alignment: Alignment.center,
       child: ElevatedButton.icon(
         onPressed: _shareNews,
-        icon: const Icon(Icons.share, color: AppTheme.tertiaryColor),
-        label: const Text(
-          'مشاركة',
-          style: TextStyle(color: AppTheme.tertiaryColor),
-        ),
+        icon: const Icon(Icons.share_rounded),
+        label: const Text('شارك هذا الخبر'),
         style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.white,
-          side: const BorderSide(color: AppTheme.tertiaryColor),
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+          backgroundColor: AppTheme.primaryColor,
+          foregroundColor: Colors.white,
+          padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 12),
+          textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
         ),
       ),
     );
   }
 
   Widget _buildRelatedPhotos() {
+    if (_newsDetail == null || _newsDetail!.relatedPhotos.isEmpty) return const SizedBox.shrink();
     return Column(
       children: [
-        SectionHeader(
-          title: 'صور متعلقة',
-          icon: Icons.photo_library,
+        SectionHeader( // Corrected: Assuming SectionHeader is a widget class
+          title: 'صور متعلقة بالخبر',
+          icon: Icons.photo_library_outlined,
           onMorePressed: () => _showPhotoGallery(0),
-          moreText: 'المعرض',
+          moreText: 'عرض كل الصور',
         ),
         SizedBox(
-          height: 120,
+          height: 130, 
           child: ListView.builder(
             scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(horizontal: 16),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
             itemCount: _newsDetail!.relatedPhotos.length,
             itemBuilder: (context, index) {
               final photo = _newsDetail!.relatedPhotos[index];
               return GestureDetector(
                 onTap: () => _showPhotoGallery(index),
-                child: Container(
-                  width: 120,
-                  margin: const EdgeInsets.only(left: 8),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(8),
-                    child: CachedNetworkImage(
-                      imageUrl: photo.thumbnailPhotoUrl,
-                      fit: BoxFit.cover,
-                      placeholder: (context, url) => Container(
-                        color: Colors.grey[300],
-                        child: const Icon(Icons.image),
-                      ),
-                      errorWidget: (context, url, error) => Container(
-                        color: Colors.grey[300],
-                        child: const Icon(Icons.error),
+                child: Hero( 
+                  tag: 'photo_${photo.photoUrl}_$index', 
+                  child: Container(
+                    width: 130, 
+                    margin: const EdgeInsets.symmetric(horizontal: 4),
+                    child: Card(
+                      clipBehavior: Clip.antiAlias,
+                      elevation: 2.0,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                      child: Stack(
+                        fit: StackFit.expand,
+                        children: [
+                          CachedNetworkImage(
+                            imageUrl: photo.thumbnailPhotoUrl.isNotEmpty ? photo.thumbnailPhotoUrl : photo.photoUrl,
+                            fit: BoxFit.cover,
+                            placeholder: (context, url) => Shimmer.fromColors(baseColor: Colors.grey[300]!, highlightColor: Colors.grey[100]!, child: Container(color: Colors.white)),
+                            errorWidget: (context, url, error) => Container(color: Colors.grey[200], child: const Icon(Icons.broken_image_outlined, color: Colors.grey)),
+                          ),
+                          if (photo.photoCaption.isNotEmpty)
+                            Positioned(
+                              bottom: 0, left: 0, right: 0,
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
+                                color: Colors.black.withAlpha((255 * 0.6).round()), // Corrected withOpacity
+                                child: Text(
+                                  photo.photoCaption,
+                                  style: const TextStyle(color: Colors.white, fontSize: 10),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  textAlign: TextAlign.center,
+                                ),
+                              ),
+                            )
+                        ],
                       ),
                     ),
                   ),
@@ -499,103 +625,89 @@ class _NewsDetailScreenState extends State<NewsDetailScreen> {
             },
           ),
         ),
+        const SizedBox(height: 16),
       ],
     );
   }
 
-  Widget _buildRelatedNews() {
+  Widget _buildCuratedRelatedNews() {
+    if (_newsDetail == null || _newsDetail!.relatedNews.isEmpty) return const SizedBox.shrink();
     return Column(
       children: [
-        SectionHeader(
-          title: 'أخبار متعلقة',
-          icon: Icons.article,
+        SectionHeader( // Corrected: Assuming SectionHeader is a widget class
+          title: 'أخبار ذات صلة',
+          icon: Icons.article_outlined,
         ),
         GridView.builder(
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
-          padding: const EdgeInsets.all(16),
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 2,
-            childAspectRatio: 1.2,
-            crossAxisSpacing: 8,
-            mainAxisSpacing: 8,
+          padding: const EdgeInsets.all(12),
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: MediaQuery.of(context).size.width > 600 ? 3 : 2,
+            childAspectRatio: 0.9, 
+            crossAxisSpacing: 12,
+            mainAxisSpacing: 12,
           ),
-          itemCount: _newsDetail!.relatedNews.length,
+          itemCount: _newsDetail!.relatedNews.length.clamp(0,4), 
           itemBuilder: (context, index) {
-            final relatedNews = _newsDetail!.relatedNews[index];
-            return GestureDetector(
-              onTap: () => context.go('/news/${relatedNews.cDate}/${relatedNews.id}'),
-              child: Card(
-                clipBehavior: Clip.antiAlias,
-                child: Stack(
-                  children: [
-                    CachedNetworkImage(
-                      imageUrl: relatedNews.thumbnailPhotoUrl,
-                      width: double.infinity,
-                      height: double.infinity,
-                      fit: BoxFit.cover,
-                      placeholder: (context, url) => Container(
-                        color: Colors.grey[300],
-                        child: const Icon(Icons.image),
-                      ),
-                      errorWidget: (context, url, error) => Container(
-                        color: Colors.grey[300],
-                        child: const Icon(Icons.error),
-                      ),
-                    ),
-                    Container(
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          begin: Alignment.topCenter,
-                          end: Alignment.bottomCenter,
-                          colors: [
-                            Colors.transparent,
-                            Colors.black.withOpacity(0.7),
-                          ],
-                        ),
-                      ),
-                    ),
-                    Positioned(
-                      bottom: 8,
-                      left: 8,
-                      right: 8,
-                      child: Text(
-                        relatedNews.title,
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 11,
-                          fontWeight: FontWeight.bold,
-                        ),
-                        maxLines: 3,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
+            final relatedNewsItem = _newsDetail!.relatedNews[index];
+             final tempArticle = NewsArticle( 
+              id: relatedNewsItem.id,
+              cDate: relatedNewsItem.cDate,
+              title: relatedNewsItem.title,
+              summary: '', 
+              body: '',
+              photoUrl: relatedNewsItem.thumbnailPhotoUrl, 
+              thumbnailPhotoUrl: relatedNewsItem.thumbnailPhotoUrl,
+              sectionId: _newsDetail!.sectionId, 
+              sectionArName: '',
+              publishDate: '', 
+              publishDateFormatted: '',
+              publishTimeFormatted: '',
+              lastModificationDate: '',
+              lastModificationDateFormatted: '',
+              editorAndSource: '',
+              canonicalUrl: '/news/${relatedNewsItem.cDate}/${relatedNewsItem.id}', 
+              relatedPhotos: [],
+              relatedNews: []
+            );
+            return NewsCard(
+              article: tempArticle,
+              onTap: () => context.go('/news/${relatedNewsItem.cDate}/${relatedNewsItem.id}'),
             );
           },
         ),
+         const SizedBox(height: 16),
       ],
     );
   }
 
-  Widget _buildMoreNewsSection() {
-    if (_relatedNews.isEmpty) return const SizedBox.shrink();
+  Widget _buildMoreNewsFromSectionWidget() {
+    if (_isLoadingMoreNews && _moreNewsFromSection.isEmpty) {
+      return Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Shimmer.fromColors( 
+            baseColor: Colors.grey[300]!,
+            highlightColor: Colors.grey[100]!,
+            child: Container(height: 24, width: 150, decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(4))),
+        ),
+      );
+    }
+    if (_moreNewsFromSection.isEmpty) return const SizedBox.shrink();
     
     return Column(
       children: [
-        SectionHeader(
-          title: 'المزيد من الأخبار',
-          icon: Icons.article,
-          onMorePressed: () => context.go('/news?sectionId=${_newsDetail!.sectionId}&sectionName=${_newsDetail!.sectionArName}'),
+        SectionHeader( // Corrected: Assuming SectionHeader is a widget class
+          title: 'المزيد من قسم "${_newsDetail?.sectionArName ?? ''}"',
+          icon: Icons.library_books_outlined,
+          onMorePressed: () => context.go('/news?sectionId=${_newsDetail!.sectionId}&sectionName=${Uri.encodeComponent(_newsDetail!.sectionArName)}'),
         ),
         ListView.builder(
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
-          itemCount: _relatedNews.length.clamp(0, 4),
+          itemCount: _moreNewsFromSection.length, 
           itemBuilder: (context, index) {
-            final news = _relatedNews[index];
+            final news = _moreNewsFromSection[index];
             return NewsCard(
               article: news,
               isHorizontal: true,
@@ -604,53 +716,6 @@ class _NewsDetailScreenState extends State<NewsDetailScreen> {
           },
         ),
       ],
-    );
-  }
-}
-
-// Photo Gallery Screen
-class PhotoGalleryScreen extends StatelessWidget {
-  final List<RelatedPhoto> photos;
-  final int initialIndex;
-
-  const PhotoGalleryScreen({
-    super.key,
-    required this.photos,
-    this.initialIndex = 0,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.black,
-      appBar: AppBar(
-        backgroundColor: Colors.black,
-        iconTheme: const IconThemeData(color: Colors.white),
-        title: Text(
-          '${initialIndex + 1} من ${photos.length}',
-          style: const TextStyle(color: Colors.white),
-        ),
-      ),
-      body: PhotoViewGallery.builder(
-        scrollPhysics: const BouncingScrollPhysics(),
-        builder: (BuildContext context, int index) {
-          return PhotoViewGalleryPageOptions(
-            imageProvider: CachedNetworkImageProvider(photos[index].photoUrl),
-            initialScale: PhotoViewComputedScale.contained,
-            minScale: PhotoViewComputedScale.contained * 0.8,
-            maxScale: PhotoViewComputedScale.covered * 2.0,
-            heroAttributes: PhotoViewHeroAttributes(tag: 'photo_$index'),
-          );
-        },
-        itemCount: photos.length,
-        loadingBuilder: (context, event) => const Center(
-          child: CircularProgressIndicator(color: Colors.white),
-        ),
-        pageController: PageController(initialPage: initialIndex),
-        onPageChanged: (index) {
-          // Update app bar title if needed
-        },
-      ),
     );
   }
 }

@@ -1,13 +1,13 @@
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'dart:convert'; // For JSON encoding/decoding of recent searches
+// For JSON encoding/decoding of recent searches
 
 import '../../models/new_model.dart'; // For NewsArticle model
 import '../../services/api_service.dart'; // To call the search API
 
 class SearchModule {
   final ApiService _apiService = ApiService();
-  static const String _recentSearchesKey = 'recent_search_queries';
+  static const String _recentSearchesKey = 'recent_search_queries_v1'; // Added _v1 for potential future migrations
   static const int _maxRecentSearches = 10; // Max number of recent searches to store
 
   /// Performs a news search using the ApiService.
@@ -16,29 +16,28 @@ class SearchModule {
   /// [page]: The page number for pagination.
   /// [pageSize]: The number of results per page.
   /// Returns a list of [NewsArticle] matching the query.
+  /// Throws an exception if the search fails.
   Future<List<NewsArticle>> performSearch(
     String query, {
     int page = 1,
-    int pageSize = 15, // Default page size for search results
+    int pageSize = 15,
   }) async {
-    if (query.trim().isEmpty) {
+    final trimmedQuery = query.trim();
+    if (trimmedQuery.isEmpty) {
       return []; // Return empty list if query is empty
     }
     try {
-      // Add the query to recent searches upon successful search initiation
-      // It's better to add it here rather than after results,
-      // as the user intended to search for it.
-      await addRecentSearch(query.trim());
-
+      // The search term is added to recent searches in the UI layer (SearchScreen)
+      // before navigating to results, which is a common pattern.
       final results = await _apiService.searchNews(
-        query.trim(),
+        trimmedQuery,
         currentPage: page,
         pageSize: pageSize,
       );
       return results;
     } catch (e) {
-      debugPrint('Error performing search in SearchModule: $e');
-      // Rethrow to allow UI to handle the error display
+      debugPrint('Error performing search in SearchModule for query "$trimmedQuery": $e');
+      // Rethrow to allow UI to handle the error display appropriately
       rethrow;
     }
   }
@@ -57,19 +56,21 @@ class SearchModule {
 
   /// Adds a search query to the list of recent searches.
   ///
-  /// Ensures no duplicates and limits the list to [_maxRecentSearches].
+  /// Ensures no duplicates (case-insensitive) and limits the list to [_maxRecentSearches].
+  /// The most recent search is added to the top.
   Future<void> addRecentSearch(String query) async {
-    if (query.trim().isEmpty) return;
+    final trimmedQuery = query.trim();
+    if (trimmedQuery.isEmpty) return;
 
     try {
       final prefs = await SharedPreferences.getInstance();
       List<String> searches = await getRecentSearches();
 
-      // Remove the query if it already exists to move it to the top (most recent)
-      searches.removeWhere((s) => s.toLowerCase() == query.toLowerCase().trim());
+      // Remove the query if it already exists (case-insensitive) to move it to the top
+      searches.removeWhere((s) => s.toLowerCase() == trimmedQuery.toLowerCase());
 
       // Add the new query to the beginning of the list
-      searches.insert(0, query.trim());
+      searches.insert(0, trimmedQuery);
 
       // Limit the number of recent searches
       if (searches.length > _maxRecentSearches) {
@@ -78,7 +79,7 @@ class SearchModule {
 
       await prefs.setStringList(_recentSearchesKey, searches);
     } catch (e) {
-      debugPrint('Error adding recent search: $e');
+      debugPrint('Error adding recent search "$trimmedQuery": $e');
     }
   }
 
@@ -87,36 +88,46 @@ class SearchModule {
     try {
       final prefs = await SharedPreferences.getInstance();
       await prefs.remove(_recentSearchesKey);
+      debugPrint('Recent searches cleared.');
     } catch (e) {
       debugPrint('Error clearing recent searches: $e');
     }
   }
 
-  /// Placeholder for fetching search suggestions (e.g., for type-ahead).
+  /// Fetches search suggestions based on a partial query.
   ///
   /// [partialQuery]: The partially typed search term.
-  /// This would typically involve another API call or local filtering.
+  /// This is a placeholder and would typically involve an API call or local filtering.
   Future<List<String>> getSearchSuggestions(String partialQuery) async {
-    if (partialQuery.trim().isEmpty) {
+    final trimmedQuery = partialQuery.trim();
+    if (trimmedQuery.isEmpty) {
       return [];
     }
-    // Simulate fetching suggestions
-    // In a real app, this could be an API call or filtering from a local dataset
-    await Future.delayed(const Duration(milliseconds: 200));
-    final mockSuggestions = [
-      '$partialQuery الأول',
-      '$partialQuery الثاني',
-      'اقتراح متعلق بـ $partialQuery',
-      'المزيد عن $partialQuery',
+    // Simulate fetching suggestions (replace with actual API call or logic)
+    debugPrint('Fetching suggestions for: "$trimmedQuery"');
+    await Future.delayed(Duration(milliseconds: 150 + (trimmedQuery.length * 20))); // Simulate network delay
+
+    // Mock suggestions - replace with actual suggestion logic
+    final List<String> allPossibleSuggestions = [
+      "أخبار $trimmedQuery اليوم",
+      "تحليل $trimmedQuery الاقتصادي",
+      "مقالات عن $trimmedQuery",
+      "$trimmedQuery والسياسة",
+      "تأثير $trimmedQuery على المجتمع",
+      "مستقبل $trimmedQuery في المنطقة",
+      "أحدث تطورات $trimmedQuery",
+      "خبراء يناقشون $trimmedQuery",
     ];
-    // Filter mock suggestions based on the partial query for a more realistic feel
-    return mockSuggestions
-        .where((s) => s.toLowerCase().contains(partialQuery.toLowerCase()))
-        .take(5) // Limit suggestions
+
+    return allPossibleSuggestions
+        .where((s) => s.toLowerCase().contains(trimmedQuery.toLowerCase()))
+        .take(5) // Limit the number of suggestions
         .toList();
   }
 
+  /// Call this method when the module is no longer needed to clean up resources.
   void dispose() {
-    // Clean up any resources if needed
+    // If there were any streams or other resources, they would be closed here.
+    debugPrint('SearchModule disposed.');
   }
 }

@@ -3,11 +3,12 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'dart:convert';
-import 'dart:io';
+import 'dart:io' show Platform;
 
 import '../services/firebase_service.dart';
 import '../services/api_service.dart';
 
+// User Model (assuming it's defined as you provided)
 class User {
   final String id;
   final String? email;
@@ -39,18 +40,18 @@ class User {
 
   factory User.fromJson(Map<String, dynamic> json) {
     return User(
-      id: json['id'] ?? '',
-      email: json['email'],
-      name: json['name'],
-      fcmToken: json['fcmToken'] ?? '',
-      deviceId: json['deviceId'] ?? '',
-      deviceType: json['deviceType'] ?? '',
-      deviceModel: json['deviceModel'] ?? '',
-      appVersion: json['appVersion'] ?? '',
-      osType: json['osType'] ?? 0,
-      createdAt: DateTime.parse(json['createdAt'] ?? DateTime.now().toIso8601String()),
-      lastActiveAt: DateTime.parse(json['lastActiveAt'] ?? DateTime.now().toIso8601String()),
-      preferences: Map<String, dynamic>.from(json['preferences'] ?? {}),
+      id: json['id']?.toString() ?? '', // Ensure ID is a string
+      email: json['email'] as String?,
+      name: json['name'] as String?,
+      fcmToken: json['fcmToken'] as String? ?? '',
+      deviceId: json['deviceId'] as String? ?? '',
+      deviceType: json['deviceType'] as String? ?? '',
+      deviceModel: json['deviceModel'] as String? ?? '',
+      appVersion: json['appVersion'] as String? ?? '',
+      osType: json['osType'] as int? ?? 0,
+      createdAt: DateTime.tryParse(json['createdAt']?.toString() ?? '') ?? DateTime.now(),
+      lastActiveAt: DateTime.tryParse(json['lastActiveAt']?.toString() ?? '') ?? DateTime.now(),
+      preferences: Map<String, dynamic>.from(json['preferences'] as Map? ?? {}),
     );
   }
 
@@ -155,27 +156,16 @@ class AuthProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      // Load user data from local storage
       await _loadUserData();
-      
-      // Initialize Firebase
-      await _firebaseService.initialize();
-      
-      // Create or update user
+      await _firebaseService.initialize(); // Ensure Firebase is initialized first
       await _createOrUpdateUser();
-      
-      // Load user preferences
       await _loadUserPreferences();
-      
-      // Load app statistics
       await _loadAppStatistics();
-      
-      // Update last used date and app open count
       await _updateAppUsage();
       
       _isInitialized = true;
     } catch (e) {
-      _errorMessage = 'Failed to initialize: ${e.toString()}';
+      _errorMessage = 'فشل تهيئة المصادقة: ${e.toString()}';
       debugPrint('Auth initialization error: $e');
     } finally {
       _isLoading = false;
@@ -183,213 +173,206 @@ class AuthProvider extends ChangeNotifier {
     }
   }
 
-  // Load user data from local storage
   Future<void> _loadUserData() async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      final userData = prefs.getString('user_data');
+      final userDataString = prefs.getString('user_data_v1'); // Consider versioning keys
       
-      if (userData != null) {
-        final Map<String, dynamic> userJson = jsonDecode(userData);
+      if (userDataString != null) {
+        final Map<String, dynamic> userJson = jsonDecode(userDataString);
         _currentUser = User.fromJson(userJson);
+        debugPrint('User data loaded from SharedPreferences.');
+      } else {
+        debugPrint('No user data found in SharedPreferences.');
       }
     } catch (e) {
       debugPrint('Error loading user data: $e');
+      // Optionally clear corrupted data
+      // final prefs = await SharedPreferences.getInstance();
+      // await prefs.remove('user_data_v1');
     }
   }
 
-  // Save user data to local storage
   Future<void> _saveUserData() async {
     if (_currentUser == null) return;
     
     try {
       final prefs = await SharedPreferences.getInstance();
-      await prefs.setString('user_data', jsonEncode(_currentUser!.toJson()));
+      await prefs.setString('user_data_v1', jsonEncode(_currentUser!.toJson()));
+      debugPrint('User data saved to SharedPreferences.');
     } catch (e) {
       debugPrint('Error saving user data: $e');
     }
   }
 
-  // Create or update user
   Future<void> _createOrUpdateUser() async {
     try {
-      final fcmToken = _firebaseService.fcmToken;
-      if (fcmToken == null) {
-        throw Exception('FCM token not available');
+      final fcmToken = _firebaseService.fcmToken; // Assumes FirebaseService.initialize() was called
+      if (fcmToken == null || fcmToken.isEmpty) {
+        debugPrint('FCM token not available for user creation/update.');
+        // Decide if this is a critical error or if the app can proceed without backend user sync
+        // For now, we'll let it proceed but it won't sync with backend.
+        return; 
       }
 
-      // Get device information
-      final deviceInfo = await _getDeviceInfo();
+      final deviceInfoMap = await _getDeviceInfo();
       final packageInfo = await PackageInfo.fromPlatform();
-      
-      // Create user ID based on FCM token
       final userId = _generateUserId(fcmToken);
       
-      // Create or update user object
       _currentUser = User(
         id: userId,
         fcmToken: fcmToken,
-        deviceId: deviceInfo['deviceId'],
-        deviceType: deviceInfo['deviceType'],
-        deviceModel: deviceInfo['deviceModel'],
+        deviceId: deviceInfoMap['deviceId'] as String,
+        deviceType: deviceInfoMap['deviceType'] as String,
+        deviceModel: deviceInfoMap['deviceModel'] as String,
         appVersion: packageInfo.version,
-        osType: deviceInfo['osType'],
+        osType: deviceInfoMap['osType'] as int,
         createdAt: _currentUser?.createdAt ?? DateTime.now(),
         lastActiveAt: DateTime.now(),
         preferences: _currentUser?.preferences ?? {},
       );
 
-      // Create user on server
+      // Call API to create/update user on the backend
       await _apiService.createUser(
         token: fcmToken,
-        os: deviceInfo['osType'],
-        deviceType: deviceInfo['deviceType'],
-        deviceModel: deviceInfo['deviceModel'],
+        os: _currentUser!.osType,
+        deviceType: _currentUser!.deviceType,
+        deviceModel: _currentUser!.deviceModel,
       );
+      debugPrint('User created/updated on backend.');
 
-      // Save user data locally
       await _saveUserData();
       
     } catch (e) {
+      _errorMessage = 'فشل في إنشاء أو تحديث المستخدم: ${e.toString()}';
       debugPrint('Error creating/updating user: $e');
-      rethrow;
+      // Do not rethrow here if initialize should continue,
+      // but the error is logged and stored in _errorMessage.
     }
   }
 
-  // Get device information
   Future<Map<String, dynamic>> _getDeviceInfo() async {
-    final deviceInfo = DeviceInfoPlugin();
-    
+    final deviceInfoPlugin = DeviceInfoPlugin();
+    String deviceId = 'unknown_device_id';
+    String deviceType = 'UnknownType';
+    String deviceModel = 'UnknownModel';
+    int osType = 0; // 0: other
+
     try {
       if (Platform.isAndroid) {
-        final androidInfo = await deviceInfo.androidInfo;
-        return {
-          'deviceId': androidInfo.id,
-          'deviceType': androidInfo.manufacturer,
-          'deviceModel': androidInfo.model,
-          'osType': 1, // Android
-        };
+        final androidInfo = await deviceInfoPlugin.androidInfo;
+        deviceId = androidInfo.id; // androidId is deprecated, use id
+        deviceType = androidInfo.manufacturer;
+        deviceModel = androidInfo.model;
+        osType = 1; // Android
       } else if (Platform.isIOS) {
-        final iosInfo = await deviceInfo.iosInfo;
-        return {
-          'deviceId': iosInfo.identifierForVendor ?? 'unknown',
-          'deviceType': 'Apple',
-          'deviceModel': iosInfo.model,
-          'osType': 2, // iOS
-        };
+        final iosInfo = await deviceInfoPlugin.iosInfo;
+        deviceId = iosInfo.identifierForVendor ?? 'unknown_ios_id';
+        deviceType = 'Apple';
+        deviceModel = iosInfo.model;
+        osType = 2; // iOS
       }
     } catch (e) {
       debugPrint('Error getting device info: $e');
     }
     
     return {
-      'deviceId': 'unknown',
-      'deviceType': 'Unknown',
-      'deviceModel': 'Unknown',
-      'osType': 0, // Other
+      'deviceId': deviceId,
+      'deviceType': deviceType,
+      'deviceModel': deviceModel,
+      'osType': osType,
     };
   }
 
-  // Generate user ID from FCM token
   String _generateUserId(String fcmToken) {
-    // Create a consistent user ID based on FCM token
-    return fcmToken.hashCode.abs().toString();
+    // Using a simple hash of FCM token. Consider a more robust unique ID generation if needed.
+    return fcmToken.hashCode.abs().toString().padLeft(10, '0'); // Ensure some length
   }
 
-  // Load user preferences
   Future<void> _loadUserPreferences() async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      
-      _fontSize = prefs.getDouble('font_size') ?? 16.0;
-      _darkMode = prefs.getBool('dark_mode') ?? false;
-      _notificationsEnabled = prefs.getBool('notifications_enabled') ?? true;
-      _preferredLanguage = prefs.getString('preferred_language') ?? 'ar';
-      
+      _fontSize = prefs.getDouble('pref_font_size') ?? 16.0;
+      _darkMode = prefs.getBool('pref_dark_mode') ?? false;
+      _notificationsEnabled = prefs.getBool('pref_notifications_enabled') ?? true;
+      _preferredLanguage = prefs.getString('pref_language') ?? 'ar';
+      debugPrint('User preferences loaded.');
     } catch (e) {
       debugPrint('Error loading user preferences: $e');
     }
   }
 
-  // Save user preferences
   Future<void> _saveUserPreferences() async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      
-      await prefs.setDouble('font_size', _fontSize);
-      await prefs.setBool('dark_mode', _darkMode);
-      await prefs.setBool('notifications_enabled', _notificationsEnabled);
-      await prefs.setString('preferred_language', _preferredLanguage);
-      
+      await prefs.setDouble('pref_font_size', _fontSize);
+      await prefs.setBool('pref_dark_mode', _darkMode);
+      await prefs.setBool('pref_notifications_enabled', _notificationsEnabled);
+      await prefs.setString('pref_language', _preferredLanguage);
+      debugPrint('User preferences saved.');
     } catch (e) {
       debugPrint('Error saving user preferences: $e');
     }
   }
 
-  // Load app statistics
   Future<void> _loadAppStatistics() async {
     try {
       final prefs = await SharedPreferences.getInstance();
+      _appOpenCount = prefs.getInt('stat_app_open_count') ?? 0;
+      _newsReadCount = prefs.getInt('stat_news_read_count') ?? 0;
+      _videosWatchedCount = prefs.getInt('stat_videos_watched_count') ?? 0;
+      _columnsReadCount = prefs.getInt('stat_columns_read_count') ?? 0;
       
-      _appOpenCount = prefs.getInt('app_open_count') ?? 0;
-      _newsReadCount = prefs.getInt('news_read_count') ?? 0;
-      _videosWatchedCount = prefs.getInt('videos_watched_count') ?? 0;
-      _columnsReadCount = prefs.getInt('columns_read_count') ?? 0;
-      
-      final firstInstallString = prefs.getString('first_install_date');
+      final firstInstallString = prefs.getString('stat_first_install_date');
       if (firstInstallString != null) {
-        _firstInstallDate = DateTime.parse(firstInstallString);
-      } else {
+        _firstInstallDate = DateTime.tryParse(firstInstallString);
+      }
+      if (_firstInstallDate == null) { // If still null (not found or parse failed)
         _firstInstallDate = DateTime.now();
-        await prefs.setString('first_install_date', _firstInstallDate!.toIso8601String());
+        await prefs.setString('stat_first_install_date', _firstInstallDate!.toIso8601String());
       }
       
-      final lastUsedString = prefs.getString('last_used_date');
+      final lastUsedString = prefs.getString('stat_last_used_date');
       if (lastUsedString != null) {
-        _lastUsedDate = DateTime.parse(lastUsedString);
+        _lastUsedDate = DateTime.tryParse(lastUsedString);
       }
-      
+      debugPrint('App statistics loaded.');
     } catch (e) {
       debugPrint('Error loading app statistics: $e');
     }
   }
 
-  // Save app statistics
   Future<void> _saveAppStatistics() async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      
-      await prefs.setInt('app_open_count', _appOpenCount);
-      await prefs.setInt('news_read_count', _newsReadCount);
-      await prefs.setInt('videos_watched_count', _videosWatchedCount);
-      await prefs.setInt('columns_read_count', _columnsReadCount);
+      await prefs.setInt('stat_app_open_count', _appOpenCount);
+      await prefs.setInt('stat_news_read_count', _newsReadCount);
+      await prefs.setInt('stat_videos_watched_count', _videosWatchedCount);
+      await prefs.setInt('stat_columns_read_count', _columnsReadCount);
       
       if (_lastUsedDate != null) {
-        await prefs.setString('last_used_date', _lastUsedDate!.toIso8601String());
+        await prefs.setString('stat_last_used_date', _lastUsedDate!.toIso8601String());
       }
-      
+      debugPrint('App statistics saved.');
     } catch (e) {
       debugPrint('Error saving app statistics: $e');
     }
   }
 
-  // Update app usage
   Future<void> _updateAppUsage() async {
     _appOpenCount++;
     _lastUsedDate = DateTime.now();
-    
     await _saveAppStatistics();
     
-    // Log analytics
-    await _firebaseService.logEvent('app_open', {
+    // Corrected: Call logAnalyticsEvent from FirebaseService
+    await _firebaseService.logAnalyticsEvent('app_open', parameters: {
       'open_count': _appOpenCount,
-      'user_id': _currentUser?.id,
+      'user_id': _currentUser?.id ?? 'anonymous', // Provide a fallback
     });
     
     notifyListeners();
   }
 
-  // Update font size
   Future<void> updateFontSize(double fontSize) async {
     if (fontSize >= 12.0 && fontSize <= 24.0) {
       _fontSize = fontSize;
@@ -398,82 +381,81 @@ class AuthProvider extends ChangeNotifier {
     }
   }
 
-  // Toggle dark mode
   Future<void> toggleDarkMode(bool enabled) async {
     _darkMode = enabled;
     await _saveUserPreferences();
+    // Potentially trigger theme change globally
     notifyListeners();
   }
 
-  // Toggle notifications
   Future<void> toggleNotifications(bool enabled) async {
     _notificationsEnabled = enabled;
     await _saveUserPreferences();
+    // This might also trigger changes in Firebase topic subscriptions via SettingsProvider
     notifyListeners();
   }
 
-  // Change language
   Future<void> changeLanguage(String languageCode) async {
     _preferredLanguage = languageCode;
     await _saveUserPreferences();
+    // This would trigger UI rebuilds to reflect new language
     notifyListeners();
   }
 
-  // Track news read
   Future<void> trackNewsRead(String newsId) async {
     _newsReadCount++;
     await _saveAppStatistics();
     
-    // Track on server
-    await _apiService.trackNewsView(newsId);
-    
-    // Log analytics
-    await _firebaseService.logEvent('news_read', {
-      'news_id': newsId,
-      'user_id': _currentUser?.id,
-      'total_read': _newsReadCount,
-    });
-    
+    try {
+      await _apiService.trackNewsView(newsId);
+      // Corrected: Call logAnalyticsEvent from FirebaseService
+      await _firebaseService.logAnalyticsEvent('news_read', parameters: {
+        'news_id': newsId,
+        'user_id': _currentUser?.id ?? 'anonymous',
+        'total_read_count': _newsReadCount,
+      });
+    } catch (e) {
+      debugPrint("Error tracking news view on API/Analytics: $e");
+    }
     notifyListeners();
   }
 
-  // Track video watched
   Future<void> trackVideoWatched(String videoId) async {
     _videosWatchedCount++;
     await _saveAppStatistics();
     
-    // Track on server
-    await _apiService.trackVideoView(videoId);
-    
-    // Log analytics
-    await _firebaseService.logEvent('video_watched', {
-      'video_id': videoId,
-      'user_id': _currentUser?.id,
-      'total_watched': _videosWatchedCount,
-    });
-    
+    try {
+      await _apiService.trackVideoView(videoId);
+      // Corrected: Call logAnalyticsEvent from FirebaseService
+      await _firebaseService.logAnalyticsEvent('video_watched', parameters: {
+        'video_id': videoId,
+        'user_id': _currentUser?.id ?? 'anonymous',
+        'total_watched_count': _videosWatchedCount,
+      });
+    } catch (e) {
+       debugPrint("Error tracking video view on API/Analytics: $e");
+    }
     notifyListeners();
   }
 
-  // Track column read
   Future<void> trackColumnRead(String columnId) async {
     _columnsReadCount++;
     await _saveAppStatistics();
     
-    // Track on server
-    await _apiService.trackColumnView(columnId);
-    
-    // Log analytics
-    await _firebaseService.logEvent('column_read', {
-      'column_id': columnId,
-      'user_id': _currentUser?.id,
-      'total_read': _columnsReadCount,
-    });
-    
+    try {
+      await _apiService.trackColumnView(columnId);
+      // Corrected: Call logAnalyticsEvent from FirebaseService
+      await _firebaseService.logAnalyticsEvent('column_read', parameters: {
+        'column_id': columnId,
+        'user_id': _currentUser?.id ?? 'anonymous',
+        'total_read_count': _columnsReadCount,
+      });
+    } catch (e) {
+      debugPrint("Error tracking column view on API/Analytics: $e");
+    }
     notifyListeners();
   }
 
-  // Update user preference
   Future<void> updateUserPreference(String key, dynamic value) async {
     if (_currentUser != null) {
       final updatedPreferences = Map<String, dynamic>.from(_currentUser!.preferences);
@@ -485,44 +467,38 @@ class AuthProvider extends ChangeNotifier {
     }
   }
 
-  // Get user preference
-  T? getUserPreference<T>(String key) {
-    if (_currentUser?.preferences.containsKey(key) == true) {
-      return _currentUser!.preferences[key] as T?;
+  T? getUserPreference<T>(String key, {T? defaultValue}) {
+    final value = _currentUser?.preferences[key];
+    if (value is T) {
+      return value;
     }
-    return null;
+    return defaultValue;
   }
 
-  // Refresh FCM token
   Future<void> refreshFCMToken() async {
     try {
-      final newToken = await _firebaseService.refreshToken();
-      if (newToken != null && _currentUser != null) {
+      final newToken = await _firebaseService.refreshToken(); // This now re-registers device
+      if (newToken != null && _currentUser != null && _currentUser!.fcmToken != newToken) {
         _currentUser = _currentUser!.copyWith(fcmToken: newToken);
         await _saveUserData();
-        
-        // Update on server
-        await _createOrUpdateUser();
-        
+        // _createOrUpdateUser(); // refreshToken in FirebaseService already calls _registerDeviceWithBackend
         notifyListeners();
+         debugPrint("AuthProvider: FCM token updated and user data saved.");
       }
     } catch (e) {
-      debugPrint('Error refreshing FCM token: $e');
+      debugPrint('Error refreshing FCM token in AuthProvider: $e');
     }
   }
 
-  // Announce user (for version tracking)
   Future<void> announceUser() async {
     try {
-      if (_currentUser?.fcmToken != null) {
-        await _firebaseService.announceUser();
-      }
+      // Corrected: Call announceUserForVersionTracking from FirebaseService
+      await _firebaseService.announceUserForVersionTracking();
     } catch (e) {
-      debugPrint('Error announcing user: $e');
+      debugPrint('Error announcing user from AuthProvider: $e');
     }
   }
 
-  // Get user statistics summary
   Map<String, dynamic> getUserStatistics() {
     return {
       'appOpenCount': _appOpenCount,
@@ -537,37 +513,45 @@ class AuthProvider extends ChangeNotifier {
     };
   }
 
-  // Reset statistics
   Future<void> resetStatistics() async {
     _appOpenCount = 0;
     _newsReadCount = 0;
     _videosWatchedCount = 0;
     _columnsReadCount = 0;
-    
+    // Should _firstInstallDate also be reset? Probably not.
+    // _lastUsedDate will be updated on next app open.
     await _saveAppStatistics();
     notifyListeners();
   }
 
-  // Clear user data (logout)
-  Future<void> clearUserData() async {
+  Future<void> clearUserDataAndLogout() async { // Renamed for clarity
     try {
       final prefs = await SharedPreferences.getInstance();
       
       // Remove user-specific data
-      await prefs.remove('user_data');
-      await prefs.remove('notification_settings');
-      
-      // Reset current user
+      await prefs.remove('user_data_v1');
+      // Also clear other user-related preferences if any (e.g., notification section choices)
+      // await prefs.remove('notification_settings'); // If managed here, but likely in SettingsProvider
+
+      // Reset local state
       _currentUser = null;
-      _isInitialized = false;
+      _isInitialized = false; // App will need to re-initialize user on next start
       
+      // Reset preferences to default
+      _fontSize = 16.0;
+      _darkMode = false;
+      _notificationsEnabled = true;
+      _preferredLanguage = 'ar';
+      // Reset statistics (optional, depends on desired behavior on logout)
+      // await resetStatistics(); 
+
+      debugPrint('User data cleared (logout).');
       notifyListeners();
     } catch (e) {
       debugPrint('Error clearing user data: $e');
     }
   }
 
-  // Export user data
   Map<String, dynamic> exportUserData() {
     return {
       'user': _currentUser?.toJson(),
@@ -582,30 +566,28 @@ class AuthProvider extends ChangeNotifier {
     };
   }
 
-  // Check if user is new (first week)
   bool get isNewUser {
-    if (_firstInstallDate == null) return true;
+    if (_firstInstallDate == null) return true; // If no date, assume new
     return DateTime.now().difference(_firstInstallDate!).inDays <= 7;
   }
 
-  // Check if user is active (used in last 7 days)
   bool get isActiveUser {
-    if (_lastUsedDate == null) return false;
+    if (_lastUsedDate == null) return false; // If never used, not active
     return DateTime.now().difference(_lastUsedDate!).inDays <= 7;
   }
 
-  // Get user engagement level
   String get userEngagementLevel {
     final totalInteractions = _newsReadCount + _videosWatchedCount + _columnsReadCount;
     
-    if (totalInteractions < 10) return 'beginner';
-    if (totalInteractions < 50) return 'casual';
-    if (totalInteractions < 200) return 'regular';
-    return 'power_user';
+    if (totalInteractions < 10) return 'مبتدئ'; // Beginner
+    if (totalInteractions < 50) return 'عادي'; // Casual
+    if (totalInteractions < 200) return 'منتظم'; // Regular
+    return 'متقدم'; // Power user
   }
 
-  @override
-  void dispose() {
-    super.dispose();
-  }
+  // Removed unnecessary override of dispose
+  // @override
+  // void dispose() {
+  //   super.dispose();
+  // }
 }

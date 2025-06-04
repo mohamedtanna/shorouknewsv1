@@ -16,7 +16,7 @@ class NewsCard extends StatelessWidget {
     required this.article,
     this.onTap,
     this.isHorizontal = false,
-    this.showDate = true,
+    this.showDate = true, required String highlightQuery,
   });
 
   @override

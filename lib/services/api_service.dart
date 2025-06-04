@@ -39,32 +39,46 @@ class ApiService {
       responseBody: true,
       logPrint: (obj) => debugPrint(obj.toString()), // Use debugPrint for Flutter
       requestHeader: true,
-      responseHeader: false, // Avoid logging too much header info unless needed
+      responseHeader: false, // Avoid logging too much header info unless needed for debugging
       error: true,
     ));
 
     // Example: Custom interceptor for more advanced error handling or token refresh
     // _dio.interceptors.add(InterceptorsWrapper(
+    //   onRequest: (options, handler) {
+    //     // Do something before request is sent
+    //     // e.g., add dynamic token
+    //     return handler.next(options); //continue
+    //   },
+    //   onResponse: (response, handler) {
+    //     // Do something with response data
+    //     return handler.next(response); // continue
+    //   },
     //   onError: (DioException e, handler) {
     //     // Handle specific error codes, e.g., 401 for unauthorized
     //     debugPrint('DioException: ${e.message}, Response: ${e.response?.data}');
-    //     return handler.next(e); // Forward the error
+    //     // Potentially refresh token or navigate to login
+    //     return handler.next(e); // Forward the error or resolve it
     //   },
     // ));
   }
 
   /// Checks internet connectivity.
-  /// Returns true if connected to Mobile or WiFi.
+  /// Returns true if connected to Mobile, WiFi, or Ethernet.
   Future<bool> _hasInternetConnection() async {
     try {
-      final List<ConnectivityResult> connectivityResult = (await Connectivity().checkConnectivity()) as List<ConnectivityResult>;
-      // Check if the list of results contains mobile or wifi.
-      // It's a list because a device can be connected to multiple networks (e.g. VPN + WiFi).
-      if (connectivityResult.contains(ConnectivityResult.mobile) ||
-          connectivityResult.contains(ConnectivityResult.wifi)) {
-        return true;
+      final List<ConnectivityResult> connectivityResults = (await Connectivity().checkConnectivity()) as List<ConnectivityResult>;
+      if (connectivityResults.contains(ConnectivityResult.none) && connectivityResults.length == 1) {
+        return false; // Explicitly offline
       }
-      return false;
+      // If it's not 'none' or if the list contains other types like mobile, wifi, ethernet, vpn, etc.
+      // it's generally considered connected for basic purposes.
+      // For more granular control, you might check for specific types:
+      // return connectivityResults.any((result) =>
+      //   result == ConnectivityResult.mobile ||
+      //   result == ConnectivityResult.wifi ||
+      //   result == ConnectivityResult.ethernet);
+      return connectivityResults.isNotEmpty && !connectivityResults.contains(ConnectivityResult.none);
     } catch (e) {
       debugPrint("Error checking connectivity: $e");
       return false; // Assume no connection if check fails
@@ -94,22 +108,27 @@ class ApiService {
   }) async {
     final String cacheKey = useCache ? _generateCacheKey(endpoint, queryParameters) : endpoint;
 
-    // Try to load from cache if offline or if cache is valid and preferred
     if (useCache) {
       final bool isConnected = await _hasInternetConnection();
       if (!isConnected) {
-        debugPrint('Offline: Attempting to load $cacheKey from cache.');
+        debugPrint('Offline: Attempting to load "$cacheKey" from cache.');
         try {
           return await _getCachedData<T>(cacheKey, fromJson, fromJsonList, cacheDuration);
         } catch (e) {
-          debugPrint('Offline and cache miss/error for $cacheKey: $e');
+          debugPrint('Offline and cache miss/error for "$cacheKey": $e');
           throw Exception('لا يوجد اتصال بالإنترنت ولا توجد بيانات مخبأة.');
         }
-      } else {
-        // If online, still check if valid cache exists and can be used (optional strategy)
-        // For now, we'll prioritize fresh data if online.
-        // You could add logic here to return cached data if it's not expired, even if online.
       }
+      // Optional: If online, you could still check for valid, non-expired cache first
+      // before making a network request to save data, depending on your app's freshness needs.
+      // For example:
+      // try {
+      //   final cached = await _getCachedData<T>(cacheKey, fromJson, fromJsonList, cacheDuration);
+      //   debugPrint('Online: Cache hit and valid for "$cacheKey", returning cached data.');
+      //   return cached;
+      // } catch (e) {
+      //   debugPrint('Online: Cache miss or expired for "$cacheKey", proceeding with network request.');
+      // }
     }
 
     try {
@@ -126,16 +145,17 @@ class ApiService {
           return fromJson(data);
         } else if (fromJsonList != null && data is List<dynamic>) {
           return fromJsonList(data);
-        } else if (data is T) { // If data is already of type T (e.g. List<String>)
+        } else if (data is T) { 
           return data;
         }
-        // If T is void and data is null or empty, it might be acceptable.
+        // Handle cases where T might be void (represented as Null in Dart generics)
+        // and the API returns an empty body or null, which is valid for void returns.
         if (T == Null && (data == null || (data is Map && data.isEmpty) || (data is List && data.isEmpty))) {
-           return null as T;
+           return null as T; // Cast null to T (which is Null)
         }
-        throw Exception('Type mismatch or parsing function not provided for response data type: ${data.runtimeType} for endpoint $endpoint');
+        throw Exception('Type mismatch or parsing function not provided for response data type: ${data.runtimeType} for endpoint $endpoint. Expected $T.');
       } else {
-        debugPrint('API Error for $endpoint: ${response.statusCode} - ${response.statusMessage}');
+        debugPrint('API Error for GET "$endpoint": ${response.statusCode} - ${response.statusMessage}');
         throw DioException(
           requestOptions: response.requestOptions,
           response: response,
@@ -144,31 +164,30 @@ class ApiService {
         );
       }
     } on DioException catch (e) {
-      debugPrint('DioException for $endpoint: ${e.message}');
+      debugPrint('DioException for GET "$endpoint": ${e.message}');
       if (useCache) {
-        debugPrint('Network error: Attempting to load $cacheKey from cache due to DioException.');
+        debugPrint('Network error: Attempting to load "$cacheKey" from cache due to DioException.');
         try {
           return await _getCachedData<T>(cacheKey, fromJson, fromJsonList, cacheDuration);
         } catch (cacheError) {
-          debugPrint('Cache miss/error for $cacheKey after DioException: $cacheError');
-          // Rethrow original DioException or a more specific one
+          debugPrint('Cache miss/error for "$cacheKey" after DioException: $cacheError');
           throw Exception('خطأ في الشبكة ولم يتم العثور على بيانات مخبأة: ${e.message}');
         }
       }
-      rethrow; // Rethrow the DioException if not using cache or cache fails
+      rethrow; 
     } catch (e) {
-      debugPrint('Unexpected error in _get for $endpoint: $e');
-      rethrow; // Rethrow other unexpected errors
+      debugPrint('Unexpected error in _get for "$endpoint": $e');
+      rethrow; 
     }
   }
 
   /// Generic POST request.
   Future<T> _post<T>(
     String endpoint, {
-    dynamic data, // Can be Map<String, dynamic> or other types if API expects
+    dynamic data, 
     Map<String, dynamic>? queryParameters,
-    T Function(Map<String, dynamic> json)? fromJson, // For single object response
-    T Function(dynamic responseData)? fromData, // For non-JSON map responses (e.g. int, String)
+    T Function(Map<String, dynamic> json)? fromJson, 
+    T Function(dynamic responseData)? fromData, 
   }) async {
     if (!await _hasInternetConnection()) {
       throw Exception('لا يوجد اتصال بالإنترنت. يرجى التحقق من اتصالك.');
@@ -181,37 +200,32 @@ class ApiService {
         queryParameters: queryParameters,
       );
 
-      // Typically, successful POST requests might return 200 OK or 201 Created.
-      // Some APIs might return 204 No Content for successful actions that don't return a body.
       if (response.statusCode == 200 || response.statusCode == 201 || response.statusCode == 204) {
         final responseData = response.data;
 
-        // Handle 204 No Content specifically if T is void or nullable
         if (response.statusCode == 204) {
-          if (T == Null || null is T) { // Check if T is nullable or void
+          if (T == Null || null is T) { 
              return null as T;
           } else {
-            // If T is not nullable and we get 204, it's a mismatch unless T is dynamic
             if (T != dynamic) {
                throw Exception('Received 204 No Content, but expected a non-nullable $T for endpoint $endpoint');
             }
-            return null as T; // Or handle as appropriate for dynamic
+            return null as T; 
           }
         }
         
-        // If there's response data (for 200 or 201)
         if (fromJson != null && responseData is Map<String, dynamic>) {
           return fromJson(responseData);
         } else if (fromData != null) {
           return fromData(responseData);
-        } else if (responseData is T) { // If responseData directly matches T
+        } else if (responseData is T) { 
           return responseData;
-        } else if (T == Null && responseData == null) { // Explicitly for void/null return types
+        } else if (T == Null && responseData == null) { 
            return null as T;
         }
-        throw Exception('Type mismatch or parsing function not provided for POST response data type: ${responseData.runtimeType} for endpoint $endpoint');
+        throw Exception('Type mismatch or parsing function not provided for POST response data type: ${responseData.runtimeType} for endpoint $endpoint. Expected $T.');
       } else {
-        debugPrint('API Error for POST $endpoint: ${response.statusCode} - ${response.statusMessage}');
+        debugPrint('API Error for POST "$endpoint": ${response.statusCode} - ${response.statusMessage}');
         throw DioException(
           requestOptions: response.requestOptions,
           response: response,
@@ -220,10 +234,10 @@ class ApiService {
         );
       }
     } on DioException catch (e) {
-      debugPrint('DioException for POST $endpoint: ${e.message}');
+      debugPrint('DioException for POST "$endpoint": ${e.message}');
       rethrow;
     } catch (e) {
-      debugPrint('Unexpected error in _post for $endpoint: $e');
+      debugPrint('Unexpected error in _post for "$endpoint": $e');
       rethrow;
     }
   }
@@ -232,11 +246,11 @@ class ApiService {
   Future<void> _cacheData(String key, dynamic data) async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      await prefs.setString('cache_$key', jsonEncode(data));
-      await prefs.setInt('cache_time_$key', DateTime.now().millisecondsSinceEpoch);
-      debugPrint('Data cached for key: cache_$key');
+      await prefs.setString('api_cache_$key', jsonEncode(data)); // Added prefix for clarity
+      await prefs.setInt('api_cache_time_$key', DateTime.now().millisecondsSinceEpoch);
+      debugPrint('Data cached for key: api_cache_$key');
     } catch (e) {
-      debugPrint('Error caching data for key cache_$key: $e');
+      debugPrint('Error caching data for key api_cache_$key: $e');
     }
   }
 
@@ -249,12 +263,12 @@ class ApiService {
   ) async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      final cacheTimestamp = prefs.getInt('cache_time_$key');
-      final cachedDataString = prefs.getString('cache_$key');
+      final cacheTimestamp = prefs.getInt('api_cache_time_$key');
+      final cachedDataString = prefs.getString('api_cache_$key');
 
       if (cachedDataString != null && cacheTimestamp != null) {
         if (!_isCacheExpired(cacheTimestamp, cacheDuration)) {
-          debugPrint('Cache hit and valid for key: cache_$key');
+          debugPrint('Cache hit and valid for key: api_cache_$key');
           final decodedData = jsonDecode(cachedDataString);
           if (fromJson != null && decodedData is Map<String, dynamic>) {
             return fromJson(decodedData);
@@ -263,17 +277,17 @@ class ApiService {
           } else if (decodedData is T) {
             return decodedData;
           }
-           throw Exception('Cached data type mismatch or parser not provided for key: cache_$key');
+           throw Exception('Cached data type mismatch or parser not provided for key: api_cache_$key');
         } else {
-          debugPrint('Cache expired for key: cache_$key. Removing.');
-          await prefs.remove('cache_$key');
-          await prefs.remove('cache_time_$key');
+          debugPrint('Cache expired for key: api_cache_$key. Removing.');
+          await prefs.remove('api_cache_$key');
+          await prefs.remove('api_cache_time_$key');
         }
       }
     } catch (e) {
-      debugPrint('Error getting cached data for key cache_$key: $e');
+      debugPrint('Error getting cached data for key api_cache_$key: $e');
     }
-    throw Exception('No valid cached data available for key: cache_$key');
+    throw Exception('No valid cached data available for key: api_cache_$key');
   }
 
   /// Check if cache is expired.
@@ -289,7 +303,7 @@ class ApiService {
       final prefs = await SharedPreferences.getInstance();
       final keys = prefs.getKeys();
       for (String key in keys) {
-        if (key.startsWith('cache_')) {
+        if (key.startsWith('api_cache_')) { // Check for prefixed keys
           await prefs.remove(key);
         }
       }
@@ -299,7 +313,7 @@ class ApiService {
     }
   }
 
-  // --- Specific API Methods ---
+  // --- Specific API Methods (Ensure these match your backend endpoints and response structures) ---
 
   Future<List<NewsArticle>> getMainStories() async {
     return await _get<List<NewsArticle>>(
@@ -333,8 +347,8 @@ class ApiService {
   }) async {
     String endpoint = sectionId != null ? 'sections/$sectionId/news' : 'news';
     Map<String, dynamic> queryParams = {
-      'currentpage': currentPage,
-      'pagesize': pageSize,
+      'currentpage': currentPage.toString(), // Ensure query params are strings if API expects
+      'pagesize': pageSize.toString(),
     };
     if (nextPageToken != null) {
       queryParams['nextpagetoken'] = nextPageToken;
@@ -343,6 +357,8 @@ class ApiService {
     return await _get<List<NewsArticle>>(
       endpoint,
       queryParameters: queryParams,
+      // Caching for general news list might be short-lived or disabled if it changes very frequently
+      // useCache: true, cacheDuration: const Duration(minutes: 10), 
       fromJsonList: (list) => list.map((item) => NewsArticle.fromJson(item as Map<String, dynamic>)).toList(),
     );
   }
@@ -373,7 +389,7 @@ class ApiService {
       'videos',
       queryParameters: {
         if (nextPageToken != null) 'nextpagetoken': nextPageToken,
-        'pagesize': pageSize,
+        'pagesize': pageSize.toString(),
       },
       fromJsonList: (list) => list.map((item) => VideoModel.fromJson(item as Map<String, dynamic>)).toList(),
     );
@@ -404,8 +420,8 @@ class ApiService {
     return await _get<List<ColumnModel>>(
       endpoint,
       queryParameters: {
-        'currentpage': currentPage,
-        'pagesize': pageSize,
+        'currentpage': currentPage.toString(),
+        'pagesize': pageSize.toString(),
       },
       fromJsonList: (list) => list.map((item) => ColumnModel.fromJson(item as Map<String, dynamic>)).toList(),
     );
@@ -422,7 +438,8 @@ class ApiService {
   Future<AuthorModel> getAuthor(String authorId) async {
     return await _get<AuthorModel>(
       'columnists/$authorId',
-      useCache: true,
+      useCache: true, // Author details might not change often
+      cacheDuration: const Duration(days: 1),
       fromJson: (json) => AuthorModel.fromJson(json),
     );
   }
@@ -434,8 +451,8 @@ class ApiService {
     return await _get<List<ColumnModel>>(
       'columnists/$authorId/columns',
       queryParameters: {
-        'currentpage': currentPage,
-        'pagesize': pageSize,
+        'currentpage': currentPage.toString(),
+        'pagesize': pageSize.toString(),
       },
       fromJsonList: (list) => list.map((item) => ColumnModel.fromJson(item as Map<String, dynamic>)).toList(),
     );
@@ -447,16 +464,16 @@ class ApiService {
         'subscribers/create',
         queryParameters: {'email': email},
       );
+      // Adapt based on actual API response for this endpoint
       if (result is int) {
         return result;
       } else if (result is String) {
-        return int.tryParse(result) ?? 10; 
-      } else if (result is Map<String, dynamic> && result.containsKey('status')) {
-         return result['status'] as int? ?? 10;
+        return int.tryParse(result) ?? 10; // Default to general failure (10)
+      } else if (result is Map<String, dynamic> && result.containsKey('status_code')) { // Example if API returns JSON
+         return result['status_code'] as int? ?? 10;
+      } else if (result == null) { // If _post returns null for 204 or similar success
+        return 1; // Assuming 1 is success code from your enum
       }
-      // If the API is expected to return an empty body on success (e.g. 204 No Content)
-      // and _post is modified to handle that by returning a specific value or null:
-      // if (result == null) return 1; // Assuming 1 means success for newsletter
       return 10; 
     } catch (e) {
       debugPrint('Error subscribing to newsletter: $e');
@@ -474,7 +491,7 @@ class ApiService {
       'users/create',
       queryParameters: {
         'token': token,
-        'os': os,
+        'os': os.toString(),
         'devicetype': deviceType,
         'devicemodel': deviceModel,
       },
@@ -496,9 +513,11 @@ class ApiService {
       'news/search',
       queryParameters: {
         'q': query,
-        'currentpage': currentPage,
-        'pagesize': pageSize,
+        'currentpage': currentPage.toString(),
+        'pagesize': pageSize.toString(),
       },
+      // Search results are dynamic, so disable cache or use very short duration
+      // useCache: false, 
       fromJsonList: (list) => list.map((item) => NewsArticle.fromJson(item as Map<String, dynamic>)).toList(),
     );
   }
@@ -508,7 +527,7 @@ class ApiService {
   }) async {
     return await _get<List<NewsArticle>>(
       'news/$newsId/related',
-      queryParameters: {'pagesize': pageSize},
+      queryParameters: {'pagesize': pageSize.toString()},
       fromJsonList: (list) => list.map((item) => NewsArticle.fromJson(item as Map<String, dynamic>)).toList(),
     );
   }
@@ -568,10 +587,15 @@ class ApiService {
   }
 
   Future<Map<String, dynamic>?> checkAppVersion() async {
-    return await _get<Map<String, dynamic>?>( 
-      'app/version',
-      fromJson: (json) => json, // Assuming API returns a map directly
-    );
+    try {
+        return await _get<Map<String, dynamic>?>( 
+        'app/version',
+        fromJson: (json) => json, 
+      );
+    } catch (e) {
+      debugPrint('Error checking app version: $e');
+      return null;
+    }
   }
 
   Future<List<String>> getTrendingTopics() async {
@@ -586,14 +610,14 @@ class ApiService {
     return await _get<Map<String, dynamic>?>(
       'weather/current',
       useCache: true, cacheDuration: const Duration(minutes: 15),
-      fromJson: (json) => json, // Assuming API returns a map directly
+      fromJson: (json) => json, 
     );
   }
 
   Future<List<NewsArticle>> getBreakingNews() async {
     return await _get<List<NewsArticle>>(
       'news/breaking',
-      useCache: true, cacheDuration: const Duration(minutes: 5),
+      useCache: true, cacheDuration: const Duration(minutes: 2), // Breaking news needs frequent updates
       fromJsonList: (list) => list.map((item) => NewsArticle.fromJson(item as Map<String, dynamic>)).toList(),
     );
   }

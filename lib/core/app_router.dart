@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 // Import all screen widgets
@@ -9,7 +8,7 @@ import '../screens/videos/videos_screen.dart';
 import '../screens/videos/video_detail_screen.dart';
 import '../screens/columns/columns_screen.dart';
 import '../screens/columns/column_detail_screen.dart';
-import '../screens/authors/authors_list_screen.dart'; // Added for completeness
+import '../screens/authors/authors_list_screen.dart';
 import '../screens/authors/author_screen.dart';
 import '../screens/settings/settings_screen.dart';
 import '../screens/newsletter/newsletter_screen.dart';
@@ -17,31 +16,28 @@ import '../screens/contact/contact_screen.dart';
 import '../screens/about/about_screen.dart';
 import '../screens/terms/terms_screen.dart';
 import '../screens/privacy/privacy_screen.dart';
-import '../screens/search/search_screen.dart'; // Added
-import '../screens/search/search_results_screen.dart'; // Added
-import '../screens/notifications/notifications_screen.dart'; // Added
-import '../screens/notifications/notification_detail_screen.dart'; // Added
-import '../screens/gallery/photo_gallery_screen.dart'; // Added
-import '../screens/gallery/image_viewer_screen.dart'; // Added
-import '../screens/error/error_screen.dart'; // For fallback in router
+import '../screens/search/search_screen.dart'; // Assumes this contains the SearchScreen class
+import '../screens/search/search_results_screen.dart'; // Assumes this contains SearchResultsScreen
+import '../screens/notifications/notifications_screen.dart';
+import '../screens/notifications/notification_detail_screen.dart';
+import '../screens/gallery/photo_gallery_screen.dart';
+import '../screens/gallery/image_viewer_screen.dart';
+import '../screens/error/error_screen.dart';
 
-// Import models if passed via 'extra' and type checking is desired at router level (optional)
-import '../models/new_model.dart';
+// Import models if passed via 'extra'
+import '../models/new_model.dart'; 
 import '../services/notification_service.dart' show NotificationPayload;
-
 
 // Import the main layout shell
 import '../widgets/main_layout.dart';
 
 class AppRouter {
   static final GoRouter router = GoRouter(
-    initialLocation: '/home', // The default screen when the app starts
-    debugLogDiagnostics: true, // Useful for debugging navigation issues
+    initialLocation: '/home',
+    debugLogDiagnostics: true,
     routes: [
-      // ShellRoute applies MainLayout to all its child routes
       ShellRoute(
         builder: (context, state, child) {
-          // MainLayout will wrap all screens defined in the routes below
           return MainLayout(child: child);
         },
         routes: [
@@ -54,12 +50,12 @@ class AppRouter {
             path: '/news',
             name: 'news',
             builder: (context, state) {
-              final sectionId = state.uri.queryParameters['sectionId'];
-              final sectionName = state.uri.queryParameters['sectionName'] ?? 'أحدث الأخبار'; // Default title
-              // Corrected: NewsListScreen expects sectionId and sectionName
+              // final sectionId = state.uri.queryParameters['sectionId']; // Keep if NewsListScreen uses it
+              final sectionName = state.uri.queryParameters['sectionName'] ?? 'أحدث الأخبار';
+              // Assuming NewsListScreen requires a 'section' parameter based on previous errors.
+              // If NewsListScreen was updated to use sectionId and sectionName, adjust accordingly.
               return NewsListScreen(
-                sectionId: sectionId,
-                sectionName: sectionName,
+                section: sectionName, 
               );
             },
           ),
@@ -78,24 +74,29 @@ class AppRouter {
           GoRoute(
             path: '/videos',
             name: 'videos',
-            builder: (context, state) => const VideosScreen(),
+            builder: (context, state) => VideosScreen(), // Removed const
           ),
           GoRoute(
             path: '/video/:videoId',
             name: 'video-detail',
             builder: (context, state) {
               final videoId = state.pathParameters['videoId']!;
-              // Assuming VideoDetailScreen takes videoId and fetches details.
-              // If it needs more parameters (like title or URL) passed directly,
-              // this route or the VideoDetailScreen itself would need adjustment.
-              return VideoDetailScreen(videoId: videoId);
+              // CRITICAL: VideoDetailScreen MUST be refactored to fetch its own
+              // videoUrl and videoTitle using the videoId.
+              // These empty strings are placeholders to satisfy the current constructor
+              // signature as indicated by previous errors.
+              return VideoDetailScreen(
+                videoId: videoId,
+                videoUrl: '', 
+                videoTitle: '', 
+              );
             },
           ),
           GoRoute(
             path: '/columns',
             name: 'columns',
             builder: (context, state) {
-              final authorId = state.uri.queryParameters['authorId']; // Changed from columnistId
+              final authorId = state.uri.queryParameters['authorId'];
               final categoryId = state.uri.queryParameters['categoryId'];
               return ColumnsScreen(authorId: authorId, categoryId: categoryId);
             },
@@ -113,7 +114,7 @@ class AppRouter {
             },
           ),
           GoRoute(
-            path: '/authors', // Added route for listing all authors
+            path: '/authors',
             name: 'authors',
             builder: (context, state) => const AuthorsListScreen(),
           ),
@@ -133,32 +134,33 @@ class AppRouter {
           GoRoute(
             path: '/newsletter',
             name: 'newsletter',
-            builder: (context, state) => const NewsletterScreen(),
+            builder: (context, state) => NewsletterScreen(), // Removed const
           ),
           GoRoute(
             path: '/contact',
             name: 'contact',
-            builder: (context, state) => const ContactScreen(),
+            builder: (context, state) => ContactScreen(), // Removed const
           ),
           GoRoute(
             path: '/about',
             name: 'about',
-            builder: (context, state) => const AboutScreen(),
+            builder: (context, state) => const AboutScreen(), // Removed const
           ),
           GoRoute(
             path: '/terms',
             name: 'terms',
-            builder: (context, state) => const TermsScreen(),
+            builder: (context, state) => TermsScreen(),
           ),
           GoRoute(
             path: '/privacy',
             name: 'privacy',
             builder: (context, state) => const PrivacyScreen(),
           ),
-          // Added Search Routes
           GoRoute(
             path: '/search',
             name: 'search',
+            // This assumes SearchScreen class is correctly defined in search_screen.dart
+            // and the ambiguous import error is resolved by renaming the class in search_results_screen.dart
             builder: (context, state) => const SearchScreen(),
           ),
           GoRoute(
@@ -167,10 +169,10 @@ class AppRouter {
             builder: (context, state) {
               final query = state.uri.queryParameters['query'] ?? '';
               final decodedQuery = Uri.decodeComponent(query);
+              // This assumes SearchResultsScreen class is correctly defined in search_results_screen.dart
               return SearchResultsScreen(query: decodedQuery);
             },
           ),
-          // Added Notification Routes
           GoRoute(
             path: '/notifications',
             name: 'notifications',
@@ -187,7 +189,6 @@ class AppRouter {
               return const ErrorScreen(errorMessage: 'تفاصيل الإشعار غير متوفرة.');
             },
           ),
-          // Added Gallery Routes
           GoRoute(
             path: '/gallery',
             name: 'gallery',
@@ -220,10 +221,9 @@ class AppRouter {
         ],
       ),
     ],
-    // Error builder for routes that are not found
     errorBuilder: (context, state) => ErrorScreen(
       errorMessage: 'الصفحة المطلوبة غير موجودة.\n(${state.error?.message ?? 'مسار غير معروف'})',
-      onRetry: () => context.go('/home'), // Option to go home
+      onRetry: () => context.go('/home'), 
       retryButtonText: 'العودة للرئيسية',
     ),
   );

@@ -1,6 +1,6 @@
 import 'package:flutter/foundation.dart';
 
-import '../models/news_model.dart';
+import '../models/new_model.dart';
 import '../models/column_model.dart';
 import '../services/api_service.dart';
 
@@ -97,7 +97,7 @@ class NewsProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      _selectedColumns = await _apiService.getSelectedColumns();
+      _selectedColumns = (await _apiService.getSelectedColumns()).cast<ColumnModel>();
     } catch (e) {
       debugPrint('Error loading selected columns: $e');
     } finally {
