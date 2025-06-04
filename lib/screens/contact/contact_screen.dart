@@ -87,7 +87,7 @@ class _ContactScreenState extends State<ContactScreen> {
   Widget _buildBreadcrumb() {
     return Container(
       padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
+      decoration: const BoxDecoration(
         border: Border(
           bottom: BorderSide(color: AppTheme.tertiaryColor, width: 4),
         ),

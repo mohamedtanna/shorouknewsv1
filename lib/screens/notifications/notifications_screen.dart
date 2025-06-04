@@ -69,7 +69,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
   Widget _buildBreadcrumb() {
     return Container(
       padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
+      decoration: const BoxDecoration(
         border: Border(
           bottom: BorderSide(color: AppTheme.tertiaryColor, width: 4),
         ),
@@ -141,7 +141,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
           baseColor: Colors.grey[300]!,
           highlightColor: Colors.grey[100]!,
           child: ListTile(
-            leading: CircleAvatar(backgroundColor: Colors.white, radius: 25),
+            leading: const CircleAvatar(backgroundColor: Colors.white, radius: 25),
             title: Container(height: 16, width: double.infinity, color: Colors.white),
             subtitle: Container(height: 12, width: MediaQuery.of(context).size.width * 0.7, color: Colors.white),
             trailing: Container(height: 10, width: 50, color: Colors.white),
@@ -184,7 +184,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
   Widget _buildNotificationsList() {
     return ListView.separated(
       itemCount: _notifications.length,
-      separatorBuilder: (context, index) => Divider(height: 1, indent: 16, endIndent: 16),
+      separatorBuilder: (context, index) => const Divider(height: 1, indent: 16, endIndent: 16),
       itemBuilder: (context, index) {
         final notification = _notifications[index];
         return ListTile(

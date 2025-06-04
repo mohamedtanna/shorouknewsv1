@@ -5,7 +5,6 @@ import 'package:photo_view/photo_view_gallery.dart';
 import 'package:share_plus/share_plus.dart';
 
 import '../../models/news_model.dart'; // For RelatedPhoto
-import '../../core/theme.dart';
 
 class ImageViewerScreen extends StatefulWidget {
   final List<RelatedPhoto> photos;

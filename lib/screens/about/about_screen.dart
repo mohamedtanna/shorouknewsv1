@@ -300,7 +300,7 @@ class _AboutScreenState extends State<AboutScreen> with TickerProviderStateMixin
   Widget _buildBreadcrumb() {
     return Container(
       padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
+      decoration: const BoxDecoration(
         border: Border(
           bottom: BorderSide(color: AppTheme.tertiaryColor, width: 4),
         ),
@@ -449,9 +449,9 @@ class _AboutScreenState extends State<AboutScreen> with TickerProviderStateMixin
                   ),
                 ),
                 const SizedBox(height: 8),
-                Text(
+                const Text(
                   AboutModule.developerName,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
                   ),
@@ -559,7 +559,7 @@ class _AboutScreenState extends State<AboutScreen> with TickerProviderStateMixin
       margin: const EdgeInsets.all(16),
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
+        gradient: const LinearGradient(
           colors: [AppTheme.primaryColor, AppTheme.secondaryColor],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,

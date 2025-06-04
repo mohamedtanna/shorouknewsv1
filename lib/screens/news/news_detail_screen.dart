@@ -76,22 +76,14 @@ class _NewsDetailScreenState extends State<NewsDetailScreen> {
         setState(() {
           _newsDetail = newsDetail;
         });
-        if (newsDetail != null) {
-          _loadMoreNewsFromSection(newsDetail.sectionId, newsDetail.id);
-          // Example: Track news view using AuthProvider
-          // try {
-          //   context.read<AuthProvider>().trackNewsRead(widget.newsId);
-          // } catch (e) {
-          //   debugPrint("Error tracking news read: $e");
-          // }
-        } else {
-           if (mounted) {
-            setState(() {
-              _loadingError = 'لم يتم العثور على تفاصيل الخبر.';
-            });
-          }
-        }
-      }
+        _loadMoreNewsFromSection(newsDetail.sectionId, newsDetail.id);
+        // Example: Track news view using AuthProvider
+        // try {
+        //   context.read<AuthProvider>().trackNewsRead(widget.newsId);
+        // } catch (e) {
+        //   debugPrint("Error tracking news read: $e");
+        // }
+            }
     } catch (e) {
       debugPrint('Error loading news detail: $e');
       if (mounted) {
@@ -301,7 +293,7 @@ class _NewsDetailScreenState extends State<NewsDetailScreen> {
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Theme.of(context).canvasColor,
-        border: Border(
+        border: const Border(
           bottom: BorderSide(color: AppTheme.tertiaryColor, width: 4),
         ),
       ),
@@ -417,7 +409,7 @@ class _NewsDetailScreenState extends State<NewsDetailScreen> {
       width: double.infinity,
       child: Text(
         _newsDetail!.editorAndSource,
-        style: TextStyle(
+        style: const TextStyle(
           // Corrected: Color does not have shade900. Using primary for contrast or a darker tertiary.
           color: AppTheme.primaryColor, // Or: Color.fromRGBO((AppTheme.tertiaryColor.red * 0.6).round(), (AppTheme.tertiaryColor.green * 0.6).round(), (AppTheme.tertiaryColor.blue * 0.6).round(),1,),
           fontWeight: FontWeight.w500,
@@ -634,7 +626,7 @@ class _NewsDetailScreenState extends State<NewsDetailScreen> {
     if (_newsDetail == null || _newsDetail!.relatedNews.isEmpty) return const SizedBox.shrink();
     return Column(
       children: [
-        SectionHeader( // Corrected: Assuming SectionHeader is a widget class
+        const SectionHeader( // Corrected: Assuming SectionHeader is a widget class
           title: 'أخبار ذات صلة',
           icon: Icons.article_outlined,
         ),

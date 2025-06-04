@@ -5,7 +5,7 @@ import '../widgets/news_card.dart'; // Assuming you have a NewsCard widget
 class NewsListScreen extends StatefulWidget {
   final String section;
 
-  const NewsListScreen({Key? key, required this.section}) : super(key: key);
+  const NewsListScreen({super.key, required this.section});
 
   @override
   _NewsListScreenState createState() => _NewsListScreenState();
@@ -24,7 +24,7 @@ class _NewsListScreenState extends State<NewsListScreen> {
   Future<void> _fetchNews() async {
     // Replace with your actual data fetching logic (e.g., from an API)
     // For now, using dummy data
-    await Future.delayed(Duration(seconds: 2)); // Simulate network delay
+    await Future.delayed(const Duration(seconds: 2)); // Simulate network delay
     setState(() {
       newsList = List.generate(
         10,
@@ -48,7 +48,7 @@ class _NewsListScreenState extends State<NewsListScreen> {
         title: Text('${widget.section} News'),
       ),
       body: isLoading
-          ? Center(child: CircularProgressIndicator())
+          ? const Center(child: CircularProgressIndicator())
           : ListView.builder(
               itemCount: newsList.length,
               itemBuilder: (context, index) {
@@ -90,12 +90,12 @@ class NewsCard extends StatelessWidget {
   final NewModel news;
   final VoidCallback? onTap;
 
-  const NewsCard({Key? key, required this.news, this.onTap}) : super(key: key);
+  const NewsCard({super.key, required this.news, this.onTap});
 
   @override
   Widget build(BuildContext context) {
     return Card(
-      margin: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: InkWell(
         onTap: onTap,
         child: Padding(
@@ -109,29 +109,29 @@ class NewsCard extends StatelessWidget {
                 height: 100,
                 fit: BoxFit.cover,
               ),
-              SizedBox(width: 16),
+              const SizedBox(width: 16),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       news.title,
-                      style: TextStyle(
+                      style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    SizedBox(height: 4),
+                    const SizedBox(height: 4),
                     Text(
                       news.summary,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
-                      style: TextStyle(fontSize: 14),
+                      style: const TextStyle(fontSize: 14),
                     ),
-                    SizedBox(height: 4),
+                    const SizedBox(height: 4),
                     Text(
                       'Published: ${news.publishDate.toLocal().toString().split(' ')[0]}',
-                      style: TextStyle(fontSize: 12, color: Colors.grey),
+                      style: const TextStyle(fontSize: 12, color: Colors.grey),
                     ),
                   ],
                 ),

@@ -55,7 +55,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Theme.of(context).canvasColor, // Or specific background
-        border: Border(
+        border: const Border(
           bottom: BorderSide(color: AppTheme.tertiaryColor, width: 4),
         ),
       ),
@@ -354,7 +354,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   onPressed: settingsProvider.isLoading || settingsProvider.pendingChanges.isEmpty
                       ? null // Disable if loading or no changes
                       : () => _saveSettings(settingsProvider),
-                  icon: settingsProvider.isLoading && !settingsProvider.pendingChanges.isEmpty // Show loader only when saving
+                  icon: settingsProvider.isLoading && settingsProvider.pendingChanges.isNotEmpty // Show loader only when saving
                       ? Container(
                           width: 20,
                           height: 20,
@@ -416,7 +416,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           SnackBar(
             content: Text('حدث خطأ أثناء حفظ الإعدادات: ${e.toString()}'),
             backgroundColor: Colors.red,
-            duration: Duration(seconds: 3),
+            duration: const Duration(seconds: 3),
           ),
         );
       }

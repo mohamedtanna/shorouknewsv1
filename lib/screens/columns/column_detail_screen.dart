@@ -62,12 +62,10 @@ class _ColumnDetailScreenState extends State<ColumnDetailScreen> {
           _columnDetail = columnDetail;
           _isLoading = false;
         });
-        if (columnDetail != null) {
-          _loadRelatedColumns(columnDetail.columnistId, columnDetail.id);
-          // Optionally, track column view here via a provider or service
-          // context.read<AuthProvider>().trackColumnRead(widget.columnId);
-        }
-      }
+        _loadRelatedColumns(columnDetail.columnistId, columnDetail.id);
+        // Optionally, track column view here via a provider or service
+        // context.read<AuthProvider>().trackColumnRead(widget.columnId);
+            }
     } catch (e) {
       debugPrint('Error loading column detail: $e');
       if (mounted) {
@@ -196,7 +194,7 @@ class _ColumnDetailScreenState extends State<ColumnDetailScreen> {
   Widget _buildBreadcrumb() {
     return Container(
       padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
+      decoration: const BoxDecoration(
         border: Border(
           bottom: BorderSide(color: AppTheme.tertiaryColor, width: 4),
         ),

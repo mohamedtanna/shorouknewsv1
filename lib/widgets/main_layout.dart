@@ -301,7 +301,7 @@ class _MainLayoutState extends State<MainLayout> {
           color: Colors.white,
           shape: BoxShape.circle,
         ),
-        child: Icon(
+        child: const Icon(
           Icons.link, // Replace with actual social media icons
           color: AppTheme.primaryColor,
           size: 20,

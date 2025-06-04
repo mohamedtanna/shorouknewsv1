@@ -134,12 +134,12 @@ class AppRouter {
           GoRoute(
             path: '/newsletter',
             name: 'newsletter',
-            builder: (context, state) => NewsletterScreen(), // Removed const
+            builder: (context, state) => const NewsletterScreen(), // Removed const
           ),
           GoRoute(
             path: '/contact',
             name: 'contact',
-            builder: (context, state) => ContactScreen(), // Removed const
+            builder: (context, state) => const ContactScreen(), // Removed const
           ),
           GoRoute(
             path: '/about',

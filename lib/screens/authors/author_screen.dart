@@ -259,8 +259,11 @@ class _AuthorScreenState extends State<AuthorScreen>
       leading: IconButton(
         icon: const Icon(Icons.arrow_back),
         onPressed: () {
-          if (context.canPop()) context.pop();
-          else context.go('/authors'); 
+          if (context.canPop()) {
+            context.pop();
+          } else {
+            context.go('/authors');
+          } 
         },
       ),
       actions: [
@@ -290,12 +293,20 @@ class _AuthorScreenState extends State<AuthorScreen>
                   switch (value) {
                     case 'search':
                       _isSearchExpanded = !_isSearchExpanded;
-                      if (_isSearchExpanded) _slideController.forward(); else _slideController.reverse();
+                      if (_isSearchExpanded) {
+                        _slideController.forward();
+                      } else {
+                        _slideController.reverse();
+                      }
                       _showFilters = false; 
                       break;
                     case 'filters':
                       _showFilters = !_showFilters;
-                       if (_showFilters) _slideController.forward(); else _slideController.reverse();
+                       if (_showFilters) {
+                         _slideController.forward();
+                       } else {
+                         _slideController.reverse();
+                       }
                       _isSearchExpanded = false; 
                       break;
                     case 'stats':
@@ -316,7 +327,7 @@ class _AuthorScreenState extends State<AuthorScreen>
               ),
               PopupMenuItem(
                 value: 'stats',
-                child: Row(children: [ Icon(_showStats ? Icons.analytics_rounded : Icons.analytics_outlined), SizedBox(width: 8), Text(_showStats ? 'إخفاء الإحصائيات' : 'عرض الإحصائيات')]),
+                child: Row(children: [ Icon(_showStats ? Icons.analytics_rounded : Icons.analytics_outlined), const SizedBox(width: 8), Text(_showStats ? 'إخفاء الإحصائيات' : 'عرض الإحصائيات')]),
               ),
             ],
           ),
@@ -564,7 +575,7 @@ class _AuthorScreenState extends State<AuthorScreen>
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Theme.of(context).canvasColor,
-        border: Border(bottom: BorderSide(color: AppTheme.tertiaryColor, width: 4)),
+        border: const Border(bottom: BorderSide(color: AppTheme.tertiaryColor, width: 4)),
       ),
       child: Row(
         children: [

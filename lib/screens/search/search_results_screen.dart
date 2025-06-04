@@ -124,7 +124,7 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Theme.of(context).canvasColor, // Use canvasColor for consistency
-        border: Border(
+        border: const Border(
           bottom: BorderSide(color: AppTheme.tertiaryColor, width: 4),
         ),
       ),

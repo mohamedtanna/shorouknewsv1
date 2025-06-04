@@ -30,7 +30,7 @@ class _AuthorsListScreenState extends State<AuthorsListScreen>
   List<AuthorModel> _filteredAuthors = [];
   List<AuthorModel> _favoriteAuthors = [];
   List<AuthorModel> _recentlyViewedAuthors = [];
-  Map<String, AuthorStats> _authorsStats = {};
+  final Map<String, AuthorStats> _authorsStats = {};
 
   // State
   bool _isLoading = true;
@@ -671,7 +671,7 @@ class _AuthorsListScreenState extends State<AuthorsListScreen>
   Widget _buildBreadcrumb() {
     return Container(
       padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
+      decoration: const BoxDecoration(
         border: Border(
           bottom: BorderSide(color: AppTheme.tertiaryColor, width: 4),
         ),
@@ -703,7 +703,7 @@ class _AuthorsListScreenState extends State<AuthorsListScreen>
       margin: const EdgeInsets.all(16),
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
+        gradient: const LinearGradient(
           colors: [AppTheme.primaryColor, AppTheme.secondaryColor],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
@@ -1086,7 +1086,7 @@ Widget _buildAuthorListCard(AuthorModel author) {
                               ),
                               child: Text(
                                 '${stats.totalColumns} مقال',
-                                style: TextStyle(
+                                style: const TextStyle(
                                   fontSize: 12,
                                   color: AppTheme.tertiaryColor,
                                   fontWeight: FontWeight.w500,

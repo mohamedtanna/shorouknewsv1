@@ -134,7 +134,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
 
                 // Most Read Stories Section
-                SliverToBoxAdapter(
+                const SliverToBoxAdapter(
                   child: SectionHeader(
                     title: 'الأكثر قراءة', // "Most Read"
                     icon: Icons.visibility_outlined, // Using outlined version

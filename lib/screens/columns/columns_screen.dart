@@ -645,7 +645,7 @@ class _ColumnsScreenState extends State<ColumnsScreen>
   }
 
   Widget _buildFilterBar() {
-    return Container(
+    return SizedBox(
       height: 60,
       child: ListView(
         scrollDirection: Axis.horizontal,
@@ -898,7 +898,7 @@ class _ColumnsScreenState extends State<ColumnsScreen>
   Widget _buildBreadcrumb() {
     return Container(
       padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
+      decoration: const BoxDecoration(
         border: Border(
           bottom: BorderSide(color: AppTheme.tertiaryColor, width: 4),
         ),
@@ -1033,7 +1033,7 @@ class _ColumnsScreenState extends State<ColumnsScreen>
                     const SizedBox(height: 8),
                     Text(
                       '${_allColumns.length} مقال',
-                      style: TextStyle(
+                      style: const TextStyle(
                         fontSize: 12,
                         color: AppTheme.tertiaryColor,
                         fontWeight: FontWeight.w500,
@@ -1056,7 +1056,7 @@ class _ColumnsScreenState extends State<ColumnsScreen>
       margin: const EdgeInsets.all(16),
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
+        gradient: const LinearGradient(
           colors: [AppTheme.primaryColor, AppTheme.secondaryColor],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
@@ -1261,7 +1261,7 @@ class _ColumnsScreenState extends State<ColumnsScreen>
                     ),
                     // Read indicator
                     if (isRead)
-                      Icon(
+                      const Icon(
                         Icons.done_all,
                         size: 16,
                         color: AppTheme.tertiaryColor,
@@ -1423,7 +1423,7 @@ class _ColumnsScreenState extends State<ColumnsScreen>
                       ),
                     ),
                     if (isRead)
-                      Icon(
+                      const Icon(
                         Icons.done_all,
                         size: 14,
                         color: AppTheme.tertiaryColor,
@@ -1485,7 +1485,7 @@ class _ColumnsScreenState extends State<ColumnsScreen>
                         if (isFavorite)
                           const Icon(Icons.favorite, size: 14, color: Colors.red),
                         if (isBookmarked)
-                          Icon(Icons.bookmark, size: 14, color: AppTheme.primaryColor),
+                          const Icon(Icons.bookmark, size: 14, color: AppTheme.primaryColor),
                       ],
                     ),
                   ],
@@ -1586,7 +1586,7 @@ class _ColumnsScreenState extends State<ColumnsScreen>
                               Expanded(
                                 child: Text(
                                   column.columnistArName,
-                                  style: TextStyle(
+                                  style: const TextStyle(
                                     fontSize: 13,
                                     fontWeight: FontWeight.w500,
                                     color: AppTheme.tertiaryColor,
