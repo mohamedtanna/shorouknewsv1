@@ -1,94 +1,164 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_html/flutter_html.dart'; // For rendering HTML if needed
+import 'package:go_router/go_router.dart';
+import 'package:url_launcher/url_launcher.dart';
 
-class PrivacyScreen extends StatelessWidget {
+import '../../core/theme.dart';
+import '../../widgets/ad_banner.dart';
+import 'privacy_module.dart'; // Import the module
+
+class PrivacyScreen extends StatefulWidget {
+  const PrivacyScreen({super.key});
+
+  @override
+  State<PrivacyScreen> createState() => _PrivacyScreenState();
+}
+
+class _PrivacyScreenState extends State<PrivacyScreen> {
+  String _privacyPolicyText = "";
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadPrivacyPolicy();
+  }
+
+  Future<void> _loadPrivacyPolicy() async {
+    setState(() => _isLoading = true);
+    // Simulate fetching if it were from a remote source
+    // await Future.delayed(const Duration(milliseconds: 100));
+    final policyText = PrivacyModule.getPrivacyPolicyText();
+    if (mounted) {
+      setState(() {
+        _privacyPolicyText = policyText;
+        _isLoading = false;
+      });
+    }
+  }
+
+  Widget _buildBreadcrumb() {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        border: Border(
+          bottom: BorderSide(color: AppTheme.tertiaryColor, width: 4),
+        ),
+      ),
+      child: Row(
+        children: [
+          GestureDetector(
+            onTap: () => context.go('/home'),
+            child: const Text(
+              'الرئيسية',
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                color: AppTheme.primaryColor,
+              ),
+            ),
+          ),
+          const Text(' > ', style: TextStyle(fontWeight: FontWeight.bold)),
+          const Text(
+            'سياسة الخصوصية',
+            style: TextStyle(fontWeight: FontWeight.bold),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Privacy Policy'),
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Privacy Policy',
-              style: Theme.of(context).textTheme.headline6,
-            ),
-            SizedBox(height: 16.0),
-            Text(
-              'This Privacy Policy describes how your personal information is collected, used, and shared when you visit or make a purchase from [Your App Name] (the "App").',
-              style: Theme.of(context).textTheme.bodyText2,
-            ),
-            SizedBox(height: 16.0),
-            Text(
-              'Personal Information We Collect',
-              style: Theme.of(context).textTheme.headline6,
-            ),
-            SizedBox(height: 8.0),
-            Text(
-              'When you visit the App, we automatically collect certain information about your device, including information about your web browser, IP address, time zone, and some of the cookies that are installed on your device. Additionally, as you browse the App, we collect information about the individual web pages or products that you view, what websites or search terms referred you to the App, and information about how you interact with the App. We refer to this automatically-collected information as "Device Information".',
-              style: Theme.of(context).textTheme.bodyText2,
-            ),
-            SizedBox(height: 16.0),
-            Text(
-              'How We Use Your Personal Information',
-              style: Theme.of(context).textTheme.headline6,
-            ),
-            SizedBox(height: 8.0),
-            Text(
-              'We use the Device Information that we collect to help us screen for potential risk and fraud (in particular, your IP address), and more generally to improve and optimize our App (for example, by generating analytics about how our customers browse and interact with the App, and to assess the success of our marketing and advertising campaigns).',
-              style: Theme.of(context).textTheme.bodyText2,
-            ),
-            SizedBox(height: 16.0),
-            Text(
-              'Sharing Your Personal Information',
-              style: Theme.of(context).textTheme.headline6,
-            ),
-            SizedBox(height: 8.0),
-            Text(
-              'We share your Personal Information with third parties to help us use your Personal Information, as described above. For example, we use Google Analytics to help us understand how our customers use the App--you can read more about how Google uses your Personal Information here: https://www.google.com/intl/en/policies/privacy/. You can also opt-out of Google Analytics here: https://tools.google.com/dlpage/gaoptout.',
-              style: Theme.of(context).textTheme.bodyText2,
-            ),
-            SizedBox(height: 16.0),
-            Text(
-              'Your Rights',
-              style: Theme.of(context).textTheme.headline6,
-            ),
-            SizedBox(height: 8.0),
-            Text(
-              'If you are a European resident, you have the right to access personal information we hold about you and to ask that your personal information be corrected, updated, or deleted. If you would like to exercise this right, please contact us through the contact information below.',
-              style: Theme.of(context).textTheme.bodyText2,
-            ),
-            SizedBox(height: 16.0),
-            Text(
-              'Changes',
-              style: Theme.of(context).textTheme.headline6,
-            ),
-            SizedBox(height: 8.0),
-            Text(
-              'We may update this privacy policy from time to time in order to reflect, for example, changes to our practices or for other operational, legal or regulatory reasons.',
-              style: Theme.of(context).textTheme.bodyText2,
-            ),
-            SizedBox(height: 16.0),
-            Text(
-              'Contact Us',
-              style: Theme.of(context).textTheme.headline6,
-            ),
-            SizedBox(height: 8.0),
-            Text(
-              'For more information about our privacy practices, if you have questions, or if you would like to make a complaint, please contact us by e-mail at [your email address] or by mail using the details provided below:',
-              style: Theme.of(context).textTheme.bodyText2,
-            ),
-            SizedBox(height: 8.0),
-            Text(
-              '[Your Address]',
-              style: Theme.of(context).textTheme.bodyText2,
-            ),
-            SizedBox(height: 16.0),
-          ],
+        title: const Text('سياسة الخصوصية'), // "Privacy Policy"
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => context.go('/home'),
         ),
+      ),
+      body: Column(
+        children: [
+          const AdBanner(adUnit: '/21765378867/ShorouknewsApp_LeaderBoard2'),
+          _buildBreadcrumb(),
+          Expanded(
+            child: _isLoading
+                ? const Center(child: CircularProgressIndicator())
+                : SingleChildScrollView(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // If your policy text might contain HTML:
+                        Html(
+                          data: _privacyPolicyText,
+                          style: {
+                            "body": Style(
+                              fontSize: FontSize(15),
+                              lineHeight: const LineHeight(1.6),
+                              textAlign: TextAlign.justify,
+                            ),
+                            "h1": Style(
+                                fontSize: FontSize(20),
+                                fontWeight: FontWeight.bold,
+                                color: AppTheme.primaryColor,
+                                margin: Margins.only(top: 16, bottom: 8)),
+                            "h2": Style(
+                                fontSize: FontSize(18),
+                                fontWeight: FontWeight.bold,
+                                color: AppTheme.primaryColor,
+                                margin: Margins.only(top: 12, bottom: 6)),
+                             "h3": Style(
+                                fontSize: FontSize(16),
+                                fontWeight: FontWeight.bold,
+                                color: AppTheme.secondaryColor,
+                                margin: Margins.only(top: 10, bottom: 4)),
+                            "p": Style(
+                              margin: Margins.only(bottom: 10),
+                            ),
+                            "li": Style(
+                              margin: Margins.only(bottom: 6),
+                            ),
+                            "a": Style(
+                              color: AppTheme.tertiaryColor,
+                              textDecoration: TextDecoration.underline,
+                            ),
+                          },
+                          onLinkTap: (url, attributes, element) async {
+                            if (url != null) {
+                              final uri = Uri.tryParse(url);
+                              if (uri != null && await canLaunchUrl(uri)) {
+                                await launchUrl(uri, mode: LaunchMode.externalApplication);
+                              } else {
+                                debugPrint('Could not launch $url');
+                              }
+                            }
+                          },
+                        ),
+                        // If your policy text is guaranteed to be plain text:
+                        // SelectableText(
+                        //   _privacyPolicyText,
+                        //   style: TextStyle(fontSize: 15, height: 1.6),
+                        //   textAlign: TextAlign.justify,
+                        // ),
+                        const SizedBox(height: 20),
+                        // Optional: Button to acknowledge or manage preferences
+                        // Center(
+                        //   child: ElevatedButton(
+                        //     onPressed: () {
+                        //       PrivacyModule.recordPrivacyPolicyAcceptance();
+                        //       ScaffoldMessenger.of(context).showSnackBar(
+                        //         const SnackBar(content: Text('تم حفظ تفضيلات الخصوصية.')),
+                        //       );
+                        //     },
+                        //     child: const Text('لقد قرأت وأوافق على سياسة الخصوصية'),
+                        //   ),
+                        // ),
+                      ],
+                    ),
+                  ),
+          ),
+        ],
       ),
     );
   }
