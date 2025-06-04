@@ -8,7 +8,7 @@ class VideoDetailScreen extends StatefulWidget {
   const VideoDetailScreen({
     Key? key,
     required this.videoUrl,
-    required this.videoTitle,
+    required this.videoTitle, required String videoId,
   }) : super(key: key);
 
   @override

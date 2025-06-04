@@ -3,10 +3,16 @@ import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:device_info_plus/device_info_plus.dart';
-import 'dart:io';
+import 'dart:io' show Platform;
+import 'package:package_info_plus/package_info_plus.dart'; // For app version
 
+import '../models/new_model.dart'; // For NewsSection if needed for default subscriptions
 import 'api_service.dart';
 import 'notification_service.dart';
+import '../core/app_router.dart'; // For navigation from notification tap
+
+// Key to check if initial default subscriptions have been set
+const String _initialSubscriptionsSetKey = 'initial_fcm_subscriptions_set_v1';
 
 class FirebaseService {
   static final FirebaseService _instance = FirebaseService._internal();
@@ -15,276 +21,326 @@ class FirebaseService {
 
   final FirebaseMessaging _messaging = FirebaseMessaging.instance;
   final FirebaseAnalytics _analytics = FirebaseAnalytics.instance;
-  final ApiService _apiService = ApiService();
-  final NotificationService _notificationService = NotificationService();
+  final ApiService _apiService = ApiService(); // Instance of your ApiService
+  final NotificationService _notificationService = NotificationService(); // Instance of NotificationService
 
   String? _fcmToken;
-  
-  // Initialize Firebase services
+  bool _isInitialized = false;
+
+  String? get fcmToken => _fcmToken;
+
+  /// Initializes Firebase services: FCM, Analytics, and user registration.
   Future<void> initialize() async {
+    if (_isInitialized) return;
+
     try {
-      // Request permission for notifications
-      await _requestPermission();
-      
+      // Request permission for notifications (iOS and Android 13+)
+      await _requestNotificationPermission();
+
       // Get FCM token
       _fcmToken = await _messaging.getToken();
-      debugPrint('FCM Token: $_fcmToken');
-      
       if (_fcmToken != null) {
-        // Create user on server
-        await _createUser();
-        
-        // Get and update subscriptions
-        await _getAndUpdateSubscriptions();
+        debugPrint('FCM Token: $_fcmToken');
+        // Register user device with backend
+        await _registerDeviceWithBackend();
+        // Handle initial topic subscriptions (e.g., subscribe to all sections for new users)
+        await _manageInitialDefaultSubscriptions();
+      } else {
+        debugPrint('Failed to get FCM token.');
       }
-      
-      // Set up message handlers
+
+      // Set up message handlers for incoming notifications
       _setupMessageHandlers();
-      
-      // Setup analytics
+
+      // Setup Firebase Analytics
       await _setupAnalytics();
-      
+
+      _isInitialized = true;
+      debugPrint('FirebaseService initialized successfully.');
     } catch (e) {
-      debugPrint('Error initializing Firebase: $e');
+      debugPrint('Error initializing FirebaseService: $e');
     }
   }
 
-  // Request notification permissions
-  Future<void> _requestPermission() async {
-    final settings = await _messaging.requestPermission(
-      alert: true,
-      badge: true,
-      sound: true,
-      provisional: false,
-    );
-    
-    debugPrint('Permission granted: ${settings.authorizationStatus}');
+  /// Requests notification permissions from the user.
+  Future<void> _requestNotificationPermission() async {
+    try {
+      NotificationSettings settings = await _messaging.requestPermission(
+        alert: true,
+        announcement: false,
+        badge: true,
+        carPlay: false,
+        criticalAlert: false,
+        provisional: false,
+        sound: true,
+      );
+      debugPrint('User granted notification permission: ${settings.authorizationStatus}');
+    } catch (e) {
+      debugPrint('Error requesting notification permission: $e');
+    }
   }
 
-  // Create user on server
-  Future<void> _createUser() async {
-    if (_fcmToken == null) return;
-    
+  /// Registers the device with the backend using the FCM token and device info.
+  Future<void> _registerDeviceWithBackend() async {
+    if (_fcmToken == null) {
+      debugPrint('FCM token is null, cannot register device with backend.');
+      return;
+    }
+
     try {
-      final deviceInfo = DeviceInfoPlugin();
+      final deviceInfoPlugin = DeviceInfoPlugin();
       String deviceType = 'Unknown';
       String deviceModel = 'Unknown';
       int os = 0; // 0: other, 1: Android, 2: iOS
-      
+
       if (Platform.isAndroid) {
-        final androidInfo = await deviceInfo.androidInfo;
+        final androidInfo = await deviceInfoPlugin.androidInfo;
         deviceType = androidInfo.manufacturer;
         deviceModel = androidInfo.model;
         os = 1;
       } else if (Platform.isIOS) {
-        final iosInfo = await deviceInfo.iosInfo;
-        deviceType = 'Apple';
-        deviceModel = iosInfo.model;
+        final iosInfo = await deviceInfoPlugin.iosInfo;
+        deviceType = 'Apple'; // Manufacturer is Apple for iOS devices
+        deviceModel = iosInfo.model ?? 'Unknown Model';
         os = 2;
       }
-      
+
+      debugPrint('Registering device: Token: $_fcmToken, OS: $os, Type: $deviceType, Model: $deviceModel');
       await _apiService.createUser(
         token: _fcmToken!,
         os: os,
         deviceType: deviceType,
         deviceModel: deviceModel,
       );
+      debugPrint('Device registered with backend successfully.');
     } catch (e) {
-      debugPrint('Error creating user: $e');
+      debugPrint('Error registering device with backend: $e');
+      // Optionally, implement retry logic or queue for later if critical
     }
   }
 
-  // Get and update current subscriptions
-  Future<void> _getAndUpdateSubscriptions() async {
+  /// Manages initial default topic subscriptions for new users.
+  /// If not already set, subscribes the user to all available news sections.
+  Future<void> _manageInitialDefaultSubscriptions() async {
     try {
-      final subscribedTopics = await getSubscribedTopics();
-      
-      // Filter out default topics
-      final userTopics = subscribedTopics.where((topic) => 
-          topic != 'all' && topic != 'android' && topic != 'ios').toList();
-      final defaultTopics = subscribedTopics.where((topic) => 
-          topic == 'all' || topic == 'android' || topic == 'ios').toList();
-      
-      // If no user topics but has default topics, subscribe to all sections
-      if (userTopics.isEmpty && defaultTopics.isNotEmpty) {
-        await _subscribeToAllSections();
+      final prefs = await SharedPreferences.getInstance();
+      final bool alreadySet = prefs.getBool(_initialSubscriptionsSetKey) ?? false;
+
+      if (!alreadySet) {
+        debugPrint('Setting initial default subscriptions...');
+        final List<NewsSection> sections = await _apiService.getSections();
+        if (sections.isNotEmpty) {
+          final List<String> sectionTopics = sections.map((s) => s.id).toList();
+          // Also subscribe to a general 'all' topic if your backend uses it
+          if (!sectionTopics.contains('all')) {
+             sectionTopics.add('all'); // Common practice for a general topic
+          }
+          // Add platform-specific topics
+          if (Platform.isAndroid && !sectionTopics.contains('android')) {
+            sectionTopics.add('android');
+          } else if (Platform.isIOS && !sectionTopics.contains('ios')) {
+            sectionTopics.add('ios');
+          }
+
+          await subscribeToTopics(sectionTopics);
+          debugPrint('Subscribed to default topics: $sectionTopics');
+        }
+        await prefs.setBool(_initialSubscriptionsSetKey, true);
+      } else {
+        debugPrint('Initial default subscriptions already set.');
       }
     } catch (e) {
-      debugPrint('Error updating subscriptions: $e');
+      debugPrint('Error managing initial default subscriptions: $e');
     }
   }
 
-  // Subscribe to all sections
-  Future<void> _subscribeToAllSections() async {
-    try {
-      final sections = await _apiService.getSections();
-      final sectionIds = sections.map((section) => section.id).toList();
-      await subscribeToTopics(sectionIds);
-    } catch (e) {
-      debugPrint('Error subscribing to all sections: $e');
-    }
-  }
 
-  // Setup message handlers
+  /// Sets up handlers for incoming FCM messages (foreground, background tap).
   void _setupMessageHandlers() {
-    // Handle foreground messages
+    // Handle messages received while the app is in the foreground
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-      debugPrint('Received foreground message: ${message.messageId}');
-      
-      // Show local notification
+      debugPrint('Foreground FCM Message Received: ${message.messageId}');
+      debugPrint('Notification Title: ${message.notification?.title}');
+      debugPrint('Notification Body: ${message.notification?.body}');
+      debugPrint('Data payload: ${message.data}');
+
+      // Show a local notification using NotificationService
       _notificationService.showNotification(
-        title: message.notification?.title ?? 'الشروق',
-        body: message.notification?.body ?? '',
+        title: message.notification?.title ?? 'الشروق نيوز', // Default title
+        body: message.notification?.body ?? 'لديك رسالة جديدة', // Default body
+        imageUrl: Platform.isAndroid ? message.notification?.android?.imageUrl : message.notification?.apple?.imageUrl,
         data: message.data,
+        // Determine if it's breaking news based on payload or channel if available
+        isBreakingNews: message.data['is_breaking'] == 'true' || message.data['priority'] == 'high',
       );
     });
 
-    // Handle notification taps
+    // Handle notification tap when the app is in the background or terminated
     FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
-      debugPrint('Message clicked: ${message.messageId}');
-      _handleMessageClick(message);
+      debugPrint('FCM Message Opened (App was in background/terminated): ${message.messageId}');
+      _handleNotificationTap(message.data);
     });
 
-    // Handle notification tap when app is terminated
+    // Check if the app was opened from a terminated state via a notification
     FirebaseMessaging.instance.getInitialMessage().then((RemoteMessage? message) {
       if (message != null) {
-        debugPrint('App opened from terminated state: ${message.messageId}');
-        _handleMessageClick(message);
+        debugPrint('App opened from terminated state via FCM Message: ${message.messageId}');
+        _handleNotificationTap(message.data);
       }
     });
   }
 
-  // Handle message click navigation
-  void _handleMessageClick(RemoteMessage message) {
-    try {
-      final data = message.data;
-      final link = data['link'] ?? data['Link'];
-      final url = data['url'] ?? data['Url'];
-      
-      String? navigationPath;
-      
-      if (link != null && link.isNotEmpty) {
-        navigationPath = link;
-      } else if (url != null && url.isNotEmpty) {
-        navigationPath = url;
+  /// Handles navigation when a notification is tapped.
+  void _handleNotificationTap(Map<String, dynamic> data) {
+    debugPrint('Handling notification tap with data: $data');
+    // Extract navigation path from common keys, case-insensitive
+    final String? link = data['link']?.toString() ?? data['Link']?.toString();
+    final String? url = data['url']?.toString() ?? data['Url']?.toString();
+    final String? navigationPath = link ?? url;
+
+    if (navigationPath != null && navigationPath.isNotEmpty) {
+      debugPrint('Navigating to path: $navigationPath');
+      try {
+        // Ensure AppRouter.router is accessible, or pass router instance
+        AppRouter.router.go(navigationPath);
+      } catch (e) {
+        debugPrint('Error navigating from notification tap: $e');
+        // Fallback navigation if specific path fails
+        AppRouter.router.go('/home');
       }
-      
-      if (navigationPath != null) {
-        // Navigate to the specified path
-        // This should be handled by your router
-        debugPrint('Navigate to: $navigationPath');
-      }
-    } catch (e) {
-      debugPrint('Error handling message click: $e');
+    } else {
+      debugPrint('No navigation path found in notification data. Navigating to home.');
+      AppRouter.router.go('/home'); // Default navigation
     }
   }
 
-  // Setup Firebase Analytics
+  /// Sets up Firebase Analytics.
   Future<void> _setupAnalytics() async {
     try {
       await _analytics.setAnalyticsCollectionEnabled(true);
-      
+      debugPrint('Firebase Analytics collection enabled.');
       // Log app open event
       await _analytics.logAppOpen();
-      
-      // Set user properties
-      await _analytics.setUserId(id: _fcmToken);
+      // Set user ID for analytics if available (e.g., after login)
+      // If you have a user ID from your backend:
+      // await _analytics.setUserId(id: 'YOUR_USER_ID');
+      // If using FCM token as a pseudo-user ID for analytics:
+      if (_fcmToken != null) {
+        await _analytics.setUserProperty(name: 'fcm_token_present', value: 'true');
+      }
     } catch (e) {
-      debugPrint('Error setting up analytics: $e');
+      debugPrint('Error setting up Firebase Analytics: $e');
     }
   }
 
-  // Subscribe to topics
+  /// Subscribes the device to a list of FCM topics.
   Future<void> subscribeToTopics(List<String> topics) async {
+    if (topics.isEmpty) return;
     try {
       for (final topic in topics) {
-        await _messaging.subscribeToTopic(topic);
-        debugPrint('Subscribed to topic: $topic');
+        if (topic.trim().isNotEmpty) {
+          await _messaging.subscribeToTopic(topic.trim());
+          debugPrint('Subscribed to FCM topic: ${topic.trim()}');
+        }
       }
-      
-      // Unsubscribe from deactivateAll if subscribing to any topic
-      if (topics.isNotEmpty) {
-        await _messaging.unsubscribeFromTopic('deactivateAll');
+      // If subscribing to specific topics, ensure "deactivateAll" is unsubscribed
+      // This logic might be specific to how your backend handles "deactivateAll"
+      if (topics.any((t) => t != 'deactivateAll')) {
+         await _messaging.unsubscribeFromTopic('deactivateAll').catchError((e) {
+            debugPrint("Minor error unsubscribing from 'deactivateAll', possibly not subscribed: $e");
+         });
       }
     } catch (e) {
-      debugPrint('Error subscribing to topics: $e');
-      rethrow;
+      debugPrint('Error subscribing to FCM topics ($topics): $e');
+      // Optionally, rethrow or handle to inform the user/SettingsProvider
     }
   }
 
-  // Unsubscribe from topics
+  /// Unsubscribes the device from a list of FCM topics.
   Future<void> unsubscribeFromTopics(List<String> topics) async {
+    if (topics.isEmpty) return;
     try {
       for (final topic in topics) {
-        await _messaging.unsubscribeFromTopic(topic);
-        debugPrint('Unsubscribed from topic: $topic');
+         if (topic.trim().isNotEmpty) {
+          await _messaging.unsubscribeFromTopic(topic.trim());
+          debugPrint('Unsubscribed from FCM topic: ${topic.trim()}');
+        }
       }
     } catch (e) {
-      debugPrint('Error unsubscribing from topics: $e');
-      rethrow;
+      debugPrint('Error unsubscribing from FCM topics ($topics): $e');
     }
   }
 
-  // Get subscribed topics (this is a simulation as FCM doesn't provide this directly)
-  Future<List<String>> getSubscribedTopics() async {
+  /// Retrieves a list of currently subscribed topics.
+  /// NOTE: FCM client SDK does not provide a direct way to get subscribed topics.
+  /// This method relies on SharedPreferences to store topics the app *thinks* it's subscribed to.
+  /// For authoritative state, your server should manage subscriptions.
+  Future<List<String>> getSubscribedTopicsFromLocal() async {
     try {
-      // In a real implementation, you would need to track subscriptions locally
-      // or use the Firebase Admin SDK on your server
       final prefs = await SharedPreferences.getInstance();
-      final topics = prefs.getStringList('subscribed_topics') ?? [];
-      return topics;
+      // Use a different key for topics managed by SettingsProvider vs initial defaults
+      return prefs.getStringList('user_subscribed_fcm_topics') ?? [];
     } catch (e) {
-      debugPrint('Error getting subscribed topics: $e');
+      debugPrint('Error getting locally stored subscribed topics: $e');
       return [];
     }
   }
 
-  // Save subscribed topics locally
-  Future<void> _saveSubscribedTopics(List<String> topics) async {
+  /// Saves the list of topics (usually managed by SettingsProvider) to SharedPreferences.
+  Future<void> saveSubscribedTopicsToLocal(List<String> topics) async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      await prefs.setStringList('subscribed_topics', topics);
+      await prefs.setStringList('user_subscribed_fcm_topics', topics);
     } catch (e) {
-      debugPrint('Error saving subscribed topics: $e');
+      debugPrint('Error saving subscribed topics locally: $e');
     }
   }
 
-  // Log analytics events
-  Future<void> logEvent(String name, {Map<String, Object>? parameters}) async {
+  /// Logs a custom event to Firebase Analytics.
+  Future<void> logAnalyticsEvent(String name, {Map<String, Object?>? parameters}) async {
     try {
       await _analytics.logEvent(name: name, parameters: parameters);
+      debugPrint('Logged Analytics event: $name');
     } catch (e) {
-      debugPrint('Error logging analytics event: $e');
+      debugPrint('Error logging analytics event "$name": $e');
     }
   }
 
-  // Log screen views
-  Future<void> logScreenView(String screenName) async {
+  /// Logs a screen view event to Firebase Analytics.
+  Future<void> logAnalyticsScreenView(String screenName) async {
     try {
       await _analytics.logScreenView(screenName: screenName);
+      debugPrint('Logged Analytics screen view: $screenName');
     } catch (e) {
-      debugPrint('Error logging screen view: $e');
+      debugPrint('Error logging screen view "$screenName": $e');
     }
   }
 
-  // Announce user (for app version tracking)
-  Future<void> announceUser() async {
-    if (_fcmToken == null) return;
-    
+  /// Announces the user to the backend, typically for app version tracking.
+  /// This corresponds to `onClickAppVersion` in the Ionic service.
+  Future<void> announceUserForVersionTracking() async {
+    if (_fcmToken == null) {
+      debugPrint('FCM token is null, cannot announce user.');
+      return;
+    }
     try {
       await _apiService.announceUser(_fcmToken!);
+      debugPrint('User announced successfully for version tracking.');
     } catch (e) {
-      debugPrint('Error announcing user: $e');
+      debugPrint('Error announcing user for version tracking: $e');
     }
   }
 
-  // Get FCM token
-  String? get fcmToken => _fcmToken;
-
-  // Refresh FCM token
+  /// Refreshes the FCM token if it's stale or missing.
   Future<String?> refreshToken() async {
     try {
-      _fcmToken = await _messaging.getToken();
+      final newToken = await _messaging.getToken();
+      if (newToken != null && newToken != _fcmToken) {
+        debugPrint('FCM Token refreshed: $newToken');
+        _fcmToken = newToken;
+        // Re-register the device with the new token
+        await _registerDeviceWithBackend();
+      }
       return _fcmToken;
     } catch (e) {
       debugPrint('Error refreshing FCM token: $e');
