@@ -1,3 +1,4 @@
 class AppConstants {
-  static const String baseUrl = '<your base url>';
+  static const String baseUrl = 'https://shorouknews.pri.land';
+
 }
