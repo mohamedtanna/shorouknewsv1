@@ -9,9 +9,9 @@ import '../../models/column_model.dart';
 import '../../models/author_model.dart';
 import '../../models/additional_models.dart';
 import '../../core/constants.dart';
-import '../../core/api_service.dart';
-import '../../core/cache_manager.dart';
-import '../../core/analytics_service.dart';
+import '../../services/api_service.dart';
+import '../../services/cache_manager.dart';
+import '../../services/analytics_service.dart';
 
 class ColumnsModule {
   static const String _moduleName = 'ColumnsModule';
