@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Google Mobile Ads Ad Services Config -->
+<ad-services-config>
+    <property name="gms:ads:privacy:privacy_sandbox_enabled" value="true"/>
+</ad-services-config>
