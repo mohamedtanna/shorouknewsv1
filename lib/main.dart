@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
-import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
+// import 'package:firebase_core/firebase_core.dart';
+// import 'package:firebase_messaging/firebase_messaging.dart';
 // import 'package:google_mobile_ads/google_mobile_ads.dart';
 
 import 'core/app_router.dart';
@@ -11,23 +11,23 @@ import 'providers/news_provider.dart';
 import 'providers/settings_provider.dart';
 import 'providers/auth_provider.dart';
 
-// Firebase background message handler
-Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
-  await Firebase.initializeApp();
-  print("Handling a background message: ${message.messageId}");
-}
+// Firebase background message handler (disabled)
+// Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+//   await Firebase.initializeApp();
+//   print("Handling a background message: ${message.messageId}");
+// }
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
-  // Initialize Firebase
-  await Firebase.initializeApp();
+  // Initialize Firebase (disabled)
+  // await Firebase.initializeApp();
   
   // Initialize Mobile Ads
   // MobileAds.instance.initialize();
   
-  // Set up Firebase messaging
-  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+  // Set up Firebase messaging (disabled)
+  // FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
   
   // Set preferred orientations
   SystemChrome.setPreferredOrientations([

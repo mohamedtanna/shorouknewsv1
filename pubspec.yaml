@@ -34,10 +34,10 @@ dependencies:
   # HTML rendering
   flutter_html: ^3.0.0-beta.2
   
-  # Push notifications
-  firebase_core: ^2.24.2
-  firebase_messaging: ^14.7.9
-  firebase_analytics: ^10.7.4
+  # Push notifications (disabled)
+  # firebase_core: ^2.24.2
+  # firebase_messaging: ^14.7.9
+  # firebase_analytics: ^10.7.4
   
   # Social sharing
   share_plus: ^7.2.1
