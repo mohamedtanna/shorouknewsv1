@@ -87,3 +87,7 @@ flutter:
           weight: 400
         - asset: assets/fonts/Tajawal-Bold.ttf
           weight: 700
+
+dependency_overrides:
+  flutter_inappwebview: ^6.0.0
+
