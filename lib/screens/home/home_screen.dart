@@ -8,12 +8,10 @@ import 'package:shimmer/shimmer.dart';
 import '../../providers/news_provider.dart';
 
 // Data models for news articles and columns
-import '../../models/news_model.dart';
-// Assuming this model exists for columns
+import 'package:shorouk_news/models/new_model.dart';
 
 // Reusable widgets for displaying content and ads
-import '../../widgets/news_card.dart'; // Displays individual news articles
-import '../../widgets/column_card.dart'; // Displays individual columns (ensure this widget exists)
+import 'package:shorouk_news/widgets/news_card.dart';
 import '../../widgets/ad_banner.dart'; // Displays advertisements
 import '../../widgets/section_header.dart'; // Displays titles for content sections
 
@@ -82,11 +80,13 @@ class _HomeScreenState extends State<HomeScreen> {
           // Listens to changes in NewsProvider and rebuilds the UI accordingly
           builder: (context, newsProvider, child) {
             return CustomScrollView(
-              controller: _scrollController, // Controller for scroll-related actions
+              controller:
+                  _scrollController, // Controller for scroll-related actions
               slivers: [
                 // Top Advertisement Banner
                 const SliverToBoxAdapter(
-                  child: AdBanner(adUnit: '/21765378867/ShorouknewsApp_LeaderBoard1'),
+                  child: AdBanner(
+                      adUnit: '/21765378867/ShorouknewsApp_LeaderBoard1'),
                 ),
 
                 // Main Story Card (Top-most prominent story)
@@ -101,7 +101,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
                 // Second Advertisement Banner
                 const SliverToBoxAdapter(
-                  child: AdBanner(adUnit: '/21765378867/ShorouknewsApp_Banner1'),
+                  child:
+                      AdBanner(adUnit: '/21765378867/ShorouknewsApp_Banner1'),
                 ),
 
                 // Top Stories Section
@@ -109,7 +110,8 @@ class _HomeScreenState extends State<HomeScreen> {
                   child: SectionHeader(
                     title: 'أهم الأخبار', // "Top News"
                     icon: Icons.trending_up,
-                    onMorePressed: () => context.go('/news'), // Navigate to full news list
+                    onMorePressed: () =>
+                        context.go('/news'), // Navigate to full news list
                   ),
                 ),
                 SliverToBoxAdapter(
@@ -118,7 +120,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
                 // Third Advertisement Banner
                 const SliverToBoxAdapter(
-                  child: AdBanner(adUnit: '/21765378867/ShorouknewsApp_Banner2'),
+                  child:
+                      AdBanner(adUnit: '/21765378867/ShorouknewsApp_Banner2'),
                 ),
 
                 // Selected Columns Section
@@ -126,7 +129,8 @@ class _HomeScreenState extends State<HomeScreen> {
                   child: SectionHeader(
                     title: 'مقالات مختارة', // "Selected Columns"
                     icon: Icons.article_outlined, // Using outlined version
-                    onMorePressed: () => context.go('/columns'), // Navigate to full columns list
+                    onMorePressed: () =>
+                        context.go('/columns'), // Navigate to full columns list
                   ),
                 ),
                 SliverToBoxAdapter(
@@ -144,7 +148,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 SliverToBoxAdapter(
                   child: _buildMostReadList(newsProvider),
                 ),
-                
+
                 // Ad Banner (MPU or similar)
                 const SliverToBoxAdapter(
                   child: AdBanner(adUnit: '/21765378867/ShorouknewsApp_MPU1'),
@@ -182,9 +186,11 @@ class _HomeScreenState extends State<HomeScreen> {
         onTap: () => context.go('/news/${mainStory.cDate}/${mainStory.id}'),
         child: Card(
           margin: EdgeInsets.zero,
-          clipBehavior: Clip.antiAlias, // Ensures content respects card's rounded corners
+          clipBehavior:
+              Clip.antiAlias, // Ensures content respects card's rounded corners
           elevation: 4.0, // Adds a subtle shadow
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)),
           child: Stack(
             // Stack allows overlaying text on the image
             children: [
@@ -200,7 +206,8 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                   errorWidget: (context, url, error) => Container(
                     color: Colors.grey[300],
-                    child: const Icon(Icons.broken_image, color: Colors.grey, size: 50),
+                    child: const Icon(Icons.broken_image,
+                        color: Colors.grey, size: 50),
                   ),
                 ),
               ),
@@ -229,13 +236,16 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: Text(
                   mainStory.title,
                   style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 20, // Slightly larger font for main story
-                    fontWeight: FontWeight.bold,
-                    shadows: [ // Text shadow for better contrast
-                      Shadow(blurRadius: 2.0, color: Colors.black54, offset: Offset(1,1))
-                    ]
-                  ),
+                      color: Colors.white,
+                      fontSize: 20, // Slightly larger font for main story
+                      fontWeight: FontWeight.bold,
+                      shadows: [
+                        // Text shadow for better contrast
+                        Shadow(
+                            blurRadius: 2.0,
+                            color: Colors.black54,
+                            offset: Offset(1, 1))
+                      ]),
                   maxLines: 3,
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -250,8 +260,9 @@ class _HomeScreenState extends State<HomeScreen> {
   /// Builds a grid for other main stories (excluding the first one).
   Widget _buildMainStoriesGrid(NewsProvider newsProvider) {
     // Show shimmer if loading, otherwise display the grid or an empty box.
-    if (newsProvider.isLoadingMainStories && newsProvider.mainStories.length <= 1) {
-       // Show shimmer for the grid if main stories are loading and only the main one might be present
+    if (newsProvider.isLoadingMainStories &&
+        newsProvider.mainStories.length <= 1) {
+      // Show shimmer for the grid if main stories are loading and only the main one might be present
       return _buildShimmerGrid(itemCount: 2);
     }
     if (newsProvider.mainStories.length <= 1) {
@@ -262,15 +273,16 @@ class _HomeScreenState extends State<HomeScreen> {
     final otherStories = newsProvider.mainStories.skip(1).take(4).toList();
     if (otherStories.isEmpty) return const SizedBox.shrink();
 
-
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 8),
       child: GridView.builder(
         shrinkWrap: true, // Important for GridView inside CustomScrollView
-        physics: const NeverScrollableScrollPhysics(), // Disable GridView's own scrolling
+        physics:
+            const NeverScrollableScrollPhysics(), // Disable GridView's own scrolling
         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: 2, // Two items per row
-          childAspectRatio: 0.85, // Adjust for desired card proportions (width/height)
+          childAspectRatio:
+              0.85, // Adjust for desired card proportions (width/height)
           crossAxisSpacing: 8,
           mainAxisSpacing: 8,
         ),
@@ -295,7 +307,10 @@ class _HomeScreenState extends State<HomeScreen> {
       return _buildShimmerHorizontalList();
     }
     if (newsProvider.topStories.isEmpty) {
-      return const Center(child: Padding(padding: EdgeInsets.all(16.0), child: Text('لا توجد أخبار هامة حالياً.')));
+      return const Center(
+          child: Padding(
+              padding: EdgeInsets.all(16.0),
+              child: Text('لا توجد أخبار هامة حالياً.')));
     }
 
     return SizedBox(
@@ -303,7 +318,8 @@ class _HomeScreenState extends State<HomeScreen> {
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-        itemCount: newsProvider.topStories.length.clamp(0, 5), // Show up to 5 top stories
+        itemCount: newsProvider.topStories.length
+            .clamp(0, 5), // Show up to 5 top stories
         itemBuilder: (context, index) {
           final story = newsProvider.topStories[index];
           return SizedBox(
@@ -326,19 +342,44 @@ class _HomeScreenState extends State<HomeScreen> {
       return _buildShimmerVerticalList(itemCount: 2);
     }
     if (newsProvider.selectedColumns.isEmpty) {
-      return const Center(child: Padding(padding: EdgeInsets.all(16.0), child: Text('لا توجد مقالات مختارة حالياً.')));
+      return const Center(
+          child: Padding(
+              padding: EdgeInsets.all(16.0),
+              child: Text('لا توجد مقالات مختارة حالياً.')));
     }
 
     return ListView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
-      itemCount: newsProvider.selectedColumns.length.clamp(0, 3), // Show up to 3 columns
+      itemCount: newsProvider.selectedColumns.length
+          .clamp(0, 3), // Show up to 3 columns
       itemBuilder: (context, index) {
         final column = newsProvider.selectedColumns[index];
-        // Ensure ColumnCard widget exists and is correctly implemented
-        return ColumnCard(
-          column: column,
+        // Display column using NewsCard
+        return NewsCard(
+          article: NewsArticle(
+            id: column.id,
+            cDate: column.cDate,
+            title: column.title,
+            summary: column.summary,
+            body: '',
+            photoUrl: column.columnistPhotoUrl,
+            thumbnailPhotoUrl: column.columnistPhotoUrl,
+            sectionId: '',
+            sectionArName: column.columnistArName,
+            publishDate: column.creationDate,
+            publishDateFormatted: column.creationDateFormatted,
+            publishTimeFormatted: '',
+            lastModificationDate: column.creationDate,
+            lastModificationDateFormatted: column.creationDateFormattedDateTime,
+            editorAndSource: column.columnistArName,
+            canonicalUrl: column.canonicalUrl,
+            relatedPhotos: [],
+            relatedNews: [],
+          ),
+          isHorizontal: true,
           onTap: () => context.go('/column/${column.cDate}/${column.id}'),
+          showDate: true,
         );
       },
     );
@@ -347,24 +388,30 @@ class _HomeScreenState extends State<HomeScreen> {
   /// Builds a list for most read stories.
   Widget _buildMostReadList(NewsProvider newsProvider) {
     // Show shimmer if loading, otherwise display the list or an empty box.
-    if (newsProvider.isLoadingMostRead && newsProvider.mostReadStories.isEmpty) {
+    if (newsProvider.isLoadingMostRead &&
+        newsProvider.mostReadStories.isEmpty) {
       return _buildShimmerVerticalList(itemCount: 3);
     }
     if (newsProvider.mostReadStories.isEmpty) {
-      return const Center(child: Padding(padding: EdgeInsets.all(16.0), child: Text('لا توجد أخبار رائجة حالياً.')));
+      return const Center(
+          child: Padding(
+              padding: EdgeInsets.all(16.0),
+              child: Text('لا توجد أخبار رائجة حالياً.')));
     }
 
     return ListView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
-      itemCount: newsProvider.mostReadStories.length.clamp(0,5), // Show up to 5 most read
+      itemCount: newsProvider.mostReadStories.length
+          .clamp(0, 5), // Show up to 5 most read
       itemBuilder: (context, index) {
         final story = newsProvider.mostReadStories[index];
         return NewsCard(
           article: story,
           isHorizontal: true, // Horizontal layout for list items
           onTap: () => context.go('/news/${story.cDate}/${story.id}'),
-          showDate: false, // Date might be less relevant for "most read" in this compact view
+          showDate:
+              false, // Date might be less relevant for "most read" in this compact view
         );
       },
     );
@@ -383,7 +430,8 @@ class _HomeScreenState extends State<HomeScreen> {
         child: Card(
           margin: EdgeInsets.zero,
           clipBehavior: Clip.antiAlias,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)),
           child: Container(color: Colors.white),
         ),
       ),
@@ -410,7 +458,8 @@ class _HomeScreenState extends State<HomeScreen> {
             highlightColor: Colors.grey[100]!,
             child: Card(
               clipBehavior: Clip.antiAlias,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.0)),
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8.0)),
               child: Container(color: Colors.white),
             ),
           );
@@ -435,7 +484,8 @@ class _HomeScreenState extends State<HomeScreen> {
               width: 280,
               child: Card(
                 margin: const EdgeInsets.symmetric(horizontal: 4),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.0)),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8.0)),
                 child: Container(color: Colors.white),
               ),
             ),
@@ -457,7 +507,8 @@ class _HomeScreenState extends State<HomeScreen> {
           highlightColor: Colors.grey[100]!,
           child: Card(
             margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.0)),
+            shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8.0)),
             child: Container(
               height: 100, // Typical height for a list item card
               color: Colors.white,

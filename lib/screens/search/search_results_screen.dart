@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shimmer/shimmer.dart'; // For loading effects
 
-import '../../models/new_model.dart'; // For NewsArticle model
+import 'package:shorouk_news/models/new_model.dart';
 import '../../widgets/news_card.dart'; // To display each search result
 import '../../widgets/ad_banner.dart';
 import '../../core/theme.dart';
@@ -50,7 +50,8 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
   ///
   /// [refresh]: If true, clears existing results and fetches from page 1.
   /// [isInitialLoad]: If true, sets the initial loading state.
-  Future<void> _fetchResults({bool refresh = false, bool isInitialLoad = false}) async {
+  Future<void> _fetchResults(
+      {bool refresh = false, bool isInitialLoad = false}) async {
     // Do not fetch if query is empty, show empty state instead
     if (widget.query.trim().isEmpty) {
       if (mounted) {
@@ -71,8 +72,10 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
 
     if (!mounted) return;
     setState(() {
-      if (isInitialLoad || (refresh && _results.isEmpty)) _isLoadingFirstLoad = true;
-      if (!isInitialLoad && !refresh) _isLoadingMore = true; // Show loading more indicator
+      if (isInitialLoad || (refresh && _results.isEmpty))
+        _isLoadingFirstLoad = true;
+      if (!isInitialLoad && !refresh)
+        _isLoadingMore = true; // Show loading more indicator
       _error = null; // Clear previous errors
     });
 
@@ -87,7 +90,8 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
           // If refreshing, replace results. Otherwise, append.
           if (refresh) _results.clear();
           _results.addAll(newResults);
-          _hasMoreData = newResults.length >= _pageSize; // Update based on fetched count
+          _hasMoreData =
+              newResults.length >= _pageSize; // Update based on fetched count
           _isLoadingFirstLoad = false;
           _isLoadingMore = false;
         });
@@ -95,8 +99,9 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
     } catch (e) {
       if (mounted) {
         setState(() {
-          _error = 'فشل في تحميل نتائج البحث.'; 
-          debugPrint('Search results error for query "${widget.query}", page $_currentPage: $e');
+          _error = 'فشل في تحميل نتائج البحث.';
+          debugPrint(
+              'Search results error for query "${widget.query}", page $_currentPage: $e');
           _isLoadingFirstLoad = false;
           _isLoadingMore = false;
           // Optionally, if an error occurs loading more, you might want to decrement _currentPage
@@ -109,7 +114,8 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
   /// Listener for scroll events to trigger loading more results.
   void _onScroll() {
     // Check if scrolled to near the bottom, not currently loading, and more data might exist
-    if (_scrollController.position.pixels >= _scrollController.position.maxScrollExtent - 300 &&
+    if (_scrollController.position.pixels >=
+            _scrollController.position.maxScrollExtent - 300 &&
         !_isLoadingFirstLoad &&
         !_isLoadingMore &&
         _hasMoreData) {
@@ -142,7 +148,8 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
           ),
           const Text(' > ', style: TextStyle(fontWeight: FontWeight.bold)),
           GestureDetector(
-            onTap: () => context.go('/search'), // Navigate back to search input screen
+            onTap: () =>
+                context.go('/search'), // Navigate back to search input screen
             child: const Text(
               'البحث',
               style: TextStyle(
@@ -168,7 +175,8 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('نتائج البحث عن: "${widget.query}"', style: const TextStyle(fontSize: 18)),
+        title: Text('نتائج البحث عن: "${widget.query}"',
+            style: const TextStyle(fontSize: 18)),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () {
@@ -182,11 +190,12 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
       ),
       body: Column(
         children: [
-          const AdBanner(adUnit: '/21765378867/ShorouknewsApp_LeaderBoard2'), 
+          const AdBanner(adUnit: '/21765378867/ShorouknewsApp_LeaderBoard2'),
           _buildBreadcrumb(),
           Expanded(
             child: RefreshIndicator(
-              onRefresh: () => _fetchResults(refresh: true, isInitialLoad: true),
+              onRefresh: () =>
+                  _fetchResults(refresh: true, isInitialLoad: true),
               color: AppTheme.primaryColor,
               child: _buildBody(),
             ),
@@ -201,7 +210,7 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
     if (_isLoadingFirstLoad) {
       return _buildLoadingShimmer();
     }
-    if (_error != null && _results.isEmpty) { 
+    if (_error != null && _results.isEmpty) {
       return _buildErrorWidget();
     }
     if (_results.isEmpty) {
@@ -219,22 +228,43 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
           baseColor: Colors.grey[300]!,
           highlightColor: Colors.grey[100]!,
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+            padding:
+                const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Container(width: 110, height: 85, decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(8))),
+                Container(
+                    width: 110,
+                    height: 85,
+                    decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(8))),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       const SizedBox(height: 4),
-                      Container(height: 16, width: double.infinity, decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(4))),
+                      Container(
+                          height: 16,
+                          width: double.infinity,
+                          decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(4))),
                       const SizedBox(height: 8),
-                      Container(height: 12, width: MediaQuery.of(context).size.width * 0.5, decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(4))),
+                      Container(
+                          height: 12,
+                          width: MediaQuery.of(context).size.width * 0.5,
+                          decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(4))),
                       const SizedBox(height: 8),
-                      Container(height: 10, width: MediaQuery.of(context).size.width * 0.3, decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(4))),
+                      Container(
+                          height: 10,
+                          width: MediaQuery.of(context).size.width * 0.3,
+                          decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(4))),
                     ],
                   ),
                 ),
@@ -259,17 +289,20 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
             Text(
               _error ?? 'حدث خطأ أثناء تحميل النتائج.',
               textAlign: TextAlign.center,
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(color: Colors.black87),
+              style: Theme.of(context)
+                  .textTheme
+                  .titleMedium
+                  ?.copyWith(color: Colors.black87),
             ),
             const SizedBox(height: 20),
             ElevatedButton.icon(
               icon: const Icon(Icons.refresh),
               label: const Text('إعادة المحاولة'),
-              onPressed: () => _fetchResults(refresh: true, isInitialLoad: true),
+              onPressed: () =>
+                  _fetchResults(refresh: true, isInitialLoad: true),
               style: ElevatedButton.styleFrom(
-                backgroundColor: AppTheme.primaryColor,
-                foregroundColor: Colors.white
-              ),
+                  backgroundColor: AppTheme.primaryColor,
+                  foregroundColor: Colors.white),
             ),
           ],
         ),
@@ -289,7 +322,10 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
             const SizedBox(height: 20),
             Text(
               'لا توجد نتائج للبحث عن "${widget.query}"',
-              style: TextStyle(fontSize: 18, color: Colors.grey[700], fontWeight: FontWeight.w500),
+              style: TextStyle(
+                  fontSize: 18,
+                  color: Colors.grey[700],
+                  fontWeight: FontWeight.w500),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 10),
@@ -300,11 +336,11 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
             ),
             const SizedBox(height: 24),
             ElevatedButton(
-              onPressed: () => context.go('/search'), // Navigate back to search input
+              onPressed: () =>
+                  context.go('/search'), // Navigate back to search input
               style: ElevatedButton.styleFrom(
-                backgroundColor: AppTheme.tertiaryColor,
-                foregroundColor: Colors.white
-              ),
+                  backgroundColor: AppTheme.tertiaryColor,
+                  foregroundColor: Colors.white),
               child: const Text('العودة إلى شاشة البحث'),
             ),
           ],
@@ -318,23 +354,30 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
     return ListView.builder(
       controller: _scrollController,
       padding: const EdgeInsets.symmetric(vertical: 8.0),
-      itemCount: _results.length + (_isLoadingMore ? 1 : 0), // Add one for loading indicator if loading more
+      itemCount: _results.length +
+          (_isLoadingMore
+              ? 1
+              : 0), // Add one for loading indicator if loading more
       itemBuilder: (context, index) {
         if (index == _results.length) {
           // This is the last item - show loading indicator if there's more data being fetched
-          return _isLoadingMore 
+          return _isLoadingMore
               ? const Padding(
                   padding: EdgeInsets.symmetric(vertical: 20.0),
-                  child: Center(child: CircularProgressIndicator(color: AppTheme.primaryColor)),
+                  child: Center(
+                      child: CircularProgressIndicator(
+                          color: AppTheme.primaryColor)),
                 )
-              : const SizedBox.shrink(); // Or a "No more results" message if _hasMoreData is false
+              : const SizedBox
+                  .shrink(); // Or a "No more results" message if _hasMoreData is false
         }
         final article = _results[index];
         return NewsCard(
           article: article,
-          isHorizontal: true, // Use horizontal card style for search results list
+          isHorizontal:
+              true, // Use horizontal card style for search results list
           onTap: () => context.go('/news/${article.cDate}/${article.id}'),
-          highlightQuery: widget.query, // Pass the query for potential highlighting in NewsCard
+          // Pass the query for potential highlighting if needed
         );
       },
     );
@@ -354,7 +397,7 @@ class _ShimmerBox extends StatelessWidget {
       height: height,
       width: width,
       decoration: BoxDecoration(
-        color: Colors.white, 
+        color: Colors.white,
         borderRadius: BorderRadius.circular(4),
       ),
     );

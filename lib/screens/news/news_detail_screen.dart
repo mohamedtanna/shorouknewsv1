@@ -7,7 +7,7 @@ import 'package:shimmer/shimmer.dart'; // For loading effects
 import 'package:url_launcher/url_launcher.dart'; // For opening external links
 
 // Models
-import '../../models/new_model.dart';
+import 'package:shorouk_news/models/new_model.dart';
 
 // Services
 import '../../services/api_service.dart';
@@ -71,7 +71,8 @@ class _NewsDetailScreenState extends State<NewsDetailScreen> {
     });
 
     try {
-      final newsDetail = await _apiService.getNewsDetail(widget.cdate, widget.newsId);
+      final newsDetail =
+          await _apiService.getNewsDetail(widget.cdate, widget.newsId);
       if (mounted) {
         setState(() {
           _newsDetail = newsDetail;
@@ -83,7 +84,7 @@ class _NewsDetailScreenState extends State<NewsDetailScreen> {
         // } catch (e) {
         //   debugPrint("Error tracking news read: $e");
         // }
-            }
+      }
     } catch (e) {
       debugPrint('Error loading news detail: $e');
       if (mounted) {
@@ -99,7 +100,8 @@ class _NewsDetailScreenState extends State<NewsDetailScreen> {
   }
 
   /// Loads more news from the same section, excluding the current article.
-  Future<void> _loadMoreNewsFromSection(String sectionId, String currentNewsId) async {
+  Future<void> _loadMoreNewsFromSection(
+      String sectionId, String currentNewsId) async {
     if (sectionId.isEmpty || !mounted) return;
 
     if (mounted) setState(() => _isLoadingMoreNews = true);
@@ -110,7 +112,8 @@ class _NewsDetailScreenState extends State<NewsDetailScreen> {
       );
       if (mounted) {
         setState(() {
-          _moreNewsFromSection = newsList.where((news) => news.id != currentNewsId).toList();
+          _moreNewsFromSection =
+              newsList.where((news) => news.id != currentNewsId).toList();
         });
       }
     } catch (e) {
@@ -154,7 +157,7 @@ class _NewsDetailScreenState extends State<NewsDetailScreen> {
     if (_newsDetail?.relatedPhotos.isEmpty ?? true) return;
 
     context.goNamed(
-      'image-viewer', 
+      'image-viewer',
       extra: {
         'photos': _newsDetail!.relatedPhotos,
         'initialIndex': initialIndex,
@@ -179,7 +182,6 @@ class _NewsDetailScreenState extends State<NewsDetailScreen> {
     }
   }
 
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -195,11 +197,11 @@ class _NewsDetailScreenState extends State<NewsDetailScreen> {
         ],
       ),
       body: _isLoading
-          ? _buildLoadingShimmer() 
+          ? _buildLoadingShimmer()
           : _loadingError != null
-              ? _buildErrorState(_loadingError!) 
+              ? _buildErrorState(_loadingError!)
               : _newsDetail == null
-                  ? _buildErrorState('لم يتم العثور على الخبر.') 
+                  ? _buildErrorState('لم يتم العثور على الخبر.')
                   : RefreshIndicator(
                       onRefresh: () => _loadNewsDetail(refresh: true),
                       color: AppTheme.primaryColor,
@@ -207,7 +209,9 @@ class _NewsDetailScreenState extends State<NewsDetailScreen> {
                         controller: _scrollController,
                         slivers: [
                           const SliverToBoxAdapter(
-                            child: AdBanner(adUnit: '/21765378867/ShorouknewsApp_LeaderBoard2'),
+                            child: AdBanner(
+                                adUnit:
+                                    '/21765378867/ShorouknewsApp_LeaderBoard2'),
                           ),
                           SliverToBoxAdapter(child: _buildBreadcrumb()),
                           SliverToBoxAdapter(child: _buildMainContent()),
@@ -220,12 +224,16 @@ class _NewsDetailScreenState extends State<NewsDetailScreen> {
                           if (_newsDetail!.relatedPhotos.isNotEmpty)
                             SliverToBoxAdapter(child: _buildRelatedPhotos()),
                           if (_newsDetail!.relatedNews.isNotEmpty)
-                             SliverToBoxAdapter(child: _buildCuratedRelatedNews()),
+                            SliverToBoxAdapter(
+                                child: _buildCuratedRelatedNews()),
                           const SliverToBoxAdapter(
-                            child: AdBanner(adUnit: '/21765378867/ShorouknewsApp_Banner2'),
+                            child: AdBanner(
+                                adUnit: '/21765378867/ShorouknewsApp_Banner2'),
                           ),
-                          if (_moreNewsFromSection.isNotEmpty || _isLoadingMoreNews)
-                            SliverToBoxAdapter(child: _buildMoreNewsFromSectionWidget()),
+                          if (_moreNewsFromSection.isNotEmpty ||
+                              _isLoadingMoreNews)
+                            SliverToBoxAdapter(
+                                child: _buildMoreNewsFromSectionWidget()),
                           const SliverToBoxAdapter(child: SizedBox(height: 20)),
                         ],
                       ),
@@ -234,7 +242,7 @@ class _NewsDetailScreenState extends State<NewsDetailScreen> {
   }
 
   Widget _buildLoadingShimmer() {
-    return SingleChildScrollView( 
+    return SingleChildScrollView(
       physics: const NeverScrollableScrollPhysics(),
       child: Shimmer.fromColors(
         baseColor: Colors.grey[300]!,
@@ -244,15 +252,40 @@ class _NewsDetailScreenState extends State<NewsDetailScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Container(width: double.infinity, height: 200.0, decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12))),
+              Container(
+                  width: double.infinity,
+                  height: 200.0,
+                  decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(12))),
               const SizedBox(height: 16.0),
-              Container(width: double.infinity, height: 24.0, decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(4))),
+              Container(
+                  width: double.infinity,
+                  height: 24.0,
+                  decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(4))),
               const SizedBox(height: 8.0),
-              Container(width: MediaQuery.of(context).size.width * 0.7, height: 20.0, decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(4))),
+              Container(
+                  width: MediaQuery.of(context).size.width * 0.7,
+                  height: 20.0,
+                  decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(4))),
               const SizedBox(height: 16.0),
-              Container(width: double.infinity, height: 100.0, decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(8))),
+              Container(
+                  width: double.infinity,
+                  height: 100.0,
+                  decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(8))),
               const SizedBox(height: 16.0),
-              Container(width: double.infinity, height: 100.0, decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(8))),
+              Container(
+                  width: double.infinity,
+                  height: 100.0,
+                  decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(8))),
             ],
           ),
         ),
@@ -272,14 +305,19 @@ class _NewsDetailScreenState extends State<NewsDetailScreen> {
             Text(
               message,
               textAlign: TextAlign.center,
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(color: Colors.black87),
+              style: Theme.of(context)
+                  .textTheme
+                  .titleMedium
+                  ?.copyWith(color: Colors.black87),
             ),
             const SizedBox(height: 20),
             ElevatedButton.icon(
               icon: const Icon(Icons.refresh),
               label: const Text('إعادة المحاولة'),
               onPressed: () => _loadNewsDetail(refresh: true),
-              style: ElevatedButton.styleFrom(backgroundColor: AppTheme.primaryColor, foregroundColor: Colors.white),
+              style: ElevatedButton.styleFrom(
+                  backgroundColor: AppTheme.primaryColor,
+                  foregroundColor: Colors.white),
             )
           ],
         ),
@@ -303,26 +341,32 @@ class _NewsDetailScreenState extends State<NewsDetailScreen> {
             onTap: () => context.go('/home'),
             child: const Text(
               'الرئيسية',
-              style: TextStyle(fontWeight: FontWeight.bold, color: AppTheme.primaryColor),
+              style: TextStyle(
+                  fontWeight: FontWeight.bold, color: AppTheme.primaryColor),
             ),
           ),
           const Text(' > ', style: TextStyle(fontWeight: FontWeight.bold)),
           // Corrected: Conditionally add GestureDetector only if sectionArName is not empty
           if (_newsDetail!.sectionArName.isNotEmpty)
-            Expanded( 
+            Expanded(
               child: GestureDetector(
-                onTap: () => context.go('/news?sectionId=${_newsDetail!.sectionId}&sectionName=${Uri.encodeComponent(_newsDetail!.sectionArName)}'),
+                onTap: () => context.go(
+                    '/news?sectionId=${_newsDetail!.sectionId}&sectionName=${Uri.encodeComponent(_newsDetail!.sectionArName)}'),
                 child: Text(
                   _newsDetail!.sectionArName,
-                  style: const TextStyle(fontWeight: FontWeight.bold, color: AppTheme.primaryColor),
+                  style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: AppTheme.primaryColor),
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
             )
-          else 
-            const Expanded( // Ensure Row children are properly expanded or sized
-              child: Text('خبر', style: TextStyle(fontWeight: FontWeight.bold), overflow: TextOverflow.ellipsis)
-            ),
+          else
+            const Expanded(
+                // Ensure Row children are properly expanded or sized
+                child: Text('خبر',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                    overflow: TextOverflow.ellipsis)),
         ],
       ),
     );
@@ -331,10 +375,10 @@ class _NewsDetailScreenState extends State<NewsDetailScreen> {
   Widget _buildMainContent() {
     if (_newsDetail == null) return const SizedBox.shrink();
     return Card(
-      margin: const EdgeInsets.all(0), 
-      elevation: 0, 
+      margin: const EdgeInsets.all(0),
+      elevation: 0,
       clipBehavior: Clip.antiAlias,
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero), 
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
       child: Stack(
         children: [
           if (_newsDetail!.photoUrl.isNotEmpty)
@@ -350,16 +394,18 @@ class _NewsDetailScreenState extends State<NewsDetailScreen> {
                 ),
                 errorWidget: (context, url, error) => Container(
                   color: Colors.grey[200],
-                  child: const Icon(Icons.broken_image_outlined, color: Colors.grey, size: 50),
+                  child: const Icon(Icons.broken_image_outlined,
+                      color: Colors.grey, size: 50),
                 ),
               ),
             )
-          else 
+          else
             AspectRatio(
               aspectRatio: 16 / 9,
               child: Container(
                 color: Colors.grey[200],
-                child: const Icon(Icons.image_not_supported_outlined, color: Colors.grey, size: 50),
+                child: const Icon(Icons.image_not_supported_outlined,
+                    color: Colors.grey, size: 50),
               ),
             ),
           Positioned.fill(
@@ -370,8 +416,10 @@ class _NewsDetailScreenState extends State<NewsDetailScreen> {
                   end: Alignment.bottomCenter,
                   colors: [
                     Colors.transparent,
-                    Colors.black.withAlpha((255 * 0.1).round()), // Corrected withOpacity
-                    Colors.black.withAlpha((255 * 0.75).round()),// Corrected withOpacity
+                    Colors.black.withAlpha(
+                        (255 * 0.1).round()), // Corrected withOpacity
+                    Colors.black.withAlpha(
+                        (255 * 0.75).round()), // Corrected withOpacity
                   ],
                   stops: const [0.0, 0.4, 1.0],
                 ),
@@ -386,13 +434,17 @@ class _NewsDetailScreenState extends State<NewsDetailScreen> {
               data: _newsDetail!.title,
               style: {
                 "body": Style(
-                  margin: Margins.zero,
-                  padding: HtmlPaddings.zero,
-                  fontSize: FontSize(20), 
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                  textShadow: [const Shadow(blurRadius: 2.0, color: Colors.black54, offset: Offset(1,1))]
-                ),
+                    margin: Margins.zero,
+                    padding: HtmlPaddings.zero,
+                    fontSize: FontSize(20),
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                    textShadow: [
+                      const Shadow(
+                          blurRadius: 2.0,
+                          color: Colors.black54,
+                          offset: Offset(1, 1))
+                    ]),
               },
             ),
           ),
@@ -402,16 +454,19 @@ class _NewsDetailScreenState extends State<NewsDetailScreen> {
   }
 
   Widget _buildEditorSource() {
-    if (_newsDetail == null || _newsDetail!.editorAndSource.isEmpty) return const SizedBox.shrink();
+    if (_newsDetail == null || _newsDetail!.editorAndSource.isEmpty)
+      return const SizedBox.shrink();
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-      color: AppTheme.tertiaryColor.withAlpha((255 * 0.15).round()), // Corrected withOpacity
+      color: AppTheme.tertiaryColor
+          .withAlpha((255 * 0.15).round()), // Corrected withOpacity
       width: double.infinity,
       child: Text(
         _newsDetail!.editorAndSource,
         style: const TextStyle(
           // Corrected: Color does not have shade900. Using primary for contrast or a darker tertiary.
-          color: AppTheme.primaryColor, // Or: Color.fromRGBO((AppTheme.tertiaryColor.red * 0.6).round(), (AppTheme.tertiaryColor.green * 0.6).round(), (AppTheme.tertiaryColor.blue * 0.6).round(),1,),
+          color: AppTheme
+              .primaryColor, // Or: Color.fromRGBO((AppTheme.tertiaryColor.red * 0.6).round(), (AppTheme.tertiaryColor.green * 0.6).round(), (AppTheme.tertiaryColor.blue * 0.6).round(),1,),
           fontWeight: FontWeight.w500,
           fontSize: 13,
         ),
@@ -424,17 +479,22 @@ class _NewsDetailScreenState extends State<NewsDetailScreen> {
     if (_newsDetail == null) return const SizedBox.shrink();
     return Container(
       padding: const EdgeInsets.all(16),
-      color: AppTheme.primaryColor.withAlpha((255 * 0.05).round()), // Corrected withOpacity
+      color: AppTheme.primaryColor
+          .withAlpha((255 * 0.05).round()), // Corrected withOpacity
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              const Icon(Icons.calendar_today_outlined, color: AppTheme.primaryColor, size: 16),
+              const Icon(Icons.calendar_today_outlined,
+                  color: AppTheme.primaryColor, size: 16),
               const SizedBox(width: 8),
               const Text(
                 'نشر في: ',
-                style: TextStyle(color: AppTheme.primaryColor, fontWeight: FontWeight.bold, fontSize: 13),
+                style: TextStyle(
+                    color: AppTheme.primaryColor,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 13),
               ),
               Text(
                 '${_newsDetail!.publishDateFormatted} - ${_newsDetail!.publishTimeFormatted}',
@@ -442,15 +502,21 @@ class _NewsDetailScreenState extends State<NewsDetailScreen> {
               ),
             ],
           ),
-          if (_newsDetail!.lastModificationDateFormatted.isNotEmpty && _newsDetail!.lastModificationDateFormatted != _newsDetail!.publishDateFormatted) ...[ 
+          if (_newsDetail!.lastModificationDateFormatted.isNotEmpty &&
+              _newsDetail!.lastModificationDateFormatted !=
+                  _newsDetail!.publishDateFormatted) ...[
             const SizedBox(height: 8),
             Row(
               children: [
-                const Icon(Icons.access_time_outlined, color: AppTheme.primaryColor, size: 16),
+                const Icon(Icons.access_time_outlined,
+                    color: AppTheme.primaryColor, size: 16),
                 const SizedBox(width: 8),
                 const Text(
                   'آخر تحديث: ',
-                  style: TextStyle(color: AppTheme.primaryColor, fontWeight: FontWeight.bold, fontSize: 13),
+                  style: TextStyle(
+                      color: AppTheme.primaryColor,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 13),
                 ),
                 Text(
                   _newsDetail!.lastModificationDateFormatted,
@@ -491,7 +557,8 @@ class _NewsDetailScreenState extends State<NewsDetailScreen> {
               backgroundColor: AppTheme.tertiaryColor,
               foregroundColor: Colors.white,
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-              textStyle: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
+              textStyle:
+                  const TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
             ),
           ),
         ],
@@ -510,7 +577,7 @@ class _NewsDetailScreenState extends State<NewsDetailScreen> {
             margin: Margins.zero,
             padding: HtmlPaddings.zero,
             fontSize: FontSize(_fontSize),
-            lineHeight: const LineHeight(1.7), 
+            lineHeight: const LineHeight(1.7),
             textAlign: TextAlign.justify,
           ),
           "p": Style(
@@ -519,11 +586,11 @@ class _NewsDetailScreenState extends State<NewsDetailScreen> {
             margin: Margins.only(bottom: 16),
           ),
           "a": Style(
-            color: AppTheme.tertiaryColor, 
+            color: AppTheme.tertiaryColor,
             textDecoration: TextDecoration.underline,
           ),
           "img": Style(
-            width: Width(MediaQuery.of(context).size.width - 32), 
+            width: Width(MediaQuery.of(context).size.width - 32),
             padding: HtmlPaddings.symmetric(vertical: 8),
           ),
         },
@@ -556,17 +623,19 @@ class _NewsDetailScreenState extends State<NewsDetailScreen> {
   }
 
   Widget _buildRelatedPhotos() {
-    if (_newsDetail == null || _newsDetail!.relatedPhotos.isEmpty) return const SizedBox.shrink();
+    if (_newsDetail == null || _newsDetail!.relatedPhotos.isEmpty)
+      return const SizedBox.shrink();
     return Column(
       children: [
-        SectionHeader( // Corrected: Assuming SectionHeader is a widget class
+        SectionHeader(
+          // Corrected: Assuming SectionHeader is a widget class
           title: 'صور متعلقة بالخبر',
           icon: Icons.photo_library_outlined,
           onMorePressed: () => _showPhotoGallery(0),
           moreText: 'عرض كل الصور',
         ),
         SizedBox(
-          height: 130, 
+          height: 130,
           child: ListView.builder(
             scrollDirection: Axis.horizontal,
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
@@ -575,33 +644,47 @@ class _NewsDetailScreenState extends State<NewsDetailScreen> {
               final photo = _newsDetail!.relatedPhotos[index];
               return GestureDetector(
                 onTap: () => _showPhotoGallery(index),
-                child: Hero( 
-                  tag: 'photo_${photo.photoUrl}_$index', 
+                child: Hero(
+                  tag: 'photo_${photo.photoUrl}_$index',
                   child: Container(
-                    width: 130, 
+                    width: 130,
                     margin: const EdgeInsets.symmetric(horizontal: 4),
                     child: Card(
                       clipBehavior: Clip.antiAlias,
                       elevation: 2.0,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8)),
                       child: Stack(
                         fit: StackFit.expand,
                         children: [
                           CachedNetworkImage(
-                            imageUrl: photo.thumbnailPhotoUrl.isNotEmpty ? photo.thumbnailPhotoUrl : photo.photoUrl,
+                            imageUrl: photo.thumbnailPhotoUrl.isNotEmpty
+                                ? photo.thumbnailPhotoUrl
+                                : photo.photoUrl,
                             fit: BoxFit.cover,
-                            placeholder: (context, url) => Shimmer.fromColors(baseColor: Colors.grey[300]!, highlightColor: Colors.grey[100]!, child: Container(color: Colors.white)),
-                            errorWidget: (context, url, error) => Container(color: Colors.grey[200], child: const Icon(Icons.broken_image_outlined, color: Colors.grey)),
+                            placeholder: (context, url) => Shimmer.fromColors(
+                                baseColor: Colors.grey[300]!,
+                                highlightColor: Colors.grey[100]!,
+                                child: Container(color: Colors.white)),
+                            errorWidget: (context, url, error) => Container(
+                                color: Colors.grey[200],
+                                child: const Icon(Icons.broken_image_outlined,
+                                    color: Colors.grey)),
                           ),
                           if (photo.photoCaption.isNotEmpty)
                             Positioned(
-                              bottom: 0, left: 0, right: 0,
+                              bottom: 0,
+                              left: 0,
+                              right: 0,
                               child: Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
-                                color: Colors.black.withAlpha((255 * 0.6).round()), // Corrected withOpacity
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 6, vertical: 4),
+                                color: Colors.black.withAlpha((255 * 0.6)
+                                    .round()), // Corrected withOpacity
                                 child: Text(
                                   photo.photoCaption,
-                                  style: const TextStyle(color: Colors.white, fontSize: 10),
+                                  style: const TextStyle(
+                                      color: Colors.white, fontSize: 10),
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
                                   textAlign: TextAlign.center,
@@ -623,10 +706,12 @@ class _NewsDetailScreenState extends State<NewsDetailScreen> {
   }
 
   Widget _buildCuratedRelatedNews() {
-    if (_newsDetail == null || _newsDetail!.relatedNews.isEmpty) return const SizedBox.shrink();
+    if (_newsDetail == null || _newsDetail!.relatedNews.isEmpty)
+      return const SizedBox.shrink();
     return Column(
       children: [
-        const SectionHeader( // Corrected: Assuming SectionHeader is a widget class
+        const SectionHeader(
+          // Corrected: Assuming SectionHeader is a widget class
           title: 'أخبار ذات صلة',
           icon: Icons.article_outlined,
         ),
@@ -636,40 +721,41 @@ class _NewsDetailScreenState extends State<NewsDetailScreen> {
           padding: const EdgeInsets.all(12),
           gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: MediaQuery.of(context).size.width > 600 ? 3 : 2,
-            childAspectRatio: 0.9, 
+            childAspectRatio: 0.9,
             crossAxisSpacing: 12,
             mainAxisSpacing: 12,
           ),
-          itemCount: _newsDetail!.relatedNews.length.clamp(0,4), 
+          itemCount: _newsDetail!.relatedNews.length.clamp(0, 4),
           itemBuilder: (context, index) {
             final relatedNewsItem = _newsDetail!.relatedNews[index];
-             final tempArticle = NewsArticle( 
-              id: relatedNewsItem.id,
-              cDate: relatedNewsItem.cDate,
-              title: relatedNewsItem.title,
-              summary: '', 
-              body: '',
-              photoUrl: relatedNewsItem.thumbnailPhotoUrl, 
-              thumbnailPhotoUrl: relatedNewsItem.thumbnailPhotoUrl,
-              sectionId: _newsDetail!.sectionId, 
-              sectionArName: '',
-              publishDate: '', 
-              publishDateFormatted: '',
-              publishTimeFormatted: '',
-              lastModificationDate: '',
-              lastModificationDateFormatted: '',
-              editorAndSource: '',
-              canonicalUrl: '/news/${relatedNewsItem.cDate}/${relatedNewsItem.id}', 
-              relatedPhotos: [],
-              relatedNews: []
-            );
+            final tempArticle = NewsArticle(
+                id: relatedNewsItem.id,
+                cDate: relatedNewsItem.cDate,
+                title: relatedNewsItem.title,
+                summary: '',
+                body: '',
+                photoUrl: relatedNewsItem.thumbnailPhotoUrl,
+                thumbnailPhotoUrl: relatedNewsItem.thumbnailPhotoUrl,
+                sectionId: _newsDetail!.sectionId,
+                sectionArName: '',
+                publishDate: '',
+                publishDateFormatted: '',
+                publishTimeFormatted: '',
+                lastModificationDate: '',
+                lastModificationDateFormatted: '',
+                editorAndSource: '',
+                canonicalUrl:
+                    '/news/${relatedNewsItem.cDate}/${relatedNewsItem.id}',
+                relatedPhotos: [],
+                relatedNews: []);
             return NewsCard(
               article: tempArticle,
-              onTap: () => context.go('/news/${relatedNewsItem.cDate}/${relatedNewsItem.id}'),
+              onTap: () => context
+                  .go('/news/${relatedNewsItem.cDate}/${relatedNewsItem.id}'),
             );
           },
         ),
-         const SizedBox(height: 16),
+        const SizedBox(height: 16),
       ],
     );
   }
@@ -678,26 +764,32 @@ class _NewsDetailScreenState extends State<NewsDetailScreen> {
     if (_isLoadingMoreNews && _moreNewsFromSection.isEmpty) {
       return Padding(
         padding: const EdgeInsets.all(16.0),
-        child: Shimmer.fromColors( 
-            baseColor: Colors.grey[300]!,
-            highlightColor: Colors.grey[100]!,
-            child: Container(height: 24, width: 150, decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(4))),
+        child: Shimmer.fromColors(
+          baseColor: Colors.grey[300]!,
+          highlightColor: Colors.grey[100]!,
+          child: Container(
+              height: 24,
+              width: 150,
+              decoration: BoxDecoration(
+                  color: Colors.white, borderRadius: BorderRadius.circular(4))),
         ),
       );
     }
     if (_moreNewsFromSection.isEmpty) return const SizedBox.shrink();
-    
+
     return Column(
       children: [
-        SectionHeader( // Corrected: Assuming SectionHeader is a widget class
+        SectionHeader(
+          // Corrected: Assuming SectionHeader is a widget class
           title: 'المزيد من قسم "${_newsDetail?.sectionArName ?? ''}"',
           icon: Icons.library_books_outlined,
-          onMorePressed: () => context.go('/news?sectionId=${_newsDetail!.sectionId}&sectionName=${Uri.encodeComponent(_newsDetail!.sectionArName)}'),
+          onMorePressed: () => context.go(
+              '/news?sectionId=${_newsDetail!.sectionId}&sectionName=${Uri.encodeComponent(_newsDetail!.sectionArName)}'),
         ),
         ListView.builder(
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
-          itemCount: _moreNewsFromSection.length, 
+          itemCount: _moreNewsFromSection.length,
           itemBuilder: (context, index) {
             final news = _moreNewsFromSection[index];
             return NewsCard(

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import '../models/new_model.dart'; // Assuming you have a NewModel class
-import '../widgets/news_card.dart'; // Assuming you have a NewsCard widget
+import 'package:shorouk_news/models/new_model.dart';
 
 class NewsListScreen extends StatefulWidget {
   final String section;

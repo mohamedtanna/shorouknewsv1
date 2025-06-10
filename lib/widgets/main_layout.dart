@@ -3,7 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 import '../providers/news_provider.dart';
-import '../models/new_model.dart';
+import 'package:shorouk_news/models/new_model.dart';
 import '../core/theme.dart';
 
 class MainLayout extends StatefulWidget {
@@ -148,7 +148,7 @@ class _MainLayoutState extends State<MainLayout> {
               ],
             ),
           ),
-          
+
           // Menu Items
           Expanded(
             child: ListView(
@@ -176,16 +176,17 @@ class _MainLayoutState extends State<MainLayout> {
                     context.go('/news');
                   },
                 ),
-                
+
                 // News Sections
                 ...sections.map((section) => _buildDrawerItem(
-                  title: section.arName,
-                  onTap: () {
-                    Navigator.pop(context);
-                    context.go('/news?sectionId=${section.id}&sectionName=${section.arName}');
-                  },
-                )),
-                
+                      title: section.arName,
+                      onTap: () {
+                        Navigator.pop(context);
+                        context.go(
+                            '/news?sectionId=${section.id}&sectionName=${section.arName}');
+                      },
+                    )),
+
                 _buildDrawerItem(
                   title: 'فيديو',
                   onTap: () {
@@ -232,7 +233,7 @@ class _MainLayoutState extends State<MainLayout> {
               ],
             ),
           ),
-          
+
           // Social Media Section
           Container(
             padding: const EdgeInsets.all(20),
@@ -242,9 +243,12 @@ class _MainLayoutState extends State<MainLayout> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                _buildSocialIcon('assets/images/facebook.svg', 'https://www.facebook.com/shorouknews'),
-                _buildSocialIcon('assets/images/youtube.svg', 'https://www.youtube.com/channel/UCGONWo6kCXGwtyA8SHrHIAw'),
-                _buildSocialIcon('assets/images/twitter.svg', 'https://twitter.com/#!/shorouk_news'),
+                _buildSocialIcon('assets/images/facebook.svg',
+                    'https://www.facebook.com/shorouknews'),
+                _buildSocialIcon('assets/images/youtube.svg',
+                    'https://www.youtube.com/channel/UCGONWo6kCXGwtyA8SHrHIAw'),
+                _buildSocialIcon('assets/images/twitter.svg',
+                    'https://twitter.com/#!/shorouk_news'),
               ],
             ),
           ),
