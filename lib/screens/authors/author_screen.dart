@@ -4,7 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart'; // For SmartRefresher
 import 'package:shimmer/shimmer.dart'; // For loading shimmer
-import 'package:share_plus/share_plus.dart'; // Added import for Share
+// Added import for Share
 import 'package:shorouk_news/models/new_model.dart';
 import 'package:shorouk_news/widgets/news_card.dart';
 
@@ -796,30 +796,6 @@ class _AuthorScreenState extends State<AuthorScreen>
     );
   }
 
-  Future<void> _shareColumn(ColumnModel column) async {
-    try {
-      final shareText = '''
-📝 ${column.title}
-بقلم: ${_author?.arName ?? 'غير محدد'}
-
-${column.summary.isNotEmpty ? column.summary : 'اقرأ المقال كاملاً على تطبيق الشروق.'}
-
-${column.canonicalUrl}
-#الشروق #مقال #رأي
-      ''';
-
-      await Share.share(shareText, subject: column.title);
-
-      // Corrected: Call the public method in AuthorModule
-      await _authorModule.logColumnShareFromAuthorScreen(
-        columnId: column.id,
-        authorId: widget.authorId,
-        columnTitle: column.title,
-      );
-    } catch (e) {
-      _showMessage('فشل في مشاركة المقال: ${e.toString()}', isError: true);
-    }
-  }
 
   Widget? _buildFloatingActionButton() {
     if (_columns.isEmpty && !_isLoading) return null; 

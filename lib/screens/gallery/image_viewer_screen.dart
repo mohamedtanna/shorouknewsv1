@@ -4,7 +4,7 @@ import 'package:photo_view/photo_view.dart';
 import 'package:photo_view/photo_view_gallery.dart';
 import 'package:share_plus/share_plus.dart';
 
-import '../../models/news_model.dart'; // For RelatedPhoto
+import '../../models/new_model.dart'; // For RelatedPhoto
 
 class ImageViewerScreen extends StatefulWidget {
   final List<RelatedPhoto> photos;
@@ -47,15 +47,14 @@ class _ImageViewerScreenState extends State<ImageViewerScreen> {
   }
 
   Future<void> _shareCurrentImage() async {
-    if (widget.photos.isNotEmpty &&
-        _currentIndex < widget.photos.length) {
+    if (widget.photos.isNotEmpty && _currentIndex < widget.photos.length) {
       final currentPhoto = widget.photos[_currentIndex];
       // In a real app, you might want to share the image file itself
       // or a link to it if available. For now, sharing the URL and caption.
       String shareText = currentPhoto.photoCaption.isNotEmpty
           ? '${currentPhoto.photoCaption}\n${currentPhoto.photoUrl}'
           : currentPhoto.photoUrl;
-      
+
       if (widget.galleryTitle != null && widget.galleryTitle!.isNotEmpty) {
         shareText = '${widget.galleryTitle}\n$shareText';
       }
@@ -66,9 +65,10 @@ class _ImageViewerScreenState extends State<ImageViewerScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final currentPhoto = widget.photos.isNotEmpty && _currentIndex < widget.photos.length
-        ? widget.photos[_currentIndex]
-        : null;
+    final currentPhoto =
+        widget.photos.isNotEmpty && _currentIndex < widget.photos.length
+            ? widget.photos[_currentIndex]
+            : null;
 
     return Scaffold(
       backgroundColor: Colors.black,
@@ -85,8 +85,10 @@ class _ImageViewerScreenState extends State<ImageViewerScreen> {
                   initialScale: PhotoViewComputedScale.contained,
                   minScale: PhotoViewComputedScale.contained * 0.8,
                   maxScale: PhotoViewComputedScale.covered * 2.5,
-                  heroAttributes: PhotoViewHeroAttributes(tag: 'photo_${photo.photoUrl}_$index'),
-                  onTapUp: (context, details, controllerValue) => _toggleOverlay(),
+                  heroAttributes: PhotoViewHeroAttributes(
+                      tag: 'photo_${photo.photoUrl}_$index'),
+                  onTapUp: (context, details, controllerValue) =>
+                      _toggleOverlay(),
                 );
               },
               itemCount: widget.photos.length,
@@ -112,6 +114,7 @@ class _ImageViewerScreenState extends State<ImageViewerScreen> {
                 left: 0,
                 right: 0,
                 child: AppBar(
+                  // ignore: deprecated_member_use
                   backgroundColor: Colors.black.withOpacity(0.5),
                   elevation: 0,
                   iconTheme: const IconThemeData(color: Colors.white),
@@ -121,7 +124,8 @@ class _ImageViewerScreenState extends State<ImageViewerScreen> {
                   ),
                   actions: [
                     IconButton(
-                      icon: const Icon(Icons.share_outlined, color: Colors.white),
+                      icon:
+                          const Icon(Icons.share_outlined, color: Colors.white),
                       onPressed: _shareCurrentImage,
                       tooltip: 'مشاركة الصورة',
                     ),
@@ -131,7 +135,8 @@ class _ImageViewerScreenState extends State<ImageViewerScreen> {
                       child: Center(
                         child: Text(
                           '${_currentIndex + 1} / ${widget.photos.length}',
-                          style: const TextStyle(color: Colors.white, fontSize: 16),
+                          style: const TextStyle(
+                              color: Colors.white, fontSize: 16),
                         ),
                       ),
                     ),
@@ -147,6 +152,7 @@ class _ImageViewerScreenState extends State<ImageViewerScreen> {
                   child: Container(
                     padding: const EdgeInsets.symmetric(
                         vertical: 12.0, horizontal: 16.0),
+                    // ignore: deprecated_member_use
                     color: Colors.black.withOpacity(0.6),
                     child: Text(
                       currentPhoto.photoCaption,
