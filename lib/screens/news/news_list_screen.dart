@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:shorouk_news/models/new_model.dart';
 
 class NewsListScreen extends StatefulWidget {
   final String section;

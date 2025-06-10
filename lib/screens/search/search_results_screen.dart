@@ -72,10 +72,12 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
 
     if (!mounted) return;
     setState(() {
-      if (isInitialLoad || (refresh && _results.isEmpty))
+      if (isInitialLoad || (refresh && _results.isEmpty)) {
         _isLoadingFirstLoad = true;
-      if (!isInitialLoad && !refresh)
+      }
+      if (!isInitialLoad && !refresh) {
         _isLoadingMore = true; // Show loading more indicator
+      }
       _error = null; // Clear previous errors
     });
 

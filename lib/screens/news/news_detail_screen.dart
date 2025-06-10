@@ -454,8 +454,9 @@ class _NewsDetailScreenState extends State<NewsDetailScreen> {
   }
 
   Widget _buildEditorSource() {
-    if (_newsDetail == null || _newsDetail!.editorAndSource.isEmpty)
+    if (_newsDetail == null || _newsDetail!.editorAndSource.isEmpty) {
       return const SizedBox.shrink();
+    }
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
       color: AppTheme.tertiaryColor
@@ -623,8 +624,9 @@ class _NewsDetailScreenState extends State<NewsDetailScreen> {
   }
 
   Widget _buildRelatedPhotos() {
-    if (_newsDetail == null || _newsDetail!.relatedPhotos.isEmpty)
+    if (_newsDetail == null || _newsDetail!.relatedPhotos.isEmpty) {
       return const SizedBox.shrink();
+    }
     return Column(
       children: [
         SectionHeader(
@@ -706,8 +708,9 @@ class _NewsDetailScreenState extends State<NewsDetailScreen> {
   }
 
   Widget _buildCuratedRelatedNews() {
-    if (_newsDetail == null || _newsDetail!.relatedNews.isEmpty)
+    if (_newsDetail == null || _newsDetail!.relatedNews.isEmpty) {
       return const SizedBox.shrink();
+    }
     return Column(
       children: [
         const SectionHeader(

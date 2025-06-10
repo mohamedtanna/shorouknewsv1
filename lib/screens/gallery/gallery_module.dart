@@ -1,5 +1,4 @@
-import 'package:flutter/foundation.dart';
-import '../../models/news_model.dart'; // Assuming RelatedPhoto will be used
+import '../../models/new_model.dart'; // Assuming RelatedPhoto will be used
 
 // You can define specific models for gallery albums or items if needed.
 // For example:

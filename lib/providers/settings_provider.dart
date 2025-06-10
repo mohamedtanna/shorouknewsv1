@@ -140,8 +140,9 @@ class SettingsProvider extends ChangeNotifier {
           // However, for initial load, it might be better to update local based on Firebase.
           // Let's update local based on what Firebase thinks it's subscribed to for now.
           syncedSettings[section.id] = isSubscribedToFirebase;
-          if (isLocallyEnabled != isSubscribedToFirebase)
+          if (isLocallyEnabled != isSubscribedToFirebase) {
             settingsChangedBasedOnFirebase = true;
+          }
         } else {
           syncedSettings[section.id] = isLocallyEnabled;
         }
@@ -229,8 +230,9 @@ class SettingsProvider extends ChangeNotifier {
   /// Saves the pending notification settings to Firebase (by subscribing/unsubscribing)
   /// and persists the settings locally.
   Future<void> saveSettings() async {
-    if (_pendingChanges.isEmpty && !_isLoading)
+    if (_pendingChanges.isEmpty && !_isLoading) {
       return; // No changes to save or already saving
+    }
 
     _isLoading = true;
     notifyListeners();
