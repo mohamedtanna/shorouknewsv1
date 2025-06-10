@@ -10,7 +10,7 @@ import 'package:shorouk_news/widgets/news_card.dart';
 
 import '../../models/additional_models.dart'; // Contains AuthorModel and other models
 import '../../models/column_model.dart';
-import '../../widgets/ad_banner.dart';
+// import '../../widgets/ad_banner.dart';
 import '../../widgets/section_header.dart';
 import '../../core/theme.dart';
 import 'author_module.dart'; // Contains AuthorModule and its models like AuthorStats etc.
@@ -490,10 +490,10 @@ class _AuthorScreenState extends State<AuthorScreen>
           onLoading: _loadMoreData, 
           child: CustomScrollView(
             controller: _scrollController,
-            slivers: [
-              const SliverToBoxAdapter(
-                child: AdBanner(adUnit: '/21765378867/ShorouknewsApp_LeaderBoard2'),
-              ),
+              slivers: [
+                // const SliverToBoxAdapter(
+                //   child: AdBanner(adUnit: '/21765378867/ShorouknewsApp_LeaderBoard2'),
+                // ),
               SliverToBoxAdapter(child: _buildBreadcrumb()),
               SliverToBoxAdapter(child: _buildAuthorInfo()),
               if (_showStats && _authorStats != null)

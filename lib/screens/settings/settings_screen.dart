@@ -5,7 +5,7 @@ import 'package:shimmer/shimmer.dart'; // For loading shimmer effect
 
 import '../../providers/settings_provider.dart'; // Manages settings state and logic
 // For NewsSection model
-import '../../widgets/ad_banner.dart'; // For displaying ads
+// import '../../widgets/ad_banner.dart'; // For displaying ads
 import '../../core/theme.dart'; // For consistent app styling
 
 class SettingsScreen extends StatefulWidget {
@@ -91,10 +91,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
           onPressed: () => context.go('/home'), // Navigate back to home
         ),
       ),
-      body: Column(
+        body: Column(
         children: [
           // Advertisement Banner at the top
-          const AdBanner(adUnit: '/21765378867/ShorouknewsApp_LeaderBoard2'),
+          // const AdBanner(adUnit: '/21765378867/ShorouknewsApp_LeaderBoard2'),
           _buildBreadcrumb(),
           Expanded(
             child: RefreshIndicator(

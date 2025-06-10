@@ -4,7 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../core/theme.dart';
-import '../../widgets/ad_banner.dart';
+// import '../../widgets/ad_banner.dart';
 import 'privacy_module.dart'; // Import the module
 
 class PrivacyScreen extends StatefulWidget {
@@ -77,9 +77,9 @@ class _PrivacyScreenState extends State<PrivacyScreen> {
           onPressed: () => context.go('/home'),
         ),
       ),
-      body: Column(
+        body: Column(
         children: [
-          const AdBanner(adUnit: '/21765378867/ShorouknewsApp_LeaderBoard2'),
+          // const AdBanner(adUnit: '/21765378867/ShorouknewsApp_LeaderBoard2'),
           _buildBreadcrumb(),
           Expanded(
             child: _isLoading

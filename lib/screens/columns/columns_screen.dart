@@ -9,7 +9,7 @@ import 'package:share_plus/share_plus.dart';
 
 import '../../models/column_model.dart';
 import '../../models/additional_models.dart';
-import '../../widgets/ad_banner.dart';
+// import '../../widgets/ad_banner.dart';
 import '../../widgets/section_header.dart';
 import '../../core/theme.dart';
 import 'columns_module.dart';
@@ -692,8 +692,8 @@ class _ColumnsScreenState extends State<ColumnsScreen>
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
       child: Column(
-        children: [
-          const AdBanner(adUnit: '/21765378867/ShorouknewsApp_LeaderBoard2'),
+          children: [
+            // const AdBanner(adUnit: '/21765378867/ShorouknewsApp_LeaderBoard2'),
           const SizedBox(height: 16),
           ...List.generate(5, (index) => _buildShimmerColumnCard()),
         ],
@@ -768,11 +768,11 @@ class _ColumnsScreenState extends State<ColumnsScreen>
         onRefresh: _onRefresh,
         child: CustomScrollView(
           controller: _scrollController,
-          slivers: [
-            // Ad Banner
-            const SliverToBoxAdapter(
-              child: AdBanner(adUnit: '/21765378867/ShorouknewsApp_LeaderBoard2'),
-            ),
+            slivers: [
+              // Ad Banner
+              // const SliverToBoxAdapter(
+              //   child: AdBanner(adUnit: '/21765378867/ShorouknewsApp_LeaderBoard2'),
+              // ),
 
             // Breadcrumb
             SliverToBoxAdapter(

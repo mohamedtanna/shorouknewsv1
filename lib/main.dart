@@ -3,7 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
-import 'package:google_mobile_ads/google_mobile_ads.dart';
+// import 'package:google_mobile_ads/google_mobile_ads.dart';
 
 import 'core/app_router.dart';
 import 'core/theme.dart';
@@ -24,7 +24,7 @@ void main() async {
   await Firebase.initializeApp();
   
   // Initialize Mobile Ads
-  MobileAds.instance.initialize();
+  // MobileAds.instance.initialize();
   
   // Set up Firebase messaging
   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);

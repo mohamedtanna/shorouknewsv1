@@ -14,7 +14,7 @@ import '../../services/api_service.dart';
 // import '../../providers/auth_provider.dart'; // If you want to track news views
 
 // Widgets
-import '../../widgets/ad_banner.dart';
+// import '../../widgets/ad_banner.dart';
 import '../../widgets/section_header.dart'; // Corrected import path
 import '../../widgets/news_card.dart'; // For related news
 
@@ -208,11 +208,11 @@ class _NewsDetailScreenState extends State<NewsDetailScreen> {
                       child: CustomScrollView(
                         controller: _scrollController,
                         slivers: [
-                          const SliverToBoxAdapter(
-                            child: AdBanner(
-                                adUnit:
-                                    '/21765378867/ShorouknewsApp_LeaderBoard2'),
-                          ),
+                          // const SliverToBoxAdapter(
+                          //   child: AdBanner(
+                          //       adUnit:
+                          //           '/21765378867/ShorouknewsApp_LeaderBoard2'),
+                          // ),
                           SliverToBoxAdapter(child: _buildBreadcrumb()),
                           SliverToBoxAdapter(child: _buildMainContent()),
                           if (_newsDetail!.editorAndSource.isNotEmpty)
@@ -226,10 +226,10 @@ class _NewsDetailScreenState extends State<NewsDetailScreen> {
                           if (_newsDetail!.relatedNews.isNotEmpty)
                             SliverToBoxAdapter(
                                 child: _buildCuratedRelatedNews()),
-                          const SliverToBoxAdapter(
-                            child: AdBanner(
-                                adUnit: '/21765378867/ShorouknewsApp_Banner2'),
-                          ),
+                          // const SliverToBoxAdapter(
+                          //   child: AdBanner(
+                          //       adUnit: '/21765378867/ShorouknewsApp_Banner2'),
+                          // ),
                           if (_moreNewsFromSection.isNotEmpty ||
                               _isLoadingMoreNews)
                             SliverToBoxAdapter(

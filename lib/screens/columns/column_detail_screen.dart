@@ -7,7 +7,7 @@ import 'package:go_router/go_router.dart';
 import '../../models/column_model.dart';
 // For consistency, though columns might have their own provider
 import '../../services/api_service.dart'; // To fetch column details
-import '../../widgets/ad_banner.dart';
+// import '../../widgets/ad_banner.dart';
 import '../../widgets/section_header.dart';
 import '../../core/theme.dart';
 // Assuming this module will fetch column details
@@ -146,12 +146,12 @@ class _ColumnDetailScreenState extends State<ColumnDetailScreen> {
                   onRefresh: _loadColumnDetail,
                   child: CustomScrollView(
                     controller: _scrollController,
-                    slivers: [
-                      const SliverToBoxAdapter(
-                        child: AdBanner(
-                            adUnit:
-                                '/21765378867/ShorouknewsApp_LeaderBoard2'),
-                      ),
+                      slivers: [
+                        // const SliverToBoxAdapter(
+                        //   child: AdBanner(
+                        //       adUnit:
+                        //           '/21765378867/ShorouknewsApp_LeaderBoard2'),
+                        // ),
                       SliverToBoxAdapter(
                         child: _buildBreadcrumb(),
                       ),
@@ -177,10 +177,10 @@ class _ColumnDetailScreenState extends State<ColumnDetailScreen> {
                         SliverToBoxAdapter(
                           child: _buildRelatedColumns(),
                         ),
-                      const SliverToBoxAdapter(
-                        child: AdBanner(
-                            adUnit: '/21765378867/ShorouknewsApp_Banner2'),
-                      ),
+                        // const SliverToBoxAdapter(
+                        //   child: AdBanner(
+                        //       adUnit: '/21765378867/ShorouknewsApp_Banner2'),
+                        // ),
                       const SliverToBoxAdapter(
                         child: SizedBox(height: 20),
                       ),

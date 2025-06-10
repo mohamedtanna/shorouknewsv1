@@ -5,7 +5,7 @@ import 'package:shimmer/shimmer.dart';
 
 import '../../services/notification_service.dart'; // Your main notification service
 import '../../core/theme.dart';
-import '../../widgets/ad_banner.dart';
+// import '../../widgets/ad_banner.dart';
 import 'notifications_module.dart'; // For utility functions like formatting
 
 class NotificationsScreen extends StatefulWidget {
@@ -115,8 +115,8 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
         ],
       ),
       body: Column(
-        children: [
-          const AdBanner(adUnit: '/21765378867/ShorouknewsApp_LeaderBoard2'),
+          children: [
+          // const AdBanner(adUnit: '/21765378867/ShorouknewsApp_LeaderBoard2'),
           _buildBreadcrumb(),
           Expanded(
             child: RefreshIndicator(

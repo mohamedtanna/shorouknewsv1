@@ -6,7 +6,7 @@ import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:shimmer/shimmer.dart';
 
 import '../../models/additional_models.dart';
-import '../../widgets/ad_banner.dart';
+// import '../../widgets/ad_banner.dart';
 import '../../widgets/section_header.dart';
 import '../../core/theme.dart';
 import 'author_module.dart';
@@ -488,8 +488,8 @@ class _AuthorsListScreenState extends State<AuthorsListScreen>
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
       child: Column(
-        children: [
-          const AdBanner(adUnit: '/21765378867/ShorouknewsApp_LeaderBoard2'),
+          children: [
+            // const AdBanner(adUnit: '/21765378867/ShorouknewsApp_LeaderBoard2'),
           const SizedBox(height: 16),
           ...List.generate(6, (index) => _buildShimmerAuthorCard()),
         ],
@@ -557,11 +557,11 @@ class _AuthorsListScreenState extends State<AuthorsListScreen>
         onRefresh: _onRefresh,
         child: CustomScrollView(
           controller: _scrollController,
-          slivers: [
-            // Ad Banner
-            const SliverToBoxAdapter(
-              child: AdBanner(adUnit: '/21765378867/ShorouknewsApp_LeaderBoard2'),
-            ),
+            slivers: [
+              // Ad Banner
+              // const SliverToBoxAdapter(
+              //   child: AdBanner(adUnit: '/21765378867/ShorouknewsApp_LeaderBoard2'),
+              // ),
 
             // Breadcrumb
             SliverToBoxAdapter(
