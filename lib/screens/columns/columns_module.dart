@@ -5,7 +5,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 
 import '../../models/column_model.dart';
-import '../../models/additional_models.dart';
 import '../../core/constants.dart';
 import '../../services/analytics_service.dart';
 import '../../services/api_service.dart';
@@ -777,18 +776,14 @@ class ColumnsModule {
 
     // Find related columns by the same author
     final relatedColumns = _columnsCache.values
-        .where((column) =>
-            column.id != columnId &&
-            column.columnistId == originalColumn.columnistId)
+
         .take(limit)
         .toList();
 
     // If not enough columns by the same author, add some from cache
     if (relatedColumns.length < limit) {
       final additionalColumns = _columnsCache.values
-          .where((column) =>
-              column.id != columnId &&
-              column.columnistId != originalColumn.columnistId)
+
           .take(limit - relatedColumns.length)
           .toList();
 
@@ -1197,7 +1192,7 @@ class ColumnsModule {
 
   String generateShareLink(ColumnModel column) {
     // Generate a shareable link for the column
-    return '${AppConstants.baseUrl}/column/${column.cdate}/${column.id}';
+    return '${AppConstants.baseUrl}/column/${column.cDate}/${column.id}';
   }
 
   Future<void> shareColumn(ColumnModel column, {String? message}) async {
