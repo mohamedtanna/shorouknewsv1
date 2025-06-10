@@ -692,6 +692,22 @@ ${author.description.isNotEmpty ? author.description : 'كاتب ومحلل في
     return score.clamp(0.0, 100.0);
   }
 
+  /// Logs a share event for a column from the author screen.
+  Future<void> logColumnShareFromAuthorScreen({
+    required String columnId,
+    required String authorId,
+    required String columnTitle,
+  }) async {
+    await _firebaseService.logAnalyticsEvent(
+      'author_column_shared',
+      parameters: {
+        'column_id': columnId,
+        'author_id': authorId,
+        'column_title': columnTitle,
+      },
+    );
+  }
+
   void dispose() {
     // Clear caches on dispose if this module instance is meant to be short-lived.
     // For a singleton-like service, explicit clearAllData() might be preferred.
