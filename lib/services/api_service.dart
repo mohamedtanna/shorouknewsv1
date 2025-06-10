@@ -199,6 +199,25 @@ class ApiService {
     }
   }
 
+  /// Public wrapper around [_get].
+  Future<T> get<T>(
+    String endpoint, {
+    Map<String, dynamic>? queryParameters,
+    bool useCache = false,
+    Duration cacheDuration = const Duration(hours: 1),
+    T Function(Map<String, dynamic> json)? fromJson,
+    T Function(List<dynamic> jsonList)? fromJsonList,
+  }) {
+    return _get<T>(
+      endpoint,
+      queryParameters: queryParameters,
+      useCache: useCache,
+      cacheDuration: cacheDuration,
+      fromJson: fromJson,
+      fromJsonList: fromJsonList,
+    );
+  }
+
   /// Generic POST request.
   Future<T> _post<T>(
     String endpoint, {
