@@ -3,10 +3,8 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
-import 'package:http/http.dart' as http;
 
 import '../../models/column_model.dart';
-import '../../models/author_model.dart';
 import '../../models/additional_models.dart';
 import '../../core/constants.dart';
 import '../../core/api_service.dart';
@@ -26,7 +24,6 @@ class ColumnsModule {
   static const String _columnStatsKey = 'column_stats';
   static const String _readColumnsKey = 'read_columns';
   static const String _bookmarkedColumnsKey = 'bookmarked_columns';
-  static const String _columnCategoriesKey = 'column_categories';
   
   // API endpoints
   static const String _columnsEndpoint = '/columns';
@@ -47,7 +44,6 @@ class ColumnsModule {
   // In-memory cache
   final Map<String, ColumnModel> _columnsCache = {};
   final Map<String, List<ColumnModel>> _categoryColumnsCache = {};
-  final Map<String, AuthorModel> _authorsCache = {};
   final Set<String> _favoriteColumnIds = {};
   final List<String> _recentColumnIds = [];
   final Map<String, int> _columnViewCounts = {};
@@ -62,7 +58,6 @@ class ColumnsModule {
   static const Duration _syncInterval = Duration(minutes: 30);
   
   bool _isInitialized = false;
-  DateTime? _lastSync;
 
   ColumnsModule({
     required ApiService apiService,
@@ -909,9 +904,7 @@ class ColumnsModule {
         // In a real app, this would sync with server
         debugPrint('$_moduleName: Syncing column statistics');
       }
-      
-      _lastSync = DateTime.now();
-      
+
     } catch (e) {
       debugPrint('$_moduleName: Sync error: $e');
     }
