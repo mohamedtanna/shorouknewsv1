@@ -8,7 +8,8 @@ import 'package:share_plus/share_plus.dart'; // Added import for Share
 import 'package:shorouk_news/models/new_model.dart';
 import 'package:shorouk_news/widgets/news_card.dart';
 
-import '../../models/additional_models.dart'; // Contains AuthorModel, ColumnModel
+import '../../models/additional_models.dart'; // Contains AuthorModel and other models
+import '../../models/column_model.dart';
 import '../../widgets/ad_banner.dart';
 import '../../widgets/section_header.dart';
 import '../../core/theme.dart';

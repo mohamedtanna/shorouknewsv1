@@ -6,12 +6,10 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:http/http.dart' as http;
 
 import '../../models/column_model.dart';
-import '../../models/author_model.dart';
 import '../../models/additional_models.dart';
 import '../../core/constants.dart';
 import '../../services/api_service.dart';
-import '../../core/cache_manager.dart';
-import '../../core/analytics_service.dart';
+
 
 class ColumnsModule {
   static const String _moduleName = 'ColumnsModule';
