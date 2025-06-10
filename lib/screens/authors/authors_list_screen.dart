@@ -23,7 +23,7 @@ class _AuthorsListScreenState extends State<AuthorsListScreen>
   final AuthorModule _authorModule = AuthorModule();
   final RefreshController _refreshController = RefreshController();
   final ScrollController _scrollController = ScrollController();
-  final TextEditingController _searchController = TextEditingController();
+  final TextEditingController _searchTextController = TextEditingController();
 
   // Data
   List<AuthorModel> _allAuthors = [];
@@ -43,7 +43,7 @@ class _AuthorsListScreenState extends State<AuthorsListScreen>
 
   // Animations
   late AnimationController _fadeController;
-  late AnimationController _searchController;
+  late AnimationController _searchAnimationController;
   late Animation<double> _fadeAnimation;
   late Animation<double> _searchAnimation;
 
@@ -57,16 +57,16 @@ class _AuthorsListScreenState extends State<AuthorsListScreen>
     super.initState();
     _setupAnimations();
     _initializeModule();
-    _searchController.addListener(_onSearchChanged);
+    _searchTextController.addListener(_onSearchChanged);
   }
 
   @override
   void dispose() {
     _fadeController.dispose();
-    _searchController.dispose();
+    _searchAnimationController.dispose();
     _refreshController.dispose();
     _scrollController.dispose();
-    _searchController.dispose();
+    _searchTextController.dispose();
     _authorModule.dispose();
     super.dispose();
   }
@@ -77,7 +77,7 @@ class _AuthorsListScreenState extends State<AuthorsListScreen>
       vsync: this,
     );
 
-    _searchController = AnimationController(
+    _searchAnimationController = AnimationController(
       duration: const Duration(milliseconds: 300),
       vsync: this,
     );
@@ -94,7 +94,7 @@ class _AuthorsListScreenState extends State<AuthorsListScreen>
       begin: 0.0,
       end: 1.0,
     ).animate(CurvedAnimation(
-      parent: _searchController,
+      parent: _searchAnimationController,
       curve: Curves.easeInOut,
     ));
   }
@@ -220,7 +220,7 @@ class _AuthorsListScreenState extends State<AuthorsListScreen>
   }
 
   void _onSearchChanged() {
-    final query = _searchController.text;
+    final query = _searchTextController.text;
     setState(() {
       _searchQuery = query;
       _isSearching = query.isNotEmpty;
@@ -287,10 +287,10 @@ class _AuthorsListScreenState extends State<AuthorsListScreen>
     });
     
     if (_showSearchBar) {
-      _searchController.forward();
+      _searchAnimationController.forward();
     } else {
-      _searchController.reverse();
-      _searchController.clear();
+      _searchAnimationController.reverse();
+      _searchTextController.clear();
     }
   }
 
@@ -457,7 +457,7 @@ class _AuthorsListScreenState extends State<AuthorsListScreen>
             child: Container(
               padding: const EdgeInsets.all(8),
               child: TextField(
-                controller: _searchController,
+                controller: _searchTextController,
                 decoration: InputDecoration(
                   hintText: 'البحث عن كاتب...',
                   prefixIcon: const Icon(Icons.search),
@@ -465,7 +465,7 @@ class _AuthorsListScreenState extends State<AuthorsListScreen>
                       ? IconButton(
                           icon: const Icon(Icons.clear),
                           onPressed: () {
-                            _searchController.clear();
+                            _searchTextController.clear();
                           },
                         )
                       : null,
@@ -1147,10 +1147,10 @@ Widget _buildAuthorListCard(AuthorModel author) {
                       onPressed: () async {
                         HapticFeedback.lightImpact();
                         if (isFavorite) {
-                          await _authorModule.removeAuthorFromFavorites(author.id);
+                          await _authorModule.toggleFavoriteAuthor(author.id);
                           _showMessage('تم إزالة ${author.arName} من المفضلة');
                         } else {
-                          await _authorModule.addAuthorToFavorites(author);
+                          await _authorModule.toggleFavoriteAuthor(author.id);
                           _showMessage('تم إضافة ${author.arName} إلى المفضلة');
                         }
                         await _loadFavoriteAuthors();
@@ -1212,7 +1212,7 @@ Widget _buildAuthorListCard(AuthorModel author) {
                 icon: const Icon(Icons.clear),
                 label: const Text('مسح البحث'),
                 onPressed: () {
-                  _searchController.clear();
+                  _searchTextController.clear();
                 },
               ),
             ],
