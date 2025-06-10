@@ -5,7 +5,7 @@ import 'package:shimmer/shimmer.dart';
 
 import '../../models/new_model.dart'; // For RelatedPhoto
 import '../../core/theme.dart';
-import '../../widgets/ad_banner.dart';
+// import '../../widgets/ad_banner.dart';
 import 'gallery_module.dart'; // For GalleryAlbum if you use it
 // Import ImageViewerScreen if you navigate directly, or rely on router
 // import 'image_viewer_screen.dart';
@@ -138,9 +138,9 @@ class _PhotoGalleryScreenState extends State<PhotoGalleryScreen> {
           },
         ),
       ),
-      body: Column(
-        children: [
-          const AdBanner(adUnit: '/21765378867/ShorouknewsApp_LeaderBoard2'),
+        body: Column(
+          children: [
+          // const AdBanner(adUnit: '/21765378867/ShorouknewsApp_LeaderBoard2'),
           _buildBreadcrumb(),
           Expanded(
             child: _isLoading

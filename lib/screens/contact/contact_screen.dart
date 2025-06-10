@@ -3,7 +3,7 @@ import 'package:go_router/go_router.dart';
 // For launching URLs
 
 import '../../core/theme.dart';
-import '../../widgets/ad_banner.dart';
+// import '../../widgets/ad_banner.dart';
 import 'contact_module.dart'; // Import the module
 
 class ContactScreen extends StatefulWidget {
@@ -125,9 +125,9 @@ class _ContactScreenState extends State<ContactScreen> {
         ),
       ),
       body: SingleChildScrollView(
-        child: Column(
+          child: Column(
           children: [
-            const AdBanner(adUnit: '/21765378867/ShorouknewsApp_LeaderBoard2'),
+            // const AdBanner(adUnit: '/21765378867/ShorouknewsApp_LeaderBoard2'),
             _buildBreadcrumb(),
             Padding(
               padding: const EdgeInsets.all(20.0),

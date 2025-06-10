@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../widgets/ad_banner.dart';
+// import '../../widgets/ad_banner.dart';
 import '../../core/theme.dart';
 import 'about_module.dart';
 
@@ -208,11 +208,11 @@ class _AboutScreenState extends State<AboutScreen> with TickerProviderStateMixin
         child: RefreshIndicator(
           onRefresh: _loadData,
           child: CustomScrollView(
-            slivers: [
-              // Ad Banner
-              const SliverToBoxAdapter(
-                child: AdBanner(adUnit: '/21765378867/ShorouknewsApp_LeaderBoard2'),
-              ),
+              slivers: [
+                // Ad Banner
+                // const SliverToBoxAdapter(
+                //   child: AdBanner(adUnit: '/21765378867/ShorouknewsApp_LeaderBoard2'),
+                // ),
               
               // Breadcrumb
               SliverToBoxAdapter(

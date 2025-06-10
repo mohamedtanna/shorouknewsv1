@@ -4,7 +4,7 @@ import 'package:shimmer/shimmer.dart'; // For loading effects
 
 import 'package:shorouk_news/models/new_model.dart';
 import '../../widgets/news_card.dart'; // To display each search result
-import '../../widgets/ad_banner.dart';
+// import '../../widgets/ad_banner.dart';
 import '../../core/theme.dart';
 import 'search_module.dart'; // To perform the search
 
@@ -190,9 +190,9 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
           },
         ),
       ),
-      body: Column(
-        children: [
-          const AdBanner(adUnit: '/21765378867/ShorouknewsApp_LeaderBoard2'),
+        body: Column(
+          children: [
+          // const AdBanner(adUnit: '/21765378867/ShorouknewsApp_LeaderBoard2'),
           _buildBreadcrumb(),
           Expanded(
             child: RefreshIndicator(

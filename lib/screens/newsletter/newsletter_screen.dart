@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart'; // For navigation
 import '../../core/theme.dart'; // For consistent styling
-import '../../widgets/ad_banner.dart'; // For displaying ads
+// import '../../widgets/ad_banner.dart'; // For displaying ads
 import '../../models/additional_models.dart'; // For SubscriptionStatus enum
 import 'newsletter_module.dart'; // The module handling newsletter logic
 
@@ -112,11 +112,11 @@ class _NewsletterScreenState extends State<NewsletterScreen> {
           onPressed: () => context.go('/home'), // Navigate back to home
         ),
       ),
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            // Advertisement Banner
-            const AdBanner(adUnit: '/21765378867/ShorouknewsApp_LeaderBoard2'),
+        body: SingleChildScrollView(
+          child: Column(
+            children: [
+              // Advertisement Banner
+              // const AdBanner(adUnit: '/21765378867/ShorouknewsApp_LeaderBoard2'),
             _buildBreadcrumb(),
             Padding(
               padding: const EdgeInsets.all(20.0),

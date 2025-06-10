@@ -3,7 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:shimmer/shimmer.dart'; // For loading suggestions
 
 import '../../core/theme.dart';
-import '../../widgets/ad_banner.dart';
+// import '../../widgets/ad_banner.dart';
 import 'search_module.dart'; // Import the module
 
 class SearchScreen extends StatefulWidget {
@@ -170,9 +170,9 @@ class _SearchScreenState extends State<SearchScreen> {
           onPressed: () => context.go('/home'),
         ),
       ),
-      body: Column(
-        children: [
-          const AdBanner(adUnit: '/21765378867/ShorouknewsApp_LeaderBoard2'),
+        body: Column(
+          children: [
+          // const AdBanner(adUnit: '/21765378867/ShorouknewsApp_LeaderBoard2'),
           _buildBreadcrumb(),
           Padding(
             padding: const EdgeInsets.all(16.0),

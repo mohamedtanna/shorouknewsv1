@@ -12,7 +12,7 @@ import 'package:shorouk_news/models/new_model.dart';
 
 // Reusable widgets for displaying content and ads
 import 'package:shorouk_news/widgets/news_card.dart';
-import '../../widgets/ad_banner.dart'; // Displays advertisements
+// import '../../widgets/ad_banner.dart'; // Displays advertisements
 import '../../widgets/section_header.dart'; // Displays titles for content sections
 
 // Theme and styling for the application
@@ -84,10 +84,10 @@ class _HomeScreenState extends State<HomeScreen> {
                   _scrollController, // Controller for scroll-related actions
               slivers: [
                 // Top Advertisement Banner
-                const SliverToBoxAdapter(
-                  child: AdBanner(
-                      adUnit: '/21765378867/ShorouknewsApp_LeaderBoard1'),
-                ),
+                // const SliverToBoxAdapter(
+                //   child: AdBanner(
+                //       adUnit: '/21765378867/ShorouknewsApp_LeaderBoard1'),
+                // ),
 
                 // Main Story Card (Top-most prominent story)
                 SliverToBoxAdapter(
@@ -100,10 +100,10 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
 
                 // Second Advertisement Banner
-                const SliverToBoxAdapter(
-                  child:
-                      AdBanner(adUnit: '/21765378867/ShorouknewsApp_Banner1'),
-                ),
+                // const SliverToBoxAdapter(
+                //   child:
+                //       AdBanner(adUnit: '/21765378867/ShorouknewsApp_Banner1'),
+                // ),
 
                 // Top Stories Section
                 SliverToBoxAdapter(
@@ -119,10 +119,10 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
 
                 // Third Advertisement Banner
-                const SliverToBoxAdapter(
-                  child:
-                      AdBanner(adUnit: '/21765378867/ShorouknewsApp_Banner2'),
-                ),
+                // const SliverToBoxAdapter(
+                //   child:
+                //       AdBanner(adUnit: '/21765378867/ShorouknewsApp_Banner2'),
+                // ),
 
                 // Selected Columns Section
                 SliverToBoxAdapter(
@@ -150,9 +150,9 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
 
                 // Ad Banner (MPU or similar)
-                const SliverToBoxAdapter(
-                  child: AdBanner(adUnit: '/21765378867/ShorouknewsApp_MPU1'),
-                ),
+                // const SliverToBoxAdapter(
+                //   child: AdBanner(adUnit: '/21765378867/ShorouknewsApp_MPU1'),
+                // ),
 
                 // Bottom spacing to ensure content isn't cut off by navigation bars etc.
                 const SliverToBoxAdapter(

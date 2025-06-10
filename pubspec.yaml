@@ -48,8 +48,8 @@ dependencies:
   # Web view
   webview_flutter: ^4.4.2
   
-  # Ads
-  google_mobile_ads: ^4.0.0
+  # Ads (disabled)
+  # google_mobile_ads: ^4.0.0
   
   # Utilities
   intl: ^0.19.0
