@@ -8,11 +8,14 @@ import 'package:intl/intl.dart';
 import 'package:share_plus/share_plus.dart';
 
 import '../../models/column_model.dart';
-import '../../models/author_model.dart';
+import '../../models/additional_models.dart';
 import '../../widgets/ad_banner.dart';
 import '../../widgets/section_header.dart';
 import '../../core/theme.dart';
 import 'columns_module.dart';
+import '../../services/api_service.dart';
+import '../../services/cache_manager.dart';
+import '../../services/analytics_service.dart';
 
 class ColumnsScreen extends StatefulWidget {
   final String? authorId;
@@ -30,7 +33,11 @@ class ColumnsScreen extends StatefulWidget {
 
 class _ColumnsScreenState extends State<ColumnsScreen>
     with TickerProviderStateMixin {
-  final ColumnsModule _columnsModule = ColumnsModule();
+  final ColumnsModule _columnsModule = ColumnsModule(
+    apiService: ApiService(),
+    cacheManager: CacheManager(),
+    analyticsService: AnalyticsService(),
+  );
   final RefreshController _refreshController = RefreshController();
   final ScrollController _scrollController = ScrollController();
   final TextEditingController _searchController = TextEditingController();
@@ -1019,11 +1026,6 @@ class _ColumnsScreenState extends State<ColumnsScreen>
                       _author!.description,
                       style: TextStyle(
                         fontSize: 14,
-                        color: Colors.grey[700], 
-                        height: 1.4,),
-                        _author!.description,
-                      style: TextStyle(
-                        fontSize: 14,
                         color: Colors.grey[700],
                         height: 1.4,
                       ),
@@ -1196,7 +1198,7 @@ class _ColumnsScreenState extends State<ColumnsScreen>
       child: Card(
         elevation: 2,
         child: InkWell(
-          onTap: () => context.go('/column/${column.cdate}/${column.id}'),
+          onTap: () => context.go('/column/${column.cDate}/${column.id}'),
           borderRadius: BorderRadius.circular(8),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -1250,7 +1252,7 @@ class _ColumnsScreenState extends State<ColumnsScreen>
                             overflow: TextOverflow.ellipsis,
                           ),
                           Text(
-                            _formatDate(column.creationDate),
+                            _formatDate(DateTime.parse(column.creationDate)),
                             style: TextStyle(
                               fontSize: 10,
                               color: Colors.grey[600],
@@ -1365,7 +1367,7 @@ class _ColumnsScreenState extends State<ColumnsScreen>
       child: Card(
         elevation: 2,
         child: InkWell(
-          onTap: () => context.go('/column/${column.cdate}/${column.id}'),
+          onTap: () => context.go('/column/${column.cDate}/${column.id}'),
           borderRadius: BorderRadius.circular(8),
           child: Padding(
             padding: const EdgeInsets.all(12),
@@ -1413,7 +1415,7 @@ class _ColumnsScreenState extends State<ColumnsScreen>
                             overflow: TextOverflow.ellipsis,
                           ),
                           Text(
-                            _formatDate(column.creationDate),
+                              _formatDate(DateTime.parse(column.creationDate)),
                             style: TextStyle(
                               fontSize: 9,
                               color: Colors.grey[600],
@@ -1509,7 +1511,7 @@ class _ColumnsScreenState extends State<ColumnsScreen>
       child: Card(
         elevation: 2,
         child: InkWell(
-          onTap: () => context.go('/column/${column.cdate}/${column.id}'),
+          onTap: () => context.go('/column/${column.cDate}/${column.id}'),
           borderRadius: BorderRadius.circular(8),
           child: Column(
             children: [
@@ -1596,7 +1598,7 @@ class _ColumnsScreenState extends State<ColumnsScreen>
                                 ),
                               ),
                               Text(
-                                _formatDate(column.creationDate),
+                                _formatDate(DateTime.parse(column.creationDate)),
                                 style: TextStyle(
                                   fontSize: 12,
                                   color: Colors.grey[600],
