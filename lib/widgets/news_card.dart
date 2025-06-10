@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter_html/flutter_html.dart';
 
-import '../models/new_model.dart';
+import 'package:shorouk_news/models/new_model.dart';
 import '../core/theme.dart';
 
 class NewsCard extends StatelessWidget {
@@ -16,7 +16,7 @@ class NewsCard extends StatelessWidget {
     required this.article,
     this.onTap,
     this.isHorizontal = false,
-    this.showDate = true, required String highlightQuery,
+    this.showDate = true,
   });
 
   @override
@@ -42,8 +42,8 @@ class NewsCard extends StatelessWidget {
               ClipRRect(
                 borderRadius: BorderRadius.circular(8),
                 child: CachedNetworkImage(
-                  imageUrl: article.thumbnailPhotoUrl.isNotEmpty 
-                      ? article.thumbnailPhotoUrl 
+                  imageUrl: article.thumbnailPhotoUrl.isNotEmpty
+                      ? article.thumbnailPhotoUrl
                       : article.photoUrl,
                   width: 100,
                   height: 80,
@@ -62,9 +62,9 @@ class NewsCard extends StatelessWidget {
                   ),
                 ),
               ),
-              
+
               const SizedBox(width: 12),
-              
+
               // Content
               Expanded(
                 child: Column(
@@ -85,12 +85,13 @@ class NewsCard extends StatelessWidget {
                         ),
                       },
                     ),
-                    
+
                     if (showDate) ...[
                       const SizedBox(height: 8),
                       // Date
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 8, vertical: 4),
                         decoration: BoxDecoration(
                           color: Colors.grey[200],
                           borderRadius: BorderRadius.circular(4),

@@ -2,13 +2,15 @@ import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 // For JSON encoding/decoding of recent searches
 
-import '../../models/new_model.dart'; // For NewsArticle model
+import 'package:shorouk_news/models/new_model.dart';
 import '../../services/api_service.dart'; // To call the search API
 
 class SearchModule {
   final ApiService _apiService = ApiService();
-  static const String _recentSearchesKey = 'recent_search_queries_v1'; // Added _v1 for potential future migrations
-  static const int _maxRecentSearches = 10; // Max number of recent searches to store
+  static const String _recentSearchesKey =
+      'recent_search_queries_v1'; // Added _v1 for potential future migrations
+  static const int _maxRecentSearches =
+      10; // Max number of recent searches to store
 
   /// Performs a news search using the ApiService.
   ///
@@ -36,7 +38,8 @@ class SearchModule {
       );
       return results;
     } catch (e) {
-      debugPrint('Error performing search in SearchModule for query "$trimmedQuery": $e');
+      debugPrint(
+          'Error performing search in SearchModule for query "$trimmedQuery": $e');
       // Rethrow to allow UI to handle the error display appropriately
       rethrow;
     }
@@ -67,7 +70,8 @@ class SearchModule {
       List<String> searches = await getRecentSearches();
 
       // Remove the query if it already exists (case-insensitive) to move it to the top
-      searches.removeWhere((s) => s.toLowerCase() == trimmedQuery.toLowerCase());
+      searches
+          .removeWhere((s) => s.toLowerCase() == trimmedQuery.toLowerCase());
 
       // Add the new query to the beginning of the list
       searches.insert(0, trimmedQuery);
@@ -105,7 +109,9 @@ class SearchModule {
     }
     // Simulate fetching suggestions (replace with actual API call or logic)
     debugPrint('Fetching suggestions for: "$trimmedQuery"');
-    await Future.delayed(Duration(milliseconds: 150 + (trimmedQuery.length * 20))); // Simulate network delay
+    await Future.delayed(Duration(
+        milliseconds:
+            150 + (trimmedQuery.length * 20))); // Simulate network delay
 
     // Mock suggestions - replace with actual suggestion logic
     final List<String> allPossibleSuggestions = [

@@ -6,7 +6,7 @@ import 'package:device_info_plus/device_info_plus.dart';
 import 'dart:io' show Platform;
 // For app version
 
-import '../models/new_model.dart'; // For NewsSection if needed for default subscriptions
+import 'package:shorouk_news/models/new_model.dart';
 import 'api_service.dart';
 import 'notification_service.dart';
 import '../core/app_router.dart'; // For navigation from notification tap
@@ -22,7 +22,8 @@ class FirebaseService {
   final FirebaseMessaging _messaging = FirebaseMessaging.instance;
   final FirebaseAnalytics _analytics = FirebaseAnalytics.instance;
   final ApiService _apiService = ApiService(); // Instance of your ApiService
-  final NotificationService _notificationService = NotificationService(); // Instance of NotificationService
+  final NotificationService _notificationService =
+      NotificationService(); // Instance of NotificationService
 
   String? _fcmToken;
   bool _isInitialized = false;
@@ -74,7 +75,8 @@ class FirebaseService {
         provisional: false,
         sound: true,
       );
-      debugPrint('User granted notification permission: ${settings.authorizationStatus}');
+      debugPrint(
+          'User granted notification permission: ${settings.authorizationStatus}');
     } catch (e) {
       debugPrint('Error requesting notification permission: $e');
     }
@@ -105,7 +107,8 @@ class FirebaseService {
         os = 2;
       }
 
-      debugPrint('Registering device: Token: $_fcmToken, OS: $os, Type: $deviceType, Model: $deviceModel');
+      debugPrint(
+          'Registering device: Token: $_fcmToken, OS: $os, Type: $deviceType, Model: $deviceModel');
       await _apiService.createUser(
         token: _fcmToken!,
         os: os,
@@ -124,7 +127,8 @@ class FirebaseService {
   Future<void> _manageInitialDefaultSubscriptions() async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      final bool alreadySet = prefs.getBool(_initialSubscriptionsSetKey) ?? false;
+      final bool alreadySet =
+          prefs.getBool(_initialSubscriptionsSetKey) ?? false;
 
       if (!alreadySet) {
         debugPrint('Setting initial default subscriptions...');
@@ -133,7 +137,7 @@ class FirebaseService {
           final List<String> sectionTopics = sections.map((s) => s.id).toList();
           // Also subscribe to a general 'all' topic if your backend uses it
           if (!sectionTopics.contains('all')) {
-             sectionTopics.add('all'); // Common practice for a general topic
+            sectionTopics.add('all'); // Common practice for a general topic
           }
           // Add platform-specific topics
           if (Platform.isAndroid && !sectionTopics.contains('android')) {
@@ -154,7 +158,6 @@ class FirebaseService {
     }
   }
 
-
   /// Sets up handlers for incoming FCM messages (foreground, background tap).
   void _setupMessageHandlers() {
     // Handle messages received while the app is in the foreground
@@ -168,23 +171,30 @@ class FirebaseService {
       _notificationService.showNotification(
         title: message.notification?.title ?? 'الشروق نيوز', // Default title
         body: message.notification?.body ?? 'لديك رسالة جديدة', // Default body
-        imageUrl: Platform.isAndroid ? message.notification?.android?.imageUrl : message.notification?.apple?.imageUrl,
+        imageUrl: Platform.isAndroid
+            ? message.notification?.android?.imageUrl
+            : message.notification?.apple?.imageUrl,
         data: message.data,
         // Determine if it's breaking news based on payload or channel if available
-        isBreakingNews: message.data['is_breaking'] == 'true' || message.data['priority'] == 'high',
+        isBreakingNews: message.data['is_breaking'] == 'true' ||
+            message.data['priority'] == 'high',
       );
     });
 
     // Handle notification tap when the app is in the background or terminated
     FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
-      debugPrint('FCM Message Opened (App was in background/terminated): ${message.messageId}');
+      debugPrint(
+          'FCM Message Opened (App was in background/terminated): ${message.messageId}');
       _handleNotificationTap(message.data);
     });
 
     // Check if the app was opened from a terminated state via a notification
-    FirebaseMessaging.instance.getInitialMessage().then((RemoteMessage? message) {
+    FirebaseMessaging.instance
+        .getInitialMessage()
+        .then((RemoteMessage? message) {
       if (message != null) {
-        debugPrint('App opened from terminated state via FCM Message: ${message.messageId}');
+        debugPrint(
+            'App opened from terminated state via FCM Message: ${message.messageId}');
         _handleNotificationTap(message.data);
       }
     });
@@ -209,7 +219,8 @@ class FirebaseService {
         AppRouter.router.go('/home');
       }
     } else {
-      debugPrint('No navigation path found in notification data. Navigating to home.');
+      debugPrint(
+          'No navigation path found in notification data. Navigating to home.');
       AppRouter.router.go('/home'); // Default navigation
     }
   }
@@ -226,7 +237,8 @@ class FirebaseService {
       // await _analytics.setUserId(id: 'YOUR_USER_ID');
       // If using FCM token as a pseudo-user ID for analytics:
       if (_fcmToken != null) {
-        await _analytics.setUserProperty(name: 'fcm_token_present', value: 'true');
+        await _analytics.setUserProperty(
+            name: 'fcm_token_present', value: 'true');
       }
     } catch (e) {
       debugPrint('Error setting up Firebase Analytics: $e');
@@ -246,9 +258,10 @@ class FirebaseService {
       // If subscribing to specific topics, ensure "deactivateAll" is unsubscribed
       // This logic might be specific to how your backend handles "deactivateAll"
       if (topics.any((t) => t != 'deactivateAll')) {
-         await _messaging.unsubscribeFromTopic('deactivateAll').catchError((e) {
-            debugPrint("Minor error unsubscribing from 'deactivateAll', possibly not subscribed: $e");
-         });
+        await _messaging.unsubscribeFromTopic('deactivateAll').catchError((e) {
+          debugPrint(
+              "Minor error unsubscribing from 'deactivateAll', possibly not subscribed: $e");
+        });
       }
     } catch (e) {
       debugPrint('Error subscribing to FCM topics ($topics): $e');
@@ -261,7 +274,7 @@ class FirebaseService {
     if (topics.isEmpty) return;
     try {
       for (final topic in topics) {
-         if (topic.trim().isNotEmpty) {
+        if (topic.trim().isNotEmpty) {
           await _messaging.unsubscribeFromTopic(topic.trim());
           debugPrint('Unsubscribed from FCM topic: ${topic.trim()}');
         }
@@ -297,7 +310,8 @@ class FirebaseService {
   }
 
   /// Logs a custom event to Firebase Analytics.
-  Future<void> logAnalyticsEvent(String name, {Map<String, Object?>? parameters}) async {
+  Future<void> logAnalyticsEvent(String name,
+      {Map<String, Object?>? parameters}) async {
     try {
       await _analytics.logEvent(name: name, parameters: parameters);
       debugPrint('Logged Analytics event: $name');

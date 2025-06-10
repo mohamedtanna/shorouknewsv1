@@ -25,7 +25,7 @@ import '../screens/gallery/image_viewer_screen.dart';
 import '../screens/error/error_screen.dart';
 
 // Import models if passed via 'extra'
-import '../models/new_model.dart'; 
+import 'package:shorouk_news/models/new_model.dart';
 import '../services/notification_service.dart' show NotificationPayload;
 
 // Import the main layout shell
@@ -51,11 +51,12 @@ class AppRouter {
             name: 'news',
             builder: (context, state) {
               // final sectionId = state.uri.queryParameters['sectionId']; // Keep if NewsListScreen uses it
-              final sectionName = state.uri.queryParameters['sectionName'] ?? 'أحدث الأخبار';
+              final sectionName =
+                  state.uri.queryParameters['sectionName'] ?? 'أحدث الأخبار';
               // Assuming NewsListScreen requires a 'section' parameter based on previous errors.
               // If NewsListScreen was updated to use sectionId and sectionName, adjust accordingly.
               return NewsListScreen(
-                section: sectionName, 
+                section: sectionName,
               );
             },
           ),
@@ -87,8 +88,8 @@ class AppRouter {
               // signature as indicated by previous errors.
               return VideoDetailScreen(
                 videoId: videoId,
-                videoUrl: '', 
-                videoTitle: '', 
+                videoUrl: '',
+                videoTitle: '',
               );
             },
           ),
@@ -134,7 +135,8 @@ class AppRouter {
           GoRoute(
             path: '/newsletter',
             name: 'newsletter',
-            builder: (context, state) => const NewsletterScreen(), // Removed const
+            builder: (context, state) =>
+                const NewsletterScreen(), // Removed const
           ),
           GoRoute(
             path: '/contact',
@@ -182,18 +184,21 @@ class AppRouter {
             path: '/notification-detail',
             name: 'notification-detail',
             builder: (context, state) {
-              final NotificationPayload? notification = state.extra as NotificationPayload?;
+              final NotificationPayload? notification =
+                  state.extra as NotificationPayload?;
               if (notification != null) {
                 return NotificationDetailScreen(notification: notification);
               }
-              return const ErrorScreen(errorMessage: 'تفاصيل الإشعار غير متوفرة.');
+              return const ErrorScreen(
+                  errorMessage: 'تفاصيل الإشعار غير متوفرة.');
             },
           ),
           GoRoute(
             path: '/gallery',
             name: 'gallery',
             builder: (context, state) {
-              final List<RelatedPhoto>? photos = state.extra as List<RelatedPhoto>?;
+              final List<RelatedPhoto>? photos =
+                  state.extra as List<RelatedPhoto>?;
               final String? galleryTitle = state.uri.queryParameters['title'];
               final String? albumId = state.uri.queryParameters['albumId'];
               return PhotoGalleryScreen(
@@ -207,7 +212,8 @@ class AppRouter {
             path: '/image-viewer',
             name: 'image-viewer',
             builder: (context, state) {
-              final Map<String, dynamic>? args = state.extra as Map<String, dynamic>?;
+              final Map<String, dynamic>? args =
+                  state.extra as Map<String, dynamic>?;
               if (args != null && args['photos'] is List<RelatedPhoto>) {
                 return ImageViewerScreen(
                   photos: args['photos'] as List<RelatedPhoto>,
@@ -215,15 +221,17 @@ class AppRouter {
                   galleryTitle: args['galleryTitle'] as String?,
                 );
               }
-              return const ErrorScreen(errorMessage: 'بيانات الصورة غير متوفرة.');
+              return const ErrorScreen(
+                  errorMessage: 'بيانات الصورة غير متوفرة.');
             },
           ),
         ],
       ),
     ],
     errorBuilder: (context, state) => ErrorScreen(
-      errorMessage: 'الصفحة المطلوبة غير موجودة.\n(${state.error?.message ?? 'مسار غير معروف'})',
-      onRetry: () => context.go('/home'), 
+      errorMessage:
+          'الصفحة المطلوبة غير موجودة.\n(${state.error?.message ?? 'مسار غير معروف'})',
+      onRetry: () => context.go('/home'),
       retryButtonText: 'العودة للرئيسية',
     ),
   );

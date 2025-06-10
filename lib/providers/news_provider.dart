@@ -1,6 +1,6 @@
 import 'package:flutter/foundation.dart';
 
-import '../models/new_model.dart';
+import 'package:shorouk_news/models/new_model.dart';
 import '../models/column_model.dart';
 import '../services/api_service.dart';
 
@@ -97,7 +97,8 @@ class NewsProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      _selectedColumns = (await _apiService.getSelectedColumns()).cast<ColumnModel>();
+      _selectedColumns =
+          (await _apiService.getSelectedColumns()).cast<ColumnModel>();
     } catch (e) {
       debugPrint('Error loading selected columns: $e');
     } finally {
@@ -131,7 +132,7 @@ class NewsProvider extends ChangeNotifier {
     bool refresh = false,
   }) async {
     final key = sectionId ?? 'all';
-    
+
     if (refresh) {
       _currentPages[key] = 1;
       _hasMoreData[key] = true;
