@@ -6,6 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:shorouk_news/models/new_model.dart';
 import 'package:shorouk_news/models/additional_models.dart';
+import 'package:shorouk_news/models/column_model.dart';
 
 class ApiService {
   // Updated baseUrl with the provided API URL

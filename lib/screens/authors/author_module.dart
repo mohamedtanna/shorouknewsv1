@@ -4,7 +4,8 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 
-import '../../models/additional_models.dart'; // Contains AuthorModel, ColumnModel
+import '../../models/additional_models.dart'; // Contains AuthorModel and others
+import '../../models/column_model.dart';
 import '../../services/api_service.dart';
 import '../../services/firebase_service.dart';
 
