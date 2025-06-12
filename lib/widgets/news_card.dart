@@ -84,10 +84,12 @@ class NewsCard extends StatelessWidget {
                           padding: HtmlPaddings.zero,
                           fontSize: FontSize(13), // Slightly smaller
                           fontWeight: FontWeight.w600, // Less bold
+                          fontFamily: 'Tajawal',
                           color: AppTheme.primaryColor,
-                          maxLines: 2, // Reduced from 3
-                          textOverflow: TextOverflow.ellipsis,
-                          lineHeight: LineHeight(1.2), // Tighter line height
+                          maxLines: 3, // Reduced from 3
+                          //textOverflow: TextOverflow.ellipsis,
+                          lineHeight:
+                              const LineHeight(1.2), // Tighter line height
                         ),
                       },
                     ),
@@ -197,7 +199,7 @@ class NewsCard extends StatelessWidget {
                     "body": Style(
                       margin: Margins.zero,
                       padding: HtmlPaddings.zero,
-                      fontSize: FontSize(11),
+                      fontSize: FontSize(14),
                       fontWeight: FontWeight.w600,
                       color: Colors.black87,
                       maxLines: 3,

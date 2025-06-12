@@ -32,6 +32,17 @@ class _NewsListScreenState extends State<NewsListScreen> {
   }
 
   @override
+  void didUpdateWidget(NewsListScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // Check if section parameters have changed
+    if (oldWidget.sectionId != widget.sectionId ||
+        oldWidget.section != widget.section) {
+      // Reload news for new section
+      _loadNews(refresh: true);
+    }
+  }
+
+  @override
   void dispose() {
     _scrollController.removeListener(_onScroll);
     _scrollController.dispose();
@@ -95,8 +106,8 @@ class _NewsListScreenState extends State<NewsListScreen> {
                     return NewsCard(
                       article: article,
                       isHorizontal: true,
-                      onTap: () => context
-                          .go('/news/${article.cDate}/${article.id}'),
+                      onTap: () =>
+                          context.go('/news/${article.cDate}/${article.id}'),
                     );
                   }
                   return const Padding(
