@@ -96,7 +96,7 @@ class _MainLayoutState extends State<MainLayout> {
           if (isHome)
             IconButton(
               icon: const Icon(Icons.settings),
-              onPressed: () => context.go('/settings'),
+              onPressed: () => context.push('/settings'),
             ),
         ],
       ),
@@ -145,7 +145,7 @@ class _MainLayoutState extends State<MainLayout> {
                       // Close drawer first
                       Navigator.of(context).pop();
                       // Then navigate
-                      context.go('/settings');
+                      context.push('/settings');
                     },
                     icon: const Icon(Icons.settings, color: Colors.white),
                     label: const Text(
@@ -180,14 +180,14 @@ class _MainLayoutState extends State<MainLayout> {
                   title: 'رأي ومقالات',
                   onTap: () {
                     Navigator.of(context).pop();
-                    context.go('/columns');
+                    context.push('/columns');
                   },
                 ),
                 _buildDrawerItem(
                   title: 'أحدث الأخبار',
                   onTap: () {
                     Navigator.of(context).pop();
-                    context.go('/news');
+                    context.push('/news');
                   },
                 ),
 
@@ -196,7 +196,7 @@ class _MainLayoutState extends State<MainLayout> {
                       title: section.arName,
                       onTap: () {
                         Navigator.of(context).pop();
-                        context.go(
+                        context.push(
                             '/news?sectionId=${section.id}&sectionName=${section.arName}');
                       },
                     )),
@@ -205,7 +205,7 @@ class _MainLayoutState extends State<MainLayout> {
                   title: 'فيديو',
                   onTap: () {
                     Navigator.of(context).pop();
-                    context.go('/videos');
+                    context.push('/videos');
                   },
                   isTopBorder: true,
                 ),
@@ -213,35 +213,35 @@ class _MainLayoutState extends State<MainLayout> {
                   title: 'القائمة البريدية',
                   onTap: () {
                     Navigator.of(context).pop();
-                    context.go('/newsletter');
+                    context.push('/newsletter');
                   },
                 ),
                 _buildDrawerItem(
                   title: 'اتصل بنا',
                   onTap: () {
                     Navigator.of(context).pop();
-                    context.go('/contact');
+                    context.push('/contact');
                   },
                 ),
                 _buildDrawerItem(
                   title: 'شروط الاستخدام',
                   onTap: () {
                     Navigator.of(context).pop();
-                    context.go('/terms');
+                    context.push('/terms');
                   },
                 ),
                 _buildDrawerItem(
                   title: 'سياسة الخصوصية',
                   onTap: () {
                     Navigator.of(context).pop();
-                    context.go('/privacy');
+                    context.push('/privacy');
                   },
                 ),
                 _buildDrawerItem(
                   title: 'عن البرنامج',
                   onTap: () {
                     Navigator.of(context).pop();
-                    context.go('/about');
+                    context.push('/about');
                   },
                 ),
               ],

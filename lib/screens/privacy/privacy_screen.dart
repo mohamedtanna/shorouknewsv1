@@ -48,7 +48,7 @@ class _PrivacyScreenState extends State<PrivacyScreen> {
       child: Row(
         children: [
           GestureDetector(
-            onTap: () => context.go('/home'),
+            onTap: () => context.pop(),
             child: const Text(
               'الرئيسية',
               style: TextStyle(
@@ -74,7 +74,7 @@ class _PrivacyScreenState extends State<PrivacyScreen> {
         title: const Text('سياسة الخصوصية'), // "Privacy Policy"
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          onPressed: () => context.go('/home'),
+          onPressed: () => context.pop(),
         ),
       ),
         body: Column(

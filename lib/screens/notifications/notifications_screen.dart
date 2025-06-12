@@ -77,7 +77,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
       child: Row(
         children: [
           GestureDetector(
-            onTap: () => context.go('/home'),
+            onTap: () => context.pop(),
             child: const Text(
               'الرئيسية',
               style: TextStyle(
@@ -103,7 +103,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
         title: const Text('سجل الإشعارات'),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          onPressed: () => context.go('/home'),
+          onPressed: () => context.pop(),
         ),
         actions: [
           if (_notifications.isNotEmpty && !_isLoading)
@@ -214,7 +214,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
           onTap: () {
             // Navigate to NotificationDetailScreen
             // Pass the whole payload or necessary parts
-            context.goNamed(
+            context.pushNamed(
               'notification-detail',
                extra: notification, // Pass the entire payload
             );

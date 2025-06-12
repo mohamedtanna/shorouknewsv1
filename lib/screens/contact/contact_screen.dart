@@ -95,7 +95,7 @@ class _ContactScreenState extends State<ContactScreen> {
       child: Row(
         children: [
           GestureDetector(
-            onTap: () => context.go('/home'),
+            onTap: () => context.pop(),
             child: const Text(
               'الرئيسية',
               style: TextStyle(
@@ -121,7 +121,7 @@ class _ContactScreenState extends State<ContactScreen> {
         title: const Text('اتصل بنا'),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          onPressed: () => context.go('/home'),
+          onPressed: () => context.pop(),
         ),
       ),
       body: SingleChildScrollView(

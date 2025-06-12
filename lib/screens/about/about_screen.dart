@@ -170,7 +170,7 @@ class _AboutScreenState extends State<AboutScreen> with TickerProviderStateMixin
         title: const Text('عن البرنامج'),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          onPressed: () => context.go('/home'),
+          onPressed: () => context.pop(),
         ),
         actions: [
           IconButton(
@@ -308,7 +308,7 @@ class _AboutScreenState extends State<AboutScreen> with TickerProviderStateMixin
       child: Row(
         children: [
           GestureDetector(
-            onTap: () => context.go('/home'),
+            onTap: () => context.pop(),
             child: const Text(
               'الرئيسية',
               style: TextStyle(
@@ -895,13 +895,13 @@ class _AboutScreenState extends State<AboutScreen> with TickerProviderStateMixin
             children: [
               Expanded(
                 child: TextButton(
-                  onPressed: () => context.go('/privacy'),
+                  onPressed: () => context.push('/privacy'),
                   child: const Text('سياسة الخصوصية'),
                 ),
               ),
               Expanded(
                 child: TextButton(
-                  onPressed: () => context.go('/terms'),
+                  onPressed: () => context.push('/terms'),
                   child: const Text('شروط الاستخدام'),
                 ),
               ),

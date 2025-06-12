@@ -83,7 +83,7 @@ class _NewsletterScreenState extends State<NewsletterScreen> {
       child: Row(
         children: [
           GestureDetector(
-            onTap: () => context.go('/home'),
+            onTap: () => context.pop(),
             child: const Text(
               'الرئيسية',
               style: TextStyle(
@@ -109,7 +109,7 @@ class _NewsletterScreenState extends State<NewsletterScreen> {
         title: const Text('القائمة البريدية'), // "Newsletter"
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          onPressed: () => context.go('/home'), // Navigate back to home
+          onPressed: () => context.pop(),
         ),
       ),
         body: SingleChildScrollView(
