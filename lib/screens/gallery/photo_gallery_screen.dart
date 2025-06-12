@@ -123,6 +123,12 @@ class _PhotoGalleryScreenState extends State<PhotoGalleryScreen> {
   }
 
   @override
+  void dispose() {
+    _galleryModule.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
