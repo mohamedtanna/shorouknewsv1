@@ -58,7 +58,7 @@ class _MainLayoutState extends State<MainLayout> {
             }
           },
           child: Image.asset(
-            'assets/images/logo.png', // Add your logo image
+            'assets/images/Shorouk-Logo.png', // Add your logo image
             height: 40,
             fit: BoxFit.contain,
             errorBuilder: (context, error, stackTrace) {
@@ -120,7 +120,7 @@ class _MainLayoutState extends State<MainLayout> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Image.asset(
-                  'assets/images/logo_white.png', // Add your white logo
+                  'assets/images/Shorouk-Logo-White-2.png', // Add your white logo
                   height: 60,
                   fit: BoxFit.contain,
                   errorBuilder: (context, error, stackTrace) {
