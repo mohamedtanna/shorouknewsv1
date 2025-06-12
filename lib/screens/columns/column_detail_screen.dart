@@ -64,7 +64,7 @@ class _ColumnDetailScreenState extends State<ColumnDetailScreen> {
         _loadRelatedColumns(columnDetail.columnistId, columnDetail.id);
         // Optionally, track column view here via a provider or service
         // context.read<AuthProvider>().trackColumnRead(widget.columnId);
-            }
+      }
     } catch (e) {
       debugPrint('Error loading column detail: $e');
       if (mounted) {
@@ -82,8 +82,8 @@ class _ColumnDetailScreenState extends State<ColumnDetailScreen> {
     setState(() => _isLoadingRelated = true);
     try {
       // Fetch other columns by the same author or related by topic
-      final columns = await _apiService.getColumns(
-          columnistId: columnistId, pageSize: 5);
+      final columns =
+          await _apiService.getColumns(columnistId: columnistId, pageSize: 5);
       if (mounted) {
         setState(() {
           _relatedColumns =
@@ -152,12 +152,12 @@ class _ColumnDetailScreenState extends State<ColumnDetailScreen> {
                   onRefresh: _loadColumnDetail,
                   child: CustomScrollView(
                     controller: _scrollController,
-                      slivers: [
-                        // const SliverToBoxAdapter(
-                        //   child: AdBanner(
-                        //       adUnit:
-                        //           '/21765378867/ShorouknewsApp_LeaderBoard2'),
-                        // ),
+                    slivers: [
+                      // const SliverToBoxAdapter(
+                      //   child: AdBanner(
+                      //       adUnit:
+                      //           '/21765378867/ShorouknewsApp_LeaderBoard2'),
+                      // ),
                       SliverToBoxAdapter(
                         child: _buildBreadcrumb(),
                       ),
@@ -180,10 +180,10 @@ class _ColumnDetailScreenState extends State<ColumnDetailScreen> {
                         child: _buildShareSection(),
                       ),
                       ..._buildRelatedColumnsSlivers(),
-                        // const SliverToBoxAdapter(
-                        //   child: AdBanner(
-                        //       adUnit: '/21765378867/ShorouknewsApp_Banner2'),
-                        // ),
+                      // const SliverToBoxAdapter(
+                      //   child: AdBanner(
+                      //       adUnit: '/21765378867/ShorouknewsApp_Banner2'),
+                      // ),
                       const SliverToBoxAdapter(
                         child: SizedBox(height: 20),
                       ),
@@ -400,22 +400,39 @@ class _ColumnDetailScreenState extends State<ColumnDetailScreen> {
 
   List<Widget> _buildRelatedColumnsSlivers() {
     if (_isLoadingRelated) {
+      return const [
+        SliverToBoxAdapter(
+          child: Center(child: CircularProgressIndicator()),
+        ),
+      ];
+    }
+    if (_relatedColumns.isEmpty) return [];
 
+    final columns = _relatedColumns.take(3).toList();
+
+    return [
+      SliverToBoxAdapter(
+        child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
           child: SectionHeader(
             title: 'المزيد من مقالات الكاتب',
             icon: Icons.article_outlined,
-            onMorePressed: () =>
-                context.go('/columns?columnistId=${_columnDetail!.columnistId}'),
+            onMorePressed: () => context
+                .go('/columns?columnistId=${_columnDetail!.columnistId}'),
           ),
         ),
-
+      ),
+      SliverList(
+        delegate: SliverChildBuilderDelegate(
+          (context, index) {
+            final column = columns[index];
             return Card(
               margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
               child: ListTile(
                 title: Text(
                   column.title,
-                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                  style: const TextStyle(
+                      fontWeight: FontWeight.bold, fontSize: 14),
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -430,6 +447,8 @@ class _ColumnDetailScreenState extends State<ColumnDetailScreen> {
           },
           childCount: columns.length,
         ),
-
+      ),
+      const SliverToBoxAdapter(child: SizedBox(height: 16)),
+    ];
   }
 }
