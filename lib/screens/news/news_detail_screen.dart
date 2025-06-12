@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_html/flutter_html.dart';
 import 'package:flutter_html_iframe/flutter_html_iframe.dart';
+import 'package:html_unescape/html_unescape.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:go_router/go_router.dart';
@@ -576,10 +577,11 @@ class _NewsDetailScreenState extends State<NewsDetailScreen> {
 
   Widget _buildNewsBody() {
     if (_newsDetail == null) return const SizedBox.shrink();
+    final String unescapedBody = HtmlUnescape().convert(_newsDetail!.body);
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
       child: Html(
-        data: _newsDetail!.body,
+        data: unescapedBody,
         style: {
           "body": Style(
             margin: Margins.zero,
