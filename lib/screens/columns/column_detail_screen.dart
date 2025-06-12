@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_html/flutter_html.dart';
+import 'package:flutter_html_iframe/flutter_html_iframe.dart';
+import 'package:html_unescape/html_unescape.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:go_router/go_router.dart';
@@ -281,7 +283,7 @@ class _ColumnDetailScreenState extends State<ColumnDetailScreen> {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
       child: Html(
-        data: _columnDetail!.title,
+        data: HtmlUnescape().convert(_columnDetail!.title),
         style: {
           "body": Style(
             margin: Margins.zero,
@@ -348,10 +350,11 @@ class _ColumnDetailScreenState extends State<ColumnDetailScreen> {
   }
 
   Widget _buildColumnBody() {
+    final String unescapedBody = HtmlUnescape().convert(_columnDetail!.body);
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: Html(
-        data: _columnDetail!.body,
+        data: unescapedBody,
         style: {
           "body": Style(
             margin: Margins.zero,
@@ -376,6 +379,7 @@ class _ColumnDetailScreenState extends State<ColumnDetailScreen> {
           // You might want to use url_launcher for this
           debugPrint('Link tapped: $url');
         },
+        extensions: const [IframeHtmlExtension()],
       ),
     );
   }
