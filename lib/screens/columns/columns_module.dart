@@ -184,7 +184,7 @@ class ColumnsModule {
         },
       );
 
-      final columns = (response.data as List)
+      final columns = (response as List)
           .map((item) => ColumnModel.fromJson(item))
           .toList();
 
@@ -240,7 +240,7 @@ class ColumnsModule {
       // Fetch from API
       final response = await _apiService.get(_selectedColumnsEndpoint);
 
-      final columns = (response.data as List)
+      final columns = (response as List)
           .map((item) => ColumnModel.fromJson(item))
           .toList();
 
@@ -302,7 +302,7 @@ class ColumnsModule {
         },
       );
 
-      final columns = (response.data as List)
+      final columns = (response as List)
           .map((item) => ColumnModel.fromJson(item))
           .toList();
 
@@ -371,7 +371,7 @@ class ColumnsModule {
           .replaceAll('{id}', columnId);
 
       final response = await _apiService.get(endpoint);
-      final column = ColumnModel.fromJson(response.data);
+      final column = ColumnModel.fromJson(response as Map<String, dynamic>);
 
       // Update cache
       await _cacheManager.set(cacheKey, {
@@ -428,7 +428,7 @@ class ColumnsModule {
         },
       );
 
-      final columns = (response.data as List)
+      final columns = (response as List)
           .map((item) => ColumnModel.fromJson(item))
           .toList();
 
@@ -729,7 +729,7 @@ class ColumnsModule {
         },
       );
 
-      final columns = (response.data as List)
+      final columns = (response as List)
           .map((item) => ColumnModel.fromJson(item))
           .toList();
 
@@ -1069,7 +1069,7 @@ class ColumnsModule {
         queryParameters: queryParams,
       );
 
-      final columns = (response.data as List)
+      final columns = (response as List)
           .map((item) => ColumnModel.fromJson(item))
           .toList();
 
