@@ -65,7 +65,7 @@ class _ColumnsScreenState extends State<ColumnsScreen>
 
   // Pagination
   int _currentPage = 1;
-  static const int _pageSize = 20;
+  static const int _pageSize = 10;
 
   // Animations
   late AnimationController _fadeController;

@@ -157,7 +157,7 @@ class ColumnsModule {
 
   Future<List<ColumnModel>> getAllColumns({
     int page = 1,
-    int pageSize = 20,
+    int pageSize = 10,
     bool forceRefresh = false,
   }) async {
     _ensureInitialized();
@@ -274,7 +274,7 @@ class ColumnsModule {
   Future<List<ColumnModel>> getColumnsByAuthor(
     String authorId, {
     int page = 1,
-    int pageSize = 20,
+    int pageSize = 10,
     bool forceRefresh = false,
   }) async {
     _ensureInitialized();
@@ -405,7 +405,7 @@ class ColumnsModule {
   Future<List<ColumnModel>> searchColumns(
     String query, {
     int page = 1,
-    int pageSize = 20,
+    int pageSize = 10,
   }) async {
     _ensureInitialized();
 
@@ -701,7 +701,7 @@ class ColumnsModule {
   Future<List<ColumnModel>> getColumnsByCategory(
     String categoryId, {
     int page = 1,
-    int pageSize = 20,
+    int pageSize = 10,
     bool forceRefresh = false,
   }) async {
     _ensureInitialized();
@@ -1032,7 +1032,7 @@ class ColumnsModule {
     ColumnSortBy sortBy = ColumnSortBy.date,
     bool ascending = false,
     int page = 1,
-    int pageSize = 20,
+    int pageSize = 10,
   }) async {
     _ensureInitialized();
 
