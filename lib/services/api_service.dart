@@ -113,6 +113,7 @@ class ApiService {
     T Function(Map<String, dynamic> json)? fromJson, // For single objects
     T Function(List<dynamic> jsonList)? fromJsonList, // For lists of objects
   }) async {
+    debugPrint('GET request to $endpoint with params: $queryParameters, useCache: $useCache');
     final String cacheKey =
         useCache ? _generateCacheKey(endpoint, queryParameters) : endpoint;
 
@@ -146,7 +147,7 @@ class ApiService {
 
       if (response.statusCode == 200) {
         final data = response.data;
-
+        debugPrint('Response for $endpoint: ${response.statusCode}, data type: ${data.runtimeType}');
         if (useCache) {
           await _cacheData(cacheKey, data);
         }
@@ -399,6 +400,7 @@ class ApiService {
     String? nextPageToken,
   }) async {
     String endpoint = sectionId != null ? 'sections/$sectionId/news' : 'news';
+    debugPrint("getNews called: sectionId=$sectionId, currentPage=$currentPage, pageSize=$pageSize, nextPageToken=$nextPageToken");
     Map<String, dynamic> queryParams = {
       'currentpage': currentPage
           .toString(), // Ensure query params are strings if API expects
@@ -407,8 +409,7 @@ class ApiService {
     if (nextPageToken != null) {
       queryParams['nextpagetoken'] = nextPageToken;
     }
-
-    return await _get<List<NewsArticle>>(
+    final articles = await _get<List<NewsArticle>>(
       endpoint,
       queryParameters: queryParams,
       // Caching for general news list might be short-lived or disabled if it changes very frequently
@@ -417,6 +418,8 @@ class ApiService {
           .map((item) => NewsArticle.fromJson(item as Map<String, dynamic>))
           .toList(),
     );
+    debugPrint('getNews returned ${articles.length} articles');
+    return articles;
   }
 
   Future<NewsArticle> getNewsDetail(String cdate, String id) async {
