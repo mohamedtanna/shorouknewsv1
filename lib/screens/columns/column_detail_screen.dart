@@ -179,10 +179,7 @@ class _ColumnDetailScreenState extends State<ColumnDetailScreen> {
                       SliverToBoxAdapter(
                         child: _buildShareSection(),
                       ),
-                      if (_relatedColumns.isNotEmpty)
-                        SliverToBoxAdapter(
-                          child: _buildRelatedColumns(),
-                        ),
+                      ..._buildRelatedColumnsSlivers(),
                         // const SliverToBoxAdapter(
                         //   child: AdBanner(
                         //       adUnit: '/21765378867/ShorouknewsApp_Banner2'),
@@ -401,15 +398,9 @@ class _ColumnDetailScreenState extends State<ColumnDetailScreen> {
     );
   }
 
-  Widget _buildRelatedColumns() {
+  List<Widget> _buildRelatedColumnsSlivers() {
     if (_isLoadingRelated) {
-      return const Center(child: CircularProgressIndicator());
-    }
-    if (_relatedColumns.isEmpty) return const SizedBox.shrink();
 
-    return Column(
-      children: [
-        Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
           child: SectionHeader(
             title: 'المزيد من مقالات الكاتب',
@@ -418,12 +409,7 @@ class _ColumnDetailScreenState extends State<ColumnDetailScreen> {
                 context.go('/columns?columnistId=${_columnDetail!.columnistId}'),
           ),
         ),
-        ListView.builder(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          itemCount: _relatedColumns.take(3).length,
-          itemBuilder: (context, index) {
-            final column = _relatedColumns[index];
+
             return Card(
               margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
               child: ListTile(
@@ -442,9 +428,8 @@ class _ColumnDetailScreenState extends State<ColumnDetailScreen> {
               ),
             );
           },
+          childCount: columns.length,
         ),
-        const SizedBox(height: 16),
-      ],
-    );
+
   }
 }

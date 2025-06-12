@@ -4,6 +4,8 @@ import 'package:photo_view/photo_view.dart';
 import 'package:photo_view/photo_view_gallery.dart';
 import 'package:share_plus/share_plus.dart';
 
+import '../../core/theme.dart';
+
 import '../../models/new_model.dart'; // For RelatedPhoto
 
 class ImageViewerScreen extends StatefulWidget {
@@ -103,7 +105,7 @@ class _ImageViewerScreenState extends State<ImageViewerScreen> {
                   width: 30.0,
                   height: 30.0,
                   child: CircularProgressIndicator(
-                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white70),
+                    valueColor: AlwaysStoppedAnimation<Color>(AppTheme.primaryColor),
                   ),
                 ),
               ),
@@ -123,15 +125,15 @@ class _ImageViewerScreenState extends State<ImageViewerScreen> {
                   // ignore: deprecated_member_use
                   backgroundColor: Colors.black.withOpacity(0.5),
                   elevation: 0,
-                  iconTheme: const IconThemeData(color: Colors.white),
+                  iconTheme: const IconThemeData(color: AppTheme.textOnPrimary),
                   title: Text(
                     widget.galleryTitle ?? 'عارض الصور',
-                    style: const TextStyle(color: Colors.white, fontSize: 18),
+                    style: const TextStyle(color: AppTheme.textOnPrimary, fontSize: 18),
                   ),
                   actions: [
                     IconButton(
                       icon:
-                          const Icon(Icons.share_outlined, color: Colors.white),
+                          const Icon(Icons.share_outlined, color: AppTheme.textOnPrimary),
                       onPressed: _shareCurrentImage,
                       tooltip: 'مشاركة الصورة',
                     ),
@@ -142,7 +144,7 @@ class _ImageViewerScreenState extends State<ImageViewerScreen> {
                         child: Text(
                           '${_currentIndex + 1} / ${widget.photos.length}',
                           style: const TextStyle(
-                              color: Colors.white, fontSize: 16),
+                              color: AppTheme.textOnPrimary, fontSize: 16),
                         ),
                       ),
                     ),
@@ -164,7 +166,7 @@ class _ImageViewerScreenState extends State<ImageViewerScreen> {
                       currentPhoto.photoCaption,
                       textAlign: TextAlign.center,
                       style: const TextStyle(
-                        color: Colors.white,
+                        color: AppTheme.textOnPrimary,
                         fontSize: 14.0,
                       ),
                     ),
