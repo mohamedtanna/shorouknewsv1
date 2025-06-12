@@ -515,7 +515,7 @@ class _ColumnsScreenState extends State<ColumnsScreen>
       title: Text(_getAppBarTitle()),
       leading: IconButton(
         icon: const Icon(Icons.arrow_back),
-        onPressed: () => context.go('/home'),
+        onPressed: () => context.pop(),
       ),
       actions: [
         IconButton(
@@ -913,7 +913,7 @@ class _ColumnsScreenState extends State<ColumnsScreen>
       child: Row(
         children: [
           GestureDetector(
-            onTap: () => context.go('/home'),
+            onTap: () => context.pop(),
             child: const Text(
               'الرئيسية',
               style: TextStyle(
@@ -925,7 +925,7 @@ class _ColumnsScreenState extends State<ColumnsScreen>
           const Text(' > ', style: TextStyle(fontWeight: FontWeight.bold)),
           if (widget.authorId != null && _author != null) ...[
             GestureDetector(
-              onTap: () => context.go('/columns'),
+              onTap: () => context.push('/columns'),
               child: const Text(
                 'رأي ومقالات',
                 style: TextStyle(
@@ -1198,7 +1198,7 @@ class _ColumnsScreenState extends State<ColumnsScreen>
       child: Card(
         elevation: 2,
         child: InkWell(
-          onTap: () => context.go('/column/${column.cDate}/${column.id}'),
+          onTap: () => context.push('/column/${column.cDate}/${column.id}'),
           borderRadius: BorderRadius.circular(8),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -1367,7 +1367,7 @@ class _ColumnsScreenState extends State<ColumnsScreen>
       child: Card(
         elevation: 2,
         child: InkWell(
-          onTap: () => context.go('/column/${column.cDate}/${column.id}'),
+          onTap: () => context.push('/column/${column.cDate}/${column.id}'),
           borderRadius: BorderRadius.circular(8),
           child: Padding(
             padding: const EdgeInsets.all(12),
@@ -1511,7 +1511,7 @@ class _ColumnsScreenState extends State<ColumnsScreen>
       child: Card(
         elevation: 2,
         child: InkWell(
-          onTap: () => context.go('/column/${column.cDate}/${column.id}'),
+          onTap: () => context.push('/column/${column.cDate}/${column.id}'),
           borderRadius: BorderRadius.circular(8),
           child: Column(
             children: [

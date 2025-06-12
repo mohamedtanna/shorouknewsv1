@@ -62,7 +62,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       child: Row(
         children: [
           GestureDetector(
-            onTap: () => context.go('/home'),
+            onTap: () => context.pop(),
             child: const Text(
               'الرئيسية',
               style: TextStyle(
@@ -88,7 +88,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         title: const Text('ضبط إعدادات الإشعارات'), // "Notification Settings"
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          onPressed: () => context.go('/home'), // Navigate back to home
+          onPressed: () => context.pop(),
         ),
       ),
         body: Column(

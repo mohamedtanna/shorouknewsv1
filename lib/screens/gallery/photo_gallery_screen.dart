@@ -80,7 +80,7 @@ class _PhotoGalleryScreenState extends State<PhotoGalleryScreen> {
     // A better way would be a dedicated GalleryProvider or passing via path/query params if feasible.
 
     // Using GoRouter's 'extra' parameter to pass complex data
-    context.goNamed(
+    context.pushNamed(
       'image-viewer',
       extra: {
         'photos': _displayPhotos,
@@ -103,7 +103,7 @@ class _PhotoGalleryScreenState extends State<PhotoGalleryScreen> {
       child: Row(
         children: [
           GestureDetector(
-            onTap: () => context.go('/home'),
+            onTap: () => context.pop(),
             child: const Text(
               'الرئيسية',
               style: TextStyle(

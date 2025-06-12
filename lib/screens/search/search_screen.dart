@@ -98,7 +98,7 @@ class _SearchScreenState extends State<SearchScreen> {
       _searchModule.addRecentSearch(trimmedQuery).then((_) {
         _loadRecentSearches(); // Refresh recent searches list
       });
-      context.goNamed('search-results',
+      context.pushNamed('search-results',
           queryParameters: {'query': trimmedQuery});
     }
   }
@@ -140,7 +140,7 @@ class _SearchScreenState extends State<SearchScreen> {
       child: Row(
         children: [
           GestureDetector(
-            onTap: () => context.go('/home'),
+            onTap: () => context.pop(),
             child: const Text(
               'الرئيسية',
               style: TextStyle(
@@ -167,7 +167,7 @@ class _SearchScreenState extends State<SearchScreen> {
         title: const Text('البحث في الشروق'),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          onPressed: () => context.go('/home'),
+          onPressed: () => context.pop(),
         ),
       ),
         body: Column(

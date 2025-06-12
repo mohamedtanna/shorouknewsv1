@@ -206,7 +206,7 @@ class _ColumnDetailScreenState extends State<ColumnDetailScreen> {
       child: Row(
         children: [
           GestureDetector(
-            onTap: () => context.go('/home'),
+            onTap: () => context.pop(),
             child: const Text(
               'الرئيسية',
               style: TextStyle(
@@ -217,7 +217,7 @@ class _ColumnDetailScreenState extends State<ColumnDetailScreen> {
           ),
           const Text(' > ', style: TextStyle(fontWeight: FontWeight.bold)),
           GestureDetector(
-            onTap: () => context.go('/columns'),
+            onTap: () => context.push('/columns'),
             child: const Text(
               'رأي ومقالات',
               style: TextStyle(
@@ -272,7 +272,7 @@ class _ColumnDetailScreenState extends State<ColumnDetailScreen> {
           IconButton(
               icon: const Icon(Icons.person_search),
               onPressed: () {
-                context.go('/author/${_columnDetail!.columnistId}');
+                context.push('/author/${_columnDetail!.columnistId}');
               })
         ],
       ),
@@ -444,7 +444,7 @@ class _ColumnDetailScreenState extends State<ColumnDetailScreen> {
                   column.creationDateFormatted,
                   style: TextStyle(color: Colors.grey[600], fontSize: 12),
                 ),
-                onTap: () => context.go('/column/${column.cDate}/${column.id}'),
+                onTap: () => context.push('/column/${column.cDate}/${column.id}'),
                 trailing: const Icon(Icons.arrow_forward_ios, size: 16),
               ),
             );

@@ -263,7 +263,7 @@ class _AuthorScreenState extends State<AuthorScreen>
           if (context.canPop()) {
             context.pop();
           } else {
-            context.go('/authors');
+            context.push('/authors');
           } 
         },
       ),
@@ -581,12 +581,12 @@ class _AuthorScreenState extends State<AuthorScreen>
       child: Row(
         children: [
           GestureDetector(
-            onTap: () => context.go('/home'),
+            onTap: () => context.pop(),
             child: const Text('الرئيسية', style: TextStyle(fontWeight: FontWeight.bold, color: AppTheme.primaryColor)),
           ),
           const Text(' > ', style: TextStyle(fontWeight: FontWeight.bold)),
           GestureDetector(
-            onTap: () => context.go('/authors'), 
+            onTap: () => context.push('/authors'), 
             child: const Text('الكتّاب', style: TextStyle(fontWeight: FontWeight.bold, color: AppTheme.primaryColor)),
           ),
           if (_author != null) ...[
@@ -791,7 +791,7 @@ class _AuthorScreenState extends State<AuthorScreen>
     return NewsCard(
       article: tempArticleForCard,
       isHorizontal: true, 
-      onTap: () => context.go('/column/${column.cDate}/${column.id}'),
+      onTap: () => context.push('/column/${column.cDate}/${column.id}'),
       showDate: true, 
     );
   }
@@ -902,7 +902,7 @@ class _AuthorScreenState extends State<AuthorScreen>
                             label: const Text('قراءة المقال كاملاً'),
                             onPressed: () {
                               Navigator.pop(context); 
-                              context.go('/column/${column.cDate}/${column.id}');
+                              context.push('/column/${column.cDate}/${column.id}');
                             },
                             style: ElevatedButton.styleFrom(
                               padding: const EdgeInsets.symmetric(vertical: 12)

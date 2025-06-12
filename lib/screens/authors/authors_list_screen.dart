@@ -375,7 +375,7 @@ class _AuthorsListScreenState extends State<AuthorsListScreen>
       title: const Text('الكتّاب'),
       leading: IconButton(
         icon: const Icon(Icons.arrow_back),
-        onPressed: () => context.go('/home'),
+        onPressed: () => context.pop(),
       ),
       actions: [
         IconButton(
@@ -679,7 +679,7 @@ class _AuthorsListScreenState extends State<AuthorsListScreen>
       child: Row(
         children: [
           GestureDetector(
-            onTap: () => context.go('/home'),
+            onTap: () => context.pop(),
             child: const Text(
               'الرئيسية',
               style: TextStyle(
@@ -812,7 +812,7 @@ class _AuthorsListScreenState extends State<AuthorsListScreen>
       width: 100,
       margin: const EdgeInsets.only(left: 12),
       child: GestureDetector(
-        onTap: () => context.go('/author/${author.id}'),
+        onTap: () => context.push('/author/${author.id}'),
         child: Column(
           children: [
             Container(
@@ -873,7 +873,7 @@ class _AuthorsListScreenState extends State<AuthorsListScreen>
       child: Card(
         elevation: 2,
         child: InkWell(
-          onTap: () => context.go('/author/${author.id}'),
+          onTap: () => context.push('/author/${author.id}'),
           borderRadius: BorderRadius.circular(8),
           child: Padding(
             padding: const EdgeInsets.all(12),
@@ -992,7 +992,7 @@ Widget _buildAuthorListCard(AuthorModel author) {
       child: Card(
         elevation: 2,
         child: InkWell(
-          onTap: () => context.go('/author/${author.id}'),
+          onTap: () => context.push('/author/${author.id}'),
           borderRadius: BorderRadius.circular(8),
           child: Padding(
             padding: const EdgeInsets.all(16),

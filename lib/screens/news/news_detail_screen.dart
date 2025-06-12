@@ -164,7 +164,7 @@ class _NewsDetailScreenState extends State<NewsDetailScreen> {
   void _showPhotoGallery(int initialIndex) {
     if (_newsDetail?.relatedPhotos.isEmpty ?? true) return;
 
-    context.goNamed(
+    context.pushNamed(
       'image-viewer',
       extra: {
         'photos': _newsDetail!.relatedPhotos,
@@ -346,7 +346,7 @@ class _NewsDetailScreenState extends State<NewsDetailScreen> {
       child: Row(
         children: [
           GestureDetector(
-            onTap: () => context.go('/home'),
+            onTap: () => context.pop(),
             child: const Text(
               'الرئيسية',
               style: TextStyle(
@@ -358,7 +358,7 @@ class _NewsDetailScreenState extends State<NewsDetailScreen> {
           if (_newsDetail!.sectionArName.isNotEmpty)
             Expanded(
               child: GestureDetector(
-                onTap: () => context.go(
+                onTap: () => context.push(
                     '/news?sectionId=${_newsDetail!.sectionId}&sectionName=${Uri.encodeComponent(_newsDetail!.sectionArName)}'),
                 child: Text(
                   _newsDetail!.sectionArName,
@@ -791,7 +791,7 @@ class _NewsDetailScreenState extends State<NewsDetailScreen> {
           // Corrected: Assuming SectionHeader is a widget class
           title: 'المزيد من قسم "${_newsDetail?.sectionArName ?? ''}"',
           icon: Icons.library_books_outlined,
-          onMorePressed: () => context.go(
+          onMorePressed: () => context.push(
               '/news?sectionId=${_newsDetail!.sectionId}&sectionName=${Uri.encodeComponent(_newsDetail!.sectionArName)}'),
         ),
         ListView.builder(
@@ -803,7 +803,7 @@ class _NewsDetailScreenState extends State<NewsDetailScreen> {
             return NewsCard(
               article: news,
               isHorizontal: true,
-              onTap: () => context.go('/news/${news.cDate}/${news.id}'),
+              onTap: () => context.push('/news/${news.cDate}/${news.id}'),
             );
           },
         ),

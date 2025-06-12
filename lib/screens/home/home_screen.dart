@@ -96,7 +96,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     child: SectionHeader(
                       title: 'أهم الأخبار',
                       icon: Icons.trending_up,
-                      onMorePressed: () => context.go('/news'),
+                      onMorePressed: () => context.push('/news'),
                     ),
                   ),
                 ),
@@ -112,7 +112,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     child: SectionHeader(
                       title: 'مقالات مختارة',
                       icon: Icons.article_outlined,
-                      onMorePressed: () => context.go('/columns'),
+                      onMorePressed: () => context.push('/columns'),
                     ),
                   ),
                 ),
@@ -161,7 +161,7 @@ class _HomeScreenState extends State<HomeScreen> {
       height: 240, // Slightly increased for better readability
       margin: AppTheme.marginMedium.copyWith(top: AppTheme.marginSmall.top),
       child: GestureDetector(
-        onTap: () => context.go('/news/${mainStory.cDate}/${mainStory.id}'),
+        onTap: () => context.push('/news/${mainStory.cDate}/${mainStory.id}'),
         child: Card(
           margin: EdgeInsets.zero,
           clipBehavior: Clip.antiAlias,
@@ -262,7 +262,7 @@ class _HomeScreenState extends State<HomeScreen> {
           final story = otherStories[index];
           return NewsCard(
             article: story,
-            onTap: () => context.go('/news/${story.cDate}/${story.id}'),
+            onTap: () => context.push('/news/${story.cDate}/${story.id}'),
           );
         },
       ),
@@ -300,7 +300,7 @@ class _HomeScreenState extends State<HomeScreen> {
             child: NewsCard(
               article: story,
               isHorizontal: true,
-              onTap: () => context.go('/news/${story.cDate}/${story.id}'),
+              onTap: () => context.push('/news/${story.cDate}/${story.id}'),
             ),
           );
         },
@@ -355,7 +355,7 @@ class _HomeScreenState extends State<HomeScreen> {
             relatedNews: [],
           ),
           isHorizontal: true,
-          onTap: () => context.go('/column/${column.cDate}/${column.id}'),
+          onTap: () => context.push('/column/${column.cDate}/${column.id}'),
           showDate: true,
         );
       },
@@ -391,7 +391,7 @@ class _HomeScreenState extends State<HomeScreen> {
         return NewsCard(
           article: story,
           isHorizontal: true,
-          onTap: () => context.go('/news/${story.cDate}/${story.id}'),
+          onTap: () => context.push('/news/${story.cDate}/${story.id}'),
           showDate: false,
         );
       },

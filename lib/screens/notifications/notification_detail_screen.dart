@@ -23,7 +23,7 @@ class NotificationDetailScreen extends StatelessWidget {
       // Attempt to navigate using GoRouter
       // This assumes the navigationPath is a valid route in your app
       try {
-        context.go(notification.navigationPath!);
+        context.push(notification.navigationPath!);
       } catch (e) {
         debugPrint("Failed to navigate to ${notification.navigationPath}: $e");
         // Optionally, show a message to the user if navigation fails
@@ -62,7 +62,7 @@ class NotificationDetailScreen extends StatelessWidget {
       child: Row(
         children: [
           GestureDetector(
-            onTap: () => context.go('/home'),
+            onTap: () => context.pop(),
             child: const Text(
               'الرئيسية',
               style: TextStyle(
@@ -73,7 +73,7 @@ class NotificationDetailScreen extends StatelessWidget {
           ),
           const Text(' > ', style: TextStyle(fontWeight: FontWeight.bold)),
            GestureDetector(
-            onTap: () => context.go('/notifications'), // Navigate back to notifications list
+            onTap: () => context.push('/notifications'), // Navigate back to notifications list
             child: const Text(
               'الإشعارات',
               style: TextStyle(
@@ -106,7 +106,7 @@ class NotificationDetailScreen extends StatelessWidget {
             if (context.canPop()) {
               context.pop();
             } else {
-              context.go('/notifications'); // Fallback
+              context.push('/notifications'); // Fallback
             }
           },
         ),

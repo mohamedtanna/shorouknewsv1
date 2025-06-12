@@ -139,7 +139,7 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
       child: Row(
         children: [
           GestureDetector(
-            onTap: () => context.go('/home'),
+            onTap: () => context.pop(),
             child: const Text(
               'الرئيسية',
               style: TextStyle(
@@ -151,7 +151,7 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
           const Text(' > ', style: TextStyle(fontWeight: FontWeight.bold)),
           GestureDetector(
             onTap: () =>
-                context.go('/search'), // Navigate back to search input screen
+                context.push('/search'), // Navigate back to search input screen
             child: const Text(
               'البحث',
               style: TextStyle(
@@ -185,7 +185,7 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
             if (context.canPop()) {
               context.pop();
             } else {
-              context.go('/search'); // Fallback to search screen if cannot pop
+              context.push('/search'); // Fallback to search screen if cannot pop
             }
           },
         ),
@@ -339,7 +339,7 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
             const SizedBox(height: 24),
             ElevatedButton(
               onPressed: () =>
-                  context.go('/search'), // Navigate back to search input
+                  context.push('/search'), // Navigate back to search input
               style: ElevatedButton.styleFrom(
                   backgroundColor: AppTheme.tertiaryColor,
                   foregroundColor: Colors.white),
@@ -378,7 +378,7 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
           article: article,
           isHorizontal:
               true, // Use horizontal card style for search results list
-          onTap: () => context.go('/news/${article.cDate}/${article.id}'),
+          onTap: () => context.push('/news/${article.cDate}/${article.id}'),
           // Pass the query for potential highlighting if needed
         );
       },
