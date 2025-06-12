@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
 
+import '../../core/theme.dart';
+
 class VideoDetailScreen extends StatefulWidget {
   final String videoUrl;
   final String videoTitle;
@@ -51,13 +53,18 @@ class _VideoDetailScreenState extends State<VideoDetailScreen> {
       ),
       body: Center(
         child: _isLoading
-            ? const CircularProgressIndicator()
+            ? const CircularProgressIndicator(
+                valueColor: AlwaysStoppedAnimation(AppTheme.primaryColor),
+              )
             : _controller.value.isInitialized
                 ? AspectRatio(
                     aspectRatio: _controller.value.aspectRatio,
                     child: VideoPlayer(_controller),
                   )
-                : const Text('Error loading video.'),
+                : Text(
+                    'Error loading video.',
+                    style: Theme.of(context).textTheme.bodyMedium,
+                  ),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
@@ -67,6 +74,8 @@ class _VideoDetailScreenState extends State<VideoDetailScreen> {
                 : _controller.play();
           });
         },
+        backgroundColor: AppTheme.tertiaryColor,
+        foregroundColor: Colors.white,
         child: Icon(
           _controller.value.isPlaying ? Icons.pause : Icons.play_arrow,
         ),
