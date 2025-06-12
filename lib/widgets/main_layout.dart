@@ -19,7 +19,6 @@ class MainLayout extends StatefulWidget {
 }
 
 class _MainLayoutState extends State<MainLayout> {
-  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   List<NewsSection> sections = [];
 
   @override
@@ -48,7 +47,6 @@ class _MainLayoutState extends State<MainLayout> {
     final isHome = currentLocation == '/home';
 
     return Scaffold(
-      key: _scaffoldKey,
       appBar: AppBar(
         title: GestureDetector(
           onTap: () {
@@ -75,9 +73,11 @@ class _MainLayoutState extends State<MainLayout> {
             },
           ),
         ),
-        leading: IconButton(
-          icon: const Icon(Icons.menu),
-          onPressed: () => _scaffoldKey.currentState?.openDrawer(),
+        leading: Builder(
+          builder: (context) => IconButton(
+            icon: const Icon(Icons.menu),
+            onPressed: () => Scaffold.of(context).openDrawer(),
+          ),
         ),
         actions: [
           if (!isHome)
