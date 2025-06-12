@@ -19,22 +19,22 @@ import 'providers/auth_provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
+
   // Initialize Firebase (disabled)
   // await Firebase.initializeApp();
-  
+
   // Initialize Mobile Ads
   // MobileAds.instance.initialize();
-  
+
   // Set up Firebase messaging (disabled)
   // FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
-  
+
   // Set preferred orientations
   SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
     DeviceOrientation.portraitDown,
   ]);
-  
+
   runApp(const ShoroukNewsApp());
 }
 
