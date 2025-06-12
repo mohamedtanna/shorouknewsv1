@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_html/flutter_html.dart';
+import 'package:flutter_html_iframe/flutter_html_iframe.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:go_router/go_router.dart';
@@ -602,11 +603,7 @@ class _NewsDetailScreenState extends State<NewsDetailScreen> {
           ),
         },
         onLinkTap: (url, attributes, element) => _handleLinkTap(url),
-        // Corrected: onImageTap is not a direct parameter.
-        // Image taps can be handled by wrapping images in <a> tags in HTML
-        // or by using customRenders if more complex interaction is needed.
-        // For now, removing the onImageTap directly from Html widget.
-        // If images are wrapped in <a> tags, onLinkTap will handle them.
+        extensions: const [IframeHtmlExtension()],
       ),
     );
   }
