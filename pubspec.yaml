@@ -57,6 +57,7 @@ dependencies:
   connectivity_plus: ^5.0.2
   package_info_plus: ^8.3.0
   device_info_plus: ^9.1.1
+  html_unescape: ^2.0.0
   
   # Loading and refresh
   pull_to_refresh: ^2.0.0
