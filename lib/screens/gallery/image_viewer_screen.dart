@@ -64,6 +64,12 @@ class _ImageViewerScreenState extends State<ImageViewerScreen> {
   }
 
   @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final currentPhoto =
         widget.photos.isNotEmpty && _currentIndex < widget.photos.length
