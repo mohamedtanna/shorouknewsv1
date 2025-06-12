@@ -27,129 +27,140 @@ class NewsCard extends StatelessWidget {
     return _buildVerticalCard(context);
   }
 
+  // Horizontal card matching screenshots layout - text on left, image on right
   Widget _buildHorizontalCard(BuildContext context) {
-    return Card(
-      margin: const EdgeInsets.symmetric(
-          horizontal: 8, vertical: 3), // Reduced margins
-      elevation: 2.0, // Reduced elevation
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(8),
-        child: Container(
-          padding: const EdgeInsets.all(10), // Reduced padding
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Image - Slightly smaller
-              ClipRRect(
-                borderRadius: BorderRadius.circular(6),
-                child: CachedNetworkImage(
-                  imageUrl: article.thumbnailPhotoUrl.isNotEmpty
-                      ? article.thumbnailPhotoUrl
-                      : article.photoUrl,
-                  width: 85, // Reduced from 100
-                  height: 70, // Reduced from 80
-                  fit: BoxFit.cover,
-                  placeholder: (context, url) => Container(
-                    width: 85,
-                    height: 70,
-                    color: Colors.grey[300],
-                    child:
-                        const Icon(Icons.image, color: Colors.grey, size: 24),
-                  ),
-                  errorWidget: (context, url, error) => Container(
-                    width: 85,
-                    height: 70,
-                    color: Colors.grey[300],
-                    child:
-                        const Icon(Icons.error, color: Colors.grey, size: 24),
-                  ),
-                ),
-              ),
-
-              const SizedBox(width: 10), // Reduced spacing
-
-              // Content
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min, // Important for tight layout
-                  children: [
-                    // Title - More compact
-                    Html(
-                      data: article.title,
-                      style: {
-                        "body": Style(
-                          margin: Margins.zero,
-                          padding: HtmlPaddings.zero,
-                          fontSize: FontSize(13), // Slightly smaller
-                          fontWeight: FontWeight.w600, // Less bold
-                          fontFamily: 'Tajawal',
-                          color: AppTheme.primaryColor,
-                          maxLines: 3, // Reduced from 3
-                          //textOverflow: TextOverflow.ellipsis,
-                          lineHeight:
-                              const LineHeight(1.2), // Tighter line height
-                        ),
-                      },
-                    ),
-
-                    if (showDate) ...[
-                      const SizedBox(height: 6), // Reduced spacing
-                      // Date - More compact
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 6, vertical: 2), // Smaller padding
-                        decoration: BoxDecoration(
-                          color: Colors.grey[100],
-                          borderRadius: BorderRadius.circular(3),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(
-                              Icons.access_time,
-                              size: 10, // Smaller icon
-                              color: Colors.grey[600],
-                            ),
-                            const SizedBox(width: 3),
-                            Text(
-                              article.publishDateFormatted.isNotEmpty
-                                  ? article.publishDateFormatted
-                                  : 'منذ قليل',
-                              style: TextStyle(
-                                fontSize: 10, // Smaller font
-                                color: Colors.grey[600],
-                                fontWeight: FontWeight.w400,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ],
-                ),
-              ),
-            ],
+    return InkWell(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.all(12),
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          border: Border(
+            bottom: BorderSide(color: AppTheme.dividerColor, width: 1),
           ),
+        ),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Text content on left (RTL layout)
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Title
+                  Html(
+                    data: article.title,
+                    style: {
+                      "body": Style(
+                        margin: Margins.zero,
+                        padding: HtmlPaddings.zero,
+                        fontSize: FontSize(16),
+                        fontWeight: FontWeight.w600,
+                        fontFamily: 'Tajawal',
+                        color: AppTheme.textPrimaryColor,
+                        maxLines: 3,
+                        lineHeight: const LineHeight(1.3),
+                      ),
+                    },
+                  ),
+
+                  if (showDate) ...[
+                    const SizedBox(height: 8),
+                    // Date with calendar icon like in screenshots
+                    Row(
+                      children: [
+                        const Icon(
+                          Icons.calendar_today,
+                          size: 14,
+                          color: AppTheme.textSecondaryColor,
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          article.publishDateFormatted.isNotEmpty
+                              ? article.publishDateFormatted
+                              : 'منذ قليل',
+                          style: const TextStyle(
+                            fontSize: 12,
+                            color: AppTheme.textSecondaryColor,
+                            fontFamily: 'Tajawal',
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+
+                  // Author/Source for columns
+                  if (article.editorAndSource.isNotEmpty) ...[
+                    const SizedBox(height: 4),
+                    Text(
+                      article.editorAndSource,
+                      style: const TextStyle(
+                        fontSize: 12,
+                        color: AppTheme.primaryColor,
+                        fontWeight: FontWeight.w500,
+                        fontFamily: 'Tajawal',
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+            const SizedBox(width: 12),
+            // Image on right (RTL layout)
+            ClipRRect(
+              borderRadius: BorderRadius.circular(6),
+              child: CachedNetworkImage(
+                imageUrl: article.thumbnailPhotoUrl.isNotEmpty
+                    ? article.thumbnailPhotoUrl
+                    : article.photoUrl,
+                width: 100,
+                height: 80,
+                fit: BoxFit.cover,
+                placeholder: (context, url) => Container(
+                  width: 100,
+                  height: 80,
+                  color: AppTheme.surfaceVariant,
+                  child: const Icon(
+                    Icons.image,
+                    color: AppTheme.textDisabledColor,
+                    size: 24,
+                  ),
+                ),
+                errorWidget: (context, url, error) => Container(
+                  width: 100,
+                  height: 80,
+                  color: AppTheme.surfaceVariant,
+                  child: const Icon(
+                    Icons.error,
+                    color: AppTheme.textDisabledColor,
+                    size: 24,
+                  ),
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );
   }
 
+  // Vertical card for grid layout
   Widget _buildVerticalCard(BuildContext context) {
     return Card(
-      margin: const EdgeInsets.all(2), // Even tighter margins
+      margin: const EdgeInsets.all(2),
       clipBehavior: Clip.antiAlias,
       elevation: 2.0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
+      ),
       child: InkWell(
         onTap: onTap,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // Image - Taking most of the space
+            // Image taking most space
             Expanded(
-              flex: 7, // Image takes 70% of the card space
+              flex: 7,
               child: Stack(
                 fit: StackFit.expand,
                 children: [
@@ -157,21 +168,28 @@ class NewsCard extends StatelessWidget {
                     imageUrl: article.photoUrl,
                     fit: BoxFit.cover,
                     placeholder: (context, url) => Container(
-                      color: Colors.grey[300],
+                      color: AppTheme.surfaceVariant,
                       child: const Center(
                         child: SizedBox(
                           width: 20,
                           height: 20,
-                          child: CircularProgressIndicator(strokeWidth: 2),
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: AppTheme.primaryColor,
+                          ),
                         ),
                       ),
                     ),
                     errorWidget: (context, url, error) => Container(
-                      color: Colors.grey[300],
-                      child: const Icon(Icons.error, size: 20),
+                      color: AppTheme.surfaceVariant,
+                      child: const Icon(
+                        Icons.error,
+                        color: AppTheme.textDisabledColor,
+                        size: 20,
+                      ),
                     ),
                   ),
-                  // Gradient overlay for text readability
+                  // Gradient overlay for better text readability
                   Container(
                     decoration: BoxDecoration(
                       gradient: LinearGradient(
@@ -179,20 +197,21 @@ class NewsCard extends StatelessWidget {
                         end: Alignment.bottomCenter,
                         colors: [
                           Colors.transparent,
+                          Colors.black.withOpacity(0.1),
                           Colors.black.withOpacity(0.6),
                         ],
-                        stops: const [0.4, 1.0],
+                        stops: const [0.0, 0.5, 1.0],
                       ),
                     ),
                   ),
                 ],
               ),
             ),
-            // Title section - Taking minimal space
+            // Title section - compact
             Expanded(
-              flex: 3, // Title takes 30% of the card space
+              flex: 3,
               child: Container(
-                padding: const EdgeInsets.all(6),
+                padding: const EdgeInsets.all(8),
                 child: Html(
                   data: article.title,
                   style: {
@@ -201,10 +220,11 @@ class NewsCard extends StatelessWidget {
                       padding: HtmlPaddings.zero,
                       fontSize: FontSize(14),
                       fontWeight: FontWeight.w600,
-                      color: Colors.black87,
+                      color: AppTheme.textPrimaryColor,
                       maxLines: 3,
                       textOverflow: TextOverflow.ellipsis,
-                      lineHeight: LineHeight(1.1),
+                      lineHeight: const LineHeight(1.2),
+                      fontFamily: 'Tajawal',
                     ),
                   },
                 ),

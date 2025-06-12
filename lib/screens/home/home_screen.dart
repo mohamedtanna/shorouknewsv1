@@ -11,8 +11,8 @@ import '../../providers/news_provider.dart';
 import 'package:shorouk_news/models/new_model.dart';
 
 // Reusable widgets for displaying content and ads
-import 'package:shorouk_news/widgets/news_card.dart';
-import '../../widgets/section_header.dart';
+//import 'package:shorouk_news/widgets/news_card.dart';
+//import '../../widgets/section_header.dart';
 
 // Theme and styling for the application
 import '../../core/theme.dart';
@@ -70,6 +70,7 @@ class _HomeScreenState extends State<HomeScreen> {
     final theme = Theme.of(context);
 
     return Scaffold(
+      backgroundColor: AppTheme.backgroundColor,
       body: RefreshIndicator(
         onRefresh: _refreshData,
         color: AppTheme.primaryColor,
@@ -78,57 +79,45 @@ class _HomeScreenState extends State<HomeScreen> {
             return CustomScrollView(
               controller: _scrollController,
               slivers: [
-                // Main Story Card
+                // Main Story Section - Large featured story
                 SliverToBoxAdapter(
-                  child: _buildMainStoryCard(newsProvider, theme),
+                  child: _buildMainFeaturedStory(newsProvider, theme),
                 ),
 
-                // Grid of other Main Stories
+                // Grid of Main Stories - 2x2 grid layout like in screenshots
                 SliverToBoxAdapter(
                   child: _buildMainStoriesGrid(newsProvider),
                 ),
 
-                // Top Stories Section
+                // Top Stories Section with blue header
                 SliverToBoxAdapter(
-                  child: Padding(
-                    padding: AppTheme.paddingMedium
-                        .copyWith(bottom: AppTheme.paddingSmall.bottom),
-                    child: SectionHeader(
-                      title: 'أهم الأخبار',
-                      icon: Icons.trending_up,
-                      onMorePressed: () => context.push('/news'),
-                    ),
+                  child: _buildSectionWithHeader(
+                    title: 'أهم الأخبار',
+                    icon: Icons.trending_up,
+                    onMorePressed: () => context.push('/news'),
                   ),
                 ),
                 SliverToBoxAdapter(
                   child: _buildTopStoriesList(newsProvider),
                 ),
 
-                // Selected Columns Section
+                // Selected Columns Section with blue header
                 SliverToBoxAdapter(
-                  child: Padding(
-                    padding: AppTheme.paddingMedium
-                        .copyWith(bottom: AppTheme.paddingSmall.bottom),
-                    child: SectionHeader(
-                      title: 'مقالات مختارة',
-                      icon: Icons.article_outlined,
-                      onMorePressed: () => context.push('/columns'),
-                    ),
+                  child: _buildSectionWithHeader(
+                    title: 'مقالات مختارة',
+                    icon: Icons.article_outlined,
+                    onMorePressed: () => context.push('/columns'),
                   ),
                 ),
                 SliverToBoxAdapter(
                   child: _buildSelectedColumnsList(newsProvider),
                 ),
 
-                // Most Read Stories Section
+                // Most Read Stories Section with blue header
                 SliverToBoxAdapter(
-                  child: Padding(
-                    padding: AppTheme.paddingMedium
-                        .copyWith(bottom: AppTheme.paddingSmall.bottom),
-                    child: const SectionHeader(
-                      title: 'الأكثر قراءة',
-                      icon: Icons.visibility_outlined,
-                    ),
+                  child: _buildSectionWithHeader(
+                    title: 'الأكثر قراءة',
+                    icon: Icons.visibility_outlined,
                   ),
                 ),
                 SliverToBoxAdapter(
@@ -137,7 +126,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
                 // Bottom spacing
                 SliverToBoxAdapter(
-                  child: AppTheme.verticalSpaceMedium,
+                  child: AppTheme.verticalSpaceLarge,
                 ),
               ],
             );
@@ -147,9 +136,82 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildMainStoryCard(NewsProvider newsProvider, ThemeData theme) {
+  Widget _buildSectionWithHeader({
+    required String title,
+    required IconData icon,
+    VoidCallback? onMorePressed,
+  }) {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+      decoration: BoxDecoration(
+        color: AppTheme.primaryColor,
+        borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        child: Row(
+          children: [
+            Icon(
+              icon,
+              color: AppTheme.tertiaryColor,
+              size: 24,
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                title,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 18,
+                  fontWeight: FontWeight.w600,
+                  fontFamily: 'Tajawal',
+                ),
+              ),
+            ),
+            if (onMorePressed != null) ...[
+              Container(
+                decoration: BoxDecoration(
+                  color: AppTheme.tertiaryColor,
+                  borderRadius: BorderRadius.circular(AppTheme.radiusSmall),
+                ),
+                child: InkWell(
+                  onTap: onMorePressed,
+                  borderRadius: BorderRadius.circular(AppTheme.radiusSmall),
+                  child: const Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          'المزيد',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            fontFamily: 'Tajawal',
+                          ),
+                        ),
+                        SizedBox(width: 4),
+                        Icon(
+                          Icons.add,
+                          color: Colors.white,
+                          size: 16,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildMainFeaturedStory(NewsProvider newsProvider, ThemeData theme) {
     if (newsProvider.isLoadingMainStories && newsProvider.mainStories.isEmpty) {
-      return _buildShimmerMainCard();
+      return _buildShimmerFeaturedCard();
     }
     if (newsProvider.mainStories.isEmpty) {
       return const SizedBox.shrink();
@@ -158,8 +220,8 @@ class _HomeScreenState extends State<HomeScreen> {
     final mainStory = newsProvider.mainStories.first;
 
     return Container(
-      height: 240, // Slightly increased for better readability
-      margin: AppTheme.marginMedium.copyWith(top: AppTheme.marginSmall.top),
+      height: 300,
+      margin: const EdgeInsets.all(8),
       child: GestureDetector(
         onTap: () => context.push('/news/${mainStory.cDate}/${mainStory.id}'),
         child: Card(
@@ -167,7 +229,7 @@ class _HomeScreenState extends State<HomeScreen> {
           clipBehavior: Clip.antiAlias,
           elevation: AppTheme.elevationMedium,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(AppTheme.radiusLarge),
+            borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
           ),
           child: Stack(
             children: [
@@ -182,7 +244,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                   errorWidget: (context, url, error) => Container(
                     color: AppTheme.surfaceVariant,
-                    child: Icon(
+                    child: const Icon(
                       Icons.broken_image,
                       color: AppTheme.textDisabledColor,
                       size: 50,
@@ -192,34 +254,36 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
               Positioned.fill(
                 child: Container(
-                  decoration: BoxDecoration(
+                  decoration: const BoxDecoration(
                     gradient: LinearGradient(
                       begin: Alignment.topCenter,
                       end: Alignment.bottomCenter,
                       colors: [
                         Colors.transparent,
-                        AppTheme.shadowLight,
-                        AppTheme.shadowDark,
+                        // Colors.black.withOpacity(0.3),
+                        // Colors.black.withOpacity(0.8),
                       ],
-                      stops: const [0.0, 0.5, 1.0],
+                      stops: [0.0, 0.6, 1.0],
                     ),
                   ),
                 ),
               ),
               Positioned(
-                bottom: AppTheme.paddingMedium.bottom,
-                left: AppTheme.paddingMedium.left,
-                right: AppTheme.paddingMedium.right,
+                bottom: 16,
+                left: 16,
+                right: 16,
                 child: Text(
                   mainStory.title,
-                  style: theme.textTheme.titleLarge?.copyWith(
-                    color: AppTheme.textOnPrimary,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 20,
                     fontWeight: FontWeight.bold,
+                    fontFamily: 'Tajawal',
                     shadows: [
                       Shadow(
                         blurRadius: 3.0,
-                        color: AppTheme.shadowDark,
-                        offset: const Offset(1, 1),
+                        color: Colors.black54,
+                        offset: Offset(1, 1),
                       )
                     ],
                   ),
@@ -237,7 +301,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget _buildMainStoriesGrid(NewsProvider newsProvider) {
     if (newsProvider.isLoadingMainStories &&
         newsProvider.mainStories.length <= 1) {
-      return _buildShimmerGrid(itemCount: 2);
+      return _buildShimmerGrid(itemCount: 4);
     }
     if (newsProvider.mainStories.length <= 1) {
       return const SizedBox.shrink();
@@ -247,80 +311,108 @@ class _HomeScreenState extends State<HomeScreen> {
     if (otherStories.isEmpty) return const SizedBox.shrink();
 
     return Container(
-      margin: AppTheme.marginMedium,
+      margin: const EdgeInsets.symmetric(horizontal: 8),
       child: GridView.builder(
         shrinkWrap: true,
         physics: const NeverScrollableScrollPhysics(),
         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: 2,
-          childAspectRatio: 0.75,
-          crossAxisSpacing: AppTheme.radiusSmall,
-          mainAxisSpacing: AppTheme.radiusSmall,
+          childAspectRatio: 1.2,
+          crossAxisSpacing: 8,
+          mainAxisSpacing: 8,
         ),
         itemCount: otherStories.length,
         itemBuilder: (context, index) {
           final story = otherStories[index];
-          return NewsCard(
-            article: story,
-            onTap: () => context.push('/news/${story.cDate}/${story.id}'),
-          );
+          return _buildGridNewsCard(story);
         },
+      ),
+    );
+  }
+
+  Widget _buildGridNewsCard(NewsArticle story) {
+    return GestureDetector(
+      onTap: () => context.push('/news/${story.cDate}/${story.id}'),
+      child: Card(
+        margin: EdgeInsets.zero,
+        clipBehavior: Clip.antiAlias,
+        elevation: 2,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
+        ),
+        child: Stack(
+          children: [
+            Positioned.fill(
+              child: CachedNetworkImage(
+                imageUrl: story.thumbnailPhotoUrl.isNotEmpty
+                    ? story.thumbnailPhotoUrl
+                    : story.photoUrl,
+                fit: BoxFit.cover,
+                placeholder: (context, url) => Container(
+                  color: Colors.grey[300],
+                  child: const Center(
+                    child: CircularProgressIndicator(),
+                  ),
+                ),
+                errorWidget: (context, url, error) => Container(
+                  color: Colors.grey[300],
+                  child: const Icon(Icons.error),
+                ),
+              ),
+            ),
+            Positioned.fill(
+              child: Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      Colors.transparent,
+                      // ignore: deprecated_member_use
+                      Colors.black.withOpacity(0.7),
+                    ],
+                    stops: const [0.4, 1.0],
+                  ),
+                ),
+              ),
+            ),
+            Positioned(
+              bottom: 8,
+              left: 8,
+              right: 8,
+              child: Text(
+                story.title,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  fontFamily: 'Tajawal',
+                ),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
 
   Widget _buildTopStoriesList(NewsProvider newsProvider) {
     if (newsProvider.isLoadingTopStories && newsProvider.topStories.isEmpty) {
-      return _buildShimmerHorizontalList();
+      return _buildShimmerVerticalList(itemCount: 3);
     }
     if (newsProvider.topStories.isEmpty) {
-      return Center(
-        child: Padding(
-          padding: AppTheme.paddingLarge,
+      return const Padding(
+        padding: EdgeInsets.all(20),
+        child: Center(
           child: Text(
             'لا توجد أخبار هامة حالياً.',
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: AppTheme.textSecondaryColor,
-                ),
-          ),
-        ),
-      );
-    }
-
-    return SizedBox(
-      height: 140, // Increased for better content visibility
-      child: ListView.builder(
-        scrollDirection: Axis.horizontal,
-        padding: AppTheme.paddingSmall,
-        itemCount: newsProvider.topStories.length.clamp(0, 5),
-        itemBuilder: (context, index) {
-          final story = newsProvider.topStories[index];
-          return SizedBox(
-            width: 280, // Increased width for better readability
-            child: NewsCard(
-              article: story,
-              isHorizontal: true,
-              onTap: () => context.push('/news/${story.cDate}/${story.id}'),
+            style: TextStyle(
+              color: AppTheme.textSecondaryColor,
+              fontSize: 16,
+              fontFamily: 'Tajawal',
             ),
-          );
-        },
-      ),
-    );
-  }
-
-  Widget _buildSelectedColumnsList(NewsProvider newsProvider) {
-    if (newsProvider.isLoadingColumns && newsProvider.selectedColumns.isEmpty) {
-      return _buildShimmerVerticalList(itemCount: 2);
-    }
-    if (newsProvider.selectedColumns.isEmpty) {
-      return Center(
-        child: Padding(
-          padding: AppTheme.paddingLarge,
-          child: Text(
-            'لا توجد مقالات مختارة حالياً.',
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: AppTheme.textSecondaryColor,
-                ),
           ),
         ),
       );
@@ -329,34 +421,66 @@ class _HomeScreenState extends State<HomeScreen> {
     return ListView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
-      padding: AppTheme.paddingSmall,
+      padding: const EdgeInsets.symmetric(horizontal: 8),
+      itemCount: newsProvider.topStories.length.clamp(0, 5),
+      itemBuilder: (context, index) {
+        final story = newsProvider.topStories[index];
+        return _buildHorizontalNewsCard(story, showDate: true);
+      },
+    );
+  }
+
+  Widget _buildSelectedColumnsList(NewsProvider newsProvider) {
+    if (newsProvider.isLoadingColumns && newsProvider.selectedColumns.isEmpty) {
+      return _buildShimmerVerticalList(itemCount: 10);
+    }
+    if (newsProvider.selectedColumns.isEmpty) {
+      return const Padding(
+        padding: EdgeInsets.all(20),
+        child: Center(
+          child: Text(
+            'لا توجد مقالات مختارة حالياً.',
+            style: TextStyle(
+              color: AppTheme.textSecondaryColor,
+              fontSize: 16,
+              fontFamily: 'Tajawal',
+            ),
+          ),
+        ),
+      );
+    }
+
+    return ListView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      padding: const EdgeInsets.symmetric(horizontal: 8),
       itemCount: newsProvider.selectedColumns.length.clamp(0, 3),
       itemBuilder: (context, index) {
         final column = newsProvider.selectedColumns[index];
-        return NewsCard(
-          article: NewsArticle(
-            id: column.id,
-            cDate: column.cDate,
-            title: column.title,
-            summary: column.summary,
-            body: '',
-            photoUrl: column.columnistPhotoUrl,
-            thumbnailPhotoUrl: column.columnistPhotoUrl,
-            sectionId: '',
-            sectionArName: column.columnistArName,
-            publishDate: column.creationDate,
-            publishDateFormatted: column.creationDateFormatted,
-            publishTimeFormatted: '',
-            lastModificationDate: column.creationDate,
-            lastModificationDateFormatted: column.creationDateFormattedDateTime,
-            editorAndSource: column.columnistArName,
-            canonicalUrl: column.canonicalUrl,
-            relatedPhotos: [],
-            relatedNews: [],
-          ),
-          isHorizontal: true,
+        final article = NewsArticle(
+          id: column.id,
+          cDate: column.cDate,
+          title: column.title,
+          summary: column.summary,
+          body: '',
+          photoUrl: column.columnistPhotoUrl,
+          thumbnailPhotoUrl: column.columnistPhotoUrl,
+          sectionId: '',
+          sectionArName: column.columnistArName,
+          publishDate: column.creationDate,
+          publishDateFormatted: column.creationDateFormatted,
+          publishTimeFormatted: '',
+          lastModificationDate: column.creationDate,
+          lastModificationDateFormatted: column.creationDateFormattedDateTime,
+          editorAndSource: column.columnistArName,
+          canonicalUrl: column.canonicalUrl,
+          relatedPhotos: [],
+          relatedNews: [],
+        );
+        return GestureDetector(
           onTap: () => context.push('/column/${column.cDate}/${column.id}'),
-          showDate: true,
+          child:
+              _buildHorizontalNewsCard(article, showDate: true, isColumn: true),
         );
       },
     );
@@ -368,14 +492,16 @@ class _HomeScreenState extends State<HomeScreen> {
       return _buildShimmerVerticalList(itemCount: 3);
     }
     if (newsProvider.mostReadStories.isEmpty) {
-      return Center(
-        child: Padding(
-          padding: AppTheme.paddingLarge,
+      return const Padding(
+        padding: EdgeInsets.all(20),
+        child: Center(
           child: Text(
             'لا توجد أخبار رائجة حالياً.',
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: AppTheme.textSecondaryColor,
-                ),
+            style: TextStyle(
+              color: AppTheme.textSecondaryColor,
+              fontSize: 16,
+              fontFamily: 'Tajawal',
+            ),
           ),
         ),
       );
@@ -384,33 +510,129 @@ class _HomeScreenState extends State<HomeScreen> {
     return ListView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
-      padding: AppTheme.paddingSmall,
+      padding: const EdgeInsets.symmetric(horizontal: 8),
       itemCount: newsProvider.mostReadStories.length.clamp(0, 5),
       itemBuilder: (context, index) {
         final story = newsProvider.mostReadStories[index];
-        return NewsCard(
-          article: story,
-          isHorizontal: true,
-          onTap: () => context.push('/news/${story.cDate}/${story.id}'),
-          showDate: false,
-        );
+        return _buildHorizontalNewsCard(story, showDate: false);
       },
     );
   }
 
-  // Shimmer widgets using theme colors and spacing
-  Widget _buildShimmerMainCard() {
+  Widget _buildHorizontalNewsCard(NewsArticle article,
+      {bool showDate = true, bool isColumn = false}) {
+    return GestureDetector(
+      onTap: () => context.push('/news/${article.cDate}/${article.id}'),
+      child: Card(
+        margin: const EdgeInsets.symmetric(vertical: 4),
+        elevation: 2,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(12),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Image
+              ClipRRect(
+                borderRadius: BorderRadius.circular(AppTheme.radiusSmall),
+                child: CachedNetworkImage(
+                  imageUrl: article.thumbnailPhotoUrl.isNotEmpty
+                      ? article.thumbnailPhotoUrl
+                      : article.photoUrl,
+                  width: 100,
+                  height: 80,
+                  fit: BoxFit.cover,
+                  placeholder: (context, url) => Container(
+                    width: 100,
+                    height: 80,
+                    color: Colors.grey[300],
+                    child: const Icon(Icons.image, color: Colors.grey),
+                  ),
+                  errorWidget: (context, url, error) => Container(
+                    width: 100,
+                    height: 80,
+                    color: Colors.grey[300],
+                    child: const Icon(Icons.error, color: Colors.grey),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              // Content
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      article.title,
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: AppTheme.textPrimaryColor,
+                        fontFamily: 'Tajawal',
+                        height: 1.3,
+                      ),
+                      maxLines: 3,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    if (showDate) ...[
+                      const SizedBox(height: 8),
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.access_time,
+                            size: 16,
+                            color: Colors.grey[600],
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            article.publishDateFormatted.isNotEmpty
+                                ? article.publishDateFormatted
+                                : 'منذ قليل',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Colors.grey[600],
+                              fontFamily: 'Tajawal',
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                    if (isColumn && article.editorAndSource.isNotEmpty) ...[
+                      const SizedBox(height: 4),
+                      Text(
+                        article.editorAndSource,
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: AppTheme.primaryColor,
+                          fontWeight: FontWeight.w500,
+                          fontFamily: 'Tajawal',
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  // Shimmer widgets
+  Widget _buildShimmerFeaturedCard() {
     return Container(
-      height: 240,
-      margin: AppTheme.marginMedium.copyWith(top: AppTheme.marginSmall.top),
+      height: 300,
+      margin: const EdgeInsets.all(8),
       child: Shimmer.fromColors(
         baseColor: AppTheme.dividerColor,
         highlightColor: AppTheme.surfaceVariant,
         child: Card(
           margin: EdgeInsets.zero,
-          clipBehavior: Clip.antiAlias,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(AppTheme.radiusLarge),
+            borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
           ),
           child: Container(color: AppTheme.backgroundColor),
         ),
@@ -418,17 +640,17 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildShimmerGrid({int itemCount = 2}) {
+  Widget _buildShimmerGrid({int itemCount = 4}) {
     return Container(
-      margin: AppTheme.marginMedium,
+      margin: const EdgeInsets.symmetric(horizontal: 8),
       child: GridView.builder(
         shrinkWrap: true,
         physics: const NeverScrollableScrollPhysics(),
         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: 2,
-          childAspectRatio: 0.75,
-          crossAxisSpacing: AppTheme.radiusSmall,
-          mainAxisSpacing: AppTheme.radiusSmall,
+          childAspectRatio: 1.2,
+          crossAxisSpacing: 8,
+          mainAxisSpacing: 8,
         ),
         itemCount: itemCount,
         itemBuilder: (context, index) {
@@ -436,7 +658,7 @@ class _HomeScreenState extends State<HomeScreen> {
             baseColor: AppTheme.dividerColor,
             highlightColor: AppTheme.surfaceVariant,
             child: Card(
-              clipBehavior: Clip.antiAlias,
+              margin: EdgeInsets.zero,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
               ),
@@ -448,53 +670,23 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildShimmerHorizontalList({int itemCount = 3}) {
-    return SizedBox(
-      height: 140,
-      child: ListView.builder(
-        scrollDirection: Axis.horizontal,
-        padding: AppTheme.paddingSmall,
-        itemCount: itemCount,
-        itemBuilder: (context, index) {
-          return Shimmer.fromColors(
-            baseColor: AppTheme.dividerColor,
-            highlightColor: AppTheme.surfaceVariant,
-            child: SizedBox(
-              width: 280,
-              child: Card(
-                margin: EdgeInsets.symmetric(
-                    horizontal: AppTheme.marginSmall.horizontal / 2),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
-                ),
-                child: Container(color: AppTheme.backgroundColor),
-              ),
-            ),
-          );
-        },
-      ),
-    );
-  }
-
-  Widget _buildShimmerVerticalList({int itemCount = 3}) {
+  Widget _buildShimmerVerticalList({int itemCount = 20}) {
     return ListView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
+      padding: const EdgeInsets.symmetric(horizontal: 8),
       itemCount: itemCount,
       itemBuilder: (context, index) {
         return Shimmer.fromColors(
           baseColor: AppTheme.dividerColor,
           highlightColor: AppTheme.surfaceVariant,
           child: Card(
-            margin: AppTheme.marginMedium.copyWith(
-              top: AppTheme.marginSmall.top,
-              bottom: AppTheme.marginSmall.bottom,
-            ),
+            margin: const EdgeInsets.symmetric(vertical: 4),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
             ),
             child: Container(
-              height: 100, // Slightly increased for better proportions
+              height: 100,
               color: AppTheme.backgroundColor,
             ),
           ),
