@@ -152,6 +152,12 @@ class _NewsDetailScreenState extends State<NewsDetailScreen> {
     }
   }
 
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
   /// Navigates to the photo gallery screen.
   void _showPhotoGallery(int initialIndex) {
     if (_newsDetail?.relatedPhotos.isEmpty ?? true) return;

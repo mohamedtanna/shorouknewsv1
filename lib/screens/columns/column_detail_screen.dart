@@ -121,6 +121,12 @@ class _ColumnDetailScreenState extends State<ColumnDetailScreen> {
   }
 
   @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
@@ -397,13 +403,12 @@ class _ColumnDetailScreenState extends State<ColumnDetailScreen> {
 
   Widget _buildRelatedColumns() {
     if (_isLoadingRelated) {
-      return const SliverToBoxAdapter(
-          child: Center(child: CircularProgressIndicator()));
+      return const Center(child: CircularProgressIndicator());
     }
-    if (_relatedColumns.isEmpty) return const SliverToBoxAdapter(child: SizedBox.shrink());
+    if (_relatedColumns.isEmpty) return const SizedBox.shrink();
 
-    return SliverList(
-      delegate: SliverChildListDelegate([
+    return Column(
+      children: [
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
           child: SectionHeader(
@@ -416,10 +421,9 @@ class _ColumnDetailScreenState extends State<ColumnDetailScreen> {
         ListView.builder(
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
-          itemCount: _relatedColumns.take(3).length, // Show up to 3 related
+          itemCount: _relatedColumns.take(3).length,
           itemBuilder: (context, index) {
             final column = _relatedColumns[index];
-            // Using a simplified card for related columns
             return Card(
               margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
               child: ListTile(
@@ -440,7 +444,7 @@ class _ColumnDetailScreenState extends State<ColumnDetailScreen> {
           },
         ),
         const SizedBox(height: 16),
-      ]),
+      ],
     );
   }
 }
