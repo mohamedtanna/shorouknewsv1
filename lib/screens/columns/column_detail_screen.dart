@@ -400,19 +400,7 @@ class _ColumnDetailScreenState extends State<ColumnDetailScreen> {
 
   List<Widget> _buildRelatedColumnsSlivers() {
     if (_isLoadingRelated) {
-      return const [
-        SliverToBoxAdapter(
-          child: Center(child: CircularProgressIndicator()),
-        ),
-      ];
-    }
-    if (_relatedColumns.isEmpty) return [];
 
-    final columns = _relatedColumns.take(3).toList();
-
-    return [
-      SliverToBoxAdapter(
-        child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
           child: SectionHeader(
             title: 'المزيد من مقالات الكاتب',
@@ -421,11 +409,7 @@ class _ColumnDetailScreenState extends State<ColumnDetailScreen> {
                 context.go('/columns?columnistId=${_columnDetail!.columnistId}'),
           ),
         ),
-      ),
-      SliverList(
-        delegate: SliverChildBuilderDelegate(
-          (context, index) {
-            final column = columns[index];
+
             return Card(
               margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
               child: ListTile(
@@ -446,8 +430,6 @@ class _ColumnDetailScreenState extends State<ColumnDetailScreen> {
           },
           childCount: columns.length,
         ),
-      ),
-      const SliverToBoxAdapter(child: SizedBox(height: 16)),
-    ];
+
   }
 }
