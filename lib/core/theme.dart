@@ -98,7 +98,7 @@ class AppTheme {
         centerTitle: true,
         titleTextStyle: const TextStyle(
           fontFamily: 'Tajawal',
-          fontSize: 20,
+          fontSize: 22,
           fontWeight: FontWeight.w600,
           color: textOnPrimary,
           letterSpacing: 0.15,
@@ -131,7 +131,7 @@ class AppTheme {
           textStyle: const TextStyle(
             fontFamily: 'Tajawal',
             fontWeight: FontWeight.w600,
-            fontSize: 16,
+            fontSize: 18,
             letterSpacing: 0.5,
           ),
           shape: RoundedRectangleBorder(
@@ -151,7 +151,7 @@ class AppTheme {
           textStyle: const TextStyle(
             fontFamily: 'Tajawal',
             fontWeight: FontWeight.w600,
-            fontSize: 16,
+            fontSize: 18,
             letterSpacing: 0.5,
           ),
           shape: RoundedRectangleBorder(
@@ -169,7 +169,7 @@ class AppTheme {
           textStyle: const TextStyle(
             fontFamily: 'Tajawal',
             fontWeight: FontWeight.w600,
-            fontSize: 16,
+            fontSize: 18,
             letterSpacing: 0.5,
           ),
           shape: RoundedRectangleBorder(
@@ -189,7 +189,8 @@ class AppTheme {
           textStyle: const TextStyle(
             fontFamily: 'Tajawal',
             fontWeight: FontWeight.w600,
-            fontSize: 16,
+            fontSize: 18,
+            letterSpacing: 0.5,
           ),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(radiusMedium),
@@ -216,7 +217,7 @@ class AppTheme {
         // Display styles
         displayLarge: TextStyle(
           fontFamily: 'Tajawal',
-          fontSize: 57,
+          fontSize: 64,
           fontWeight: FontWeight.w400,
           color: textPrimaryColor,
           letterSpacing: -0.25,
@@ -224,7 +225,7 @@ class AppTheme {
         ),
         displayMedium: TextStyle(
           fontFamily: 'Tajawal',
-          fontSize: 45,
+          fontSize: 52,
           fontWeight: FontWeight.w400,
           color: textPrimaryColor,
           letterSpacing: 0.0,
@@ -232,7 +233,7 @@ class AppTheme {
         ),
         displaySmall: TextStyle(
           fontFamily: 'Tajawal',
-          fontSize: 36,
+          fontSize: 40,
           fontWeight: FontWeight.w400,
           color: textPrimaryColor,
           letterSpacing: 0.0,
@@ -242,7 +243,7 @@ class AppTheme {
         // Headline styles
         headlineLarge: TextStyle(
           fontFamily: 'Tajawal',
-          fontSize: 32,
+          fontSize: 36,
           fontWeight: FontWeight.w600,
           color: primaryColor,
           letterSpacing: 0.0,
@@ -250,7 +251,7 @@ class AppTheme {
         ),
         headlineMedium: TextStyle(
           fontFamily: 'Tajawal',
-          fontSize: 28,
+          fontSize: 32,
           fontWeight: FontWeight.w600,
           color: primaryColor,
           letterSpacing: 0.0,
@@ -258,7 +259,7 @@ class AppTheme {
         ),
         headlineSmall: TextStyle(
           fontFamily: 'Tajawal',
-          fontSize: 24,
+          fontSize: 28,
           fontWeight: FontWeight.w600,
           color: primaryColor,
           letterSpacing: 0.0,
@@ -268,7 +269,7 @@ class AppTheme {
         // Title styles
         titleLarge: TextStyle(
           fontFamily: 'Tajawal',
-          fontSize: 22,
+          fontSize: 24,
           fontWeight: FontWeight.w600,
           color: primaryColor,
           letterSpacing: 0.0,
@@ -276,7 +277,7 @@ class AppTheme {
         ),
         titleMedium: TextStyle(
           fontFamily: 'Tajawal',
-          fontSize: 18,
+          fontSize: 20,
           fontWeight: FontWeight.w600,
           color: textPrimaryColor,
           letterSpacing: 0.15,
@@ -284,7 +285,7 @@ class AppTheme {
         ),
         titleSmall: TextStyle(
           fontFamily: 'Tajawal',
-          fontSize: 16,
+          fontSize: 18,
           fontWeight: FontWeight.w600,
           color: textSecondaryColor,
           letterSpacing: 0.1,
@@ -294,7 +295,7 @@ class AppTheme {
         // Body styles
         bodyLarge: TextStyle(
           fontFamily: 'Tajawal',
-          fontSize: 16,
+          fontSize: 18,
           fontWeight: FontWeight.w400,
           color: textPrimaryColor,
           letterSpacing: 0.5,
@@ -302,7 +303,7 @@ class AppTheme {
         ),
         bodyMedium: TextStyle(
           fontFamily: 'Tajawal',
-          fontSize: 14,
+          fontSize: 16,
           fontWeight: FontWeight.w400,
           color: textPrimaryColor,
           letterSpacing: 0.25,
@@ -310,7 +311,7 @@ class AppTheme {
         ),
         bodySmall: TextStyle(
           fontFamily: 'Tajawal',
-          fontSize: 12,
+          fontSize: 14,
           fontWeight: FontWeight.w400,
           color: textSecondaryColor,
           letterSpacing: 0.4,
@@ -320,7 +321,7 @@ class AppTheme {
         // Label styles
         labelLarge: TextStyle(
           fontFamily: 'Tajawal',
-          fontSize: 14,
+          fontSize: 16,
           fontWeight: FontWeight.w600,
           color: textOnPrimary,
           letterSpacing: 0.1,
@@ -328,7 +329,7 @@ class AppTheme {
         ),
         labelMedium: TextStyle(
           fontFamily: 'Tajawal',
-          fontSize: 12,
+          fontSize: 14,
           fontWeight: FontWeight.w600,
           color: textSecondaryColor,
           letterSpacing: 0.5,
@@ -336,7 +337,7 @@ class AppTheme {
         ),
         labelSmall: TextStyle(
           fontFamily: 'Tajawal',
-          fontSize: 11,
+          fontSize: 12,
           fontWeight: FontWeight.w600,
           color: textSecondaryColor,
           letterSpacing: 0.5,
@@ -464,25 +465,25 @@ class AppTheme {
           fontFamily: 'Tajawal',
           color: primaryColor,
           fontWeight: FontWeight.w500,
-          fontSize: 16,
+          fontSize: 18,
         ),
         floatingLabelStyle: const TextStyle(
           fontFamily: 'Tajawal',
           color: primaryColor,
           fontWeight: FontWeight.w600,
-          fontSize: 14,
+          fontSize: 16,
         ),
         hintStyle: const TextStyle(
           fontFamily: 'Tajawal',
           color: textDisabledColor,
           fontWeight: FontWeight.w400,
-          fontSize: 16,
+          fontSize: 18,
         ),
         errorStyle: const TextStyle(
           fontFamily: 'Tajawal',
           color: errorColor,
           fontWeight: FontWeight.w400,
-          fontSize: 12,
+          fontSize: 14,
         ),
         prefixIconColor: primaryColor,
         suffixIconColor: primaryColor,
@@ -501,13 +502,13 @@ class AppTheme {
         labelStyle: TextStyle(
           fontFamily: 'Tajawal',
           fontWeight: FontWeight.w600,
-          fontSize: 14,
+          fontSize: 16,
           letterSpacing: 0.5,
         ),
         unselectedLabelStyle: TextStyle(
           fontFamily: 'Tajawal',
           fontWeight: FontWeight.w400,
-          fontSize: 14,
+          fontSize: 16,
           letterSpacing: 0.5,
         ),
         labelPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -584,14 +585,14 @@ class AppTheme {
         titleTextStyle: TextStyle(
           fontFamily: 'Tajawal',
           color: primaryColor,
-          fontSize: 20,
+          fontSize: 22,
           fontWeight: FontWeight.w600,
           letterSpacing: 0.15,
         ),
         contentTextStyle: TextStyle(
           fontFamily: 'Tajawal',
           color: textPrimaryColor,
-          fontSize: 16,
+          fontSize: 18,
           fontWeight: FontWeight.w400,
           height: 1.5,
         ),
@@ -610,12 +611,12 @@ class AppTheme {
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         labelStyle: const TextStyle(
           fontFamily: 'Tajawal',
-          fontSize: 14,
+          fontSize: 16,
           fontWeight: FontWeight.w500,
         ),
         secondaryLabelStyle: const TextStyle(
           fontFamily: 'Tajawal',
-          fontSize: 14,
+          fontSize: 16,
           fontWeight: FontWeight.w500,
           color: Colors.white,
         ),
@@ -641,7 +642,7 @@ class AppTheme {
         valueIndicatorTextStyle: const TextStyle(
           fontFamily: 'Tajawal',
           color: Colors.white,
-          fontSize: 12,
+          fontSize: 14,
           fontWeight: FontWeight.w500,
         ),
         trackHeight: 4.0,

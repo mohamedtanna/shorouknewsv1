@@ -61,6 +61,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Scaffold(
       body: RefreshIndicator(
         onRefresh: _refreshData,
@@ -70,20 +72,21 @@ class _HomeScreenState extends State<HomeScreen> {
             return CustomScrollView(
               controller: _scrollController,
               slivers: [
-                // Main Story Card - Reduced margins
+                // Main Story Card
                 SliverToBoxAdapter(
-                  child: _buildMainStoryCard(newsProvider),
+                  child: _buildMainStoryCard(newsProvider, theme),
                 ),
 
-                // Grid of other Main Stories - Tighter spacing
+                // Grid of other Main Stories
                 SliverToBoxAdapter(
                   child: _buildMainStoriesGrid(newsProvider),
                 ),
 
-                // Top Stories Section - Reduced spacing
+                // Top Stories Section
                 SliverToBoxAdapter(
                   child: Padding(
-                    padding: const EdgeInsets.only(top: 16.0, bottom: 8.0),
+                    padding: AppTheme.paddingMedium
+                        .copyWith(bottom: AppTheme.paddingSmall.bottom),
                     child: SectionHeader(
                       title: 'أهم الأخبار',
                       icon: Icons.trending_up,
@@ -95,10 +98,11 @@ class _HomeScreenState extends State<HomeScreen> {
                   child: _buildTopStoriesList(newsProvider),
                 ),
 
-                // Selected Columns Section - Reduced spacing
+                // Selected Columns Section
                 SliverToBoxAdapter(
                   child: Padding(
-                    padding: const EdgeInsets.only(top: 16.0, bottom: 8.0),
+                    padding: AppTheme.paddingMedium
+                        .copyWith(bottom: AppTheme.paddingSmall.bottom),
                     child: SectionHeader(
                       title: 'مقالات مختارة',
                       icon: Icons.article_outlined,
@@ -110,10 +114,11 @@ class _HomeScreenState extends State<HomeScreen> {
                   child: _buildSelectedColumnsList(newsProvider),
                 ),
 
-                // Most Read Stories Section - Reduced spacing
+                // Most Read Stories Section
                 SliverToBoxAdapter(
                   child: Padding(
-                    padding: const EdgeInsets.only(top: 16.0, bottom: 8.0),
+                    padding: AppTheme.paddingMedium
+                        .copyWith(bottom: AppTheme.paddingSmall.bottom),
                     child: const SectionHeader(
                       title: 'الأكثر قراءة',
                       icon: Icons.visibility_outlined,
@@ -124,9 +129,9 @@ class _HomeScreenState extends State<HomeScreen> {
                   child: _buildMostReadList(newsProvider),
                 ),
 
-                // Minimal bottom spacing
-                const SliverToBoxAdapter(
-                  child: SizedBox(height: 12),
+                // Bottom spacing
+                SliverToBoxAdapter(
+                  child: AppTheme.verticalSpaceMedium,
                 ),
               ],
             );
@@ -136,7 +141,7 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildMainStoryCard(NewsProvider newsProvider) {
+  Widget _buildMainStoryCard(NewsProvider newsProvider, ThemeData theme) {
     if (newsProvider.isLoadingMainStories && newsProvider.mainStories.isEmpty) {
       return _buildShimmerMainCard();
     }
@@ -147,16 +152,17 @@ class _HomeScreenState extends State<HomeScreen> {
     final mainStory = newsProvider.mainStories.first;
 
     return Container(
-      height: 220, // Reduced height
-      margin: const EdgeInsets.fromLTRB(12, 8, 12, 4), // Tighter margins
+      height: 240, // Slightly increased for better readability
+      margin: AppTheme.marginMedium.copyWith(top: AppTheme.marginSmall.top),
       child: GestureDetector(
         onTap: () => context.go('/news/${mainStory.cDate}/${mainStory.id}'),
         child: Card(
           margin: EdgeInsets.zero,
           clipBehavior: Clip.antiAlias,
-          elevation: 3.0, // Reduced elevation
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)),
+          elevation: AppTheme.elevationMedium,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(AppTheme.radiusLarge),
+          ),
           child: Stack(
             children: [
               Positioned.fill(
@@ -164,14 +170,17 @@ class _HomeScreenState extends State<HomeScreen> {
                   imageUrl: mainStory.photoUrl,
                   fit: BoxFit.cover,
                   placeholder: (context, url) => Shimmer.fromColors(
-                    baseColor: Colors.grey[300]!,
-                    highlightColor: Colors.grey[100]!,
-                    child: Container(color: Colors.white),
+                    baseColor: AppTheme.dividerColor,
+                    highlightColor: AppTheme.surfaceVariant,
+                    child: Container(color: AppTheme.backgroundColor),
                   ),
                   errorWidget: (context, url, error) => Container(
-                    color: Colors.grey[300],
-                    child: const Icon(Icons.broken_image,
-                        color: Colors.grey, size: 50),
+                    color: AppTheme.surfaceVariant,
+                    child: Icon(
+                      Icons.broken_image,
+                      color: AppTheme.textDisabledColor,
+                      size: 50,
+                    ),
                   ),
                 ),
               ),
@@ -183,8 +192,8 @@ class _HomeScreenState extends State<HomeScreen> {
                       end: Alignment.bottomCenter,
                       colors: [
                         Colors.transparent,
-                        Colors.black.withOpacity(0.1),
-                        Colors.black.withOpacity(0.7),
+                        AppTheme.shadowLight,
+                        AppTheme.shadowDark,
                       ],
                       stops: const [0.0, 0.5, 1.0],
                     ),
@@ -192,20 +201,19 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ),
               Positioned(
-                bottom: 12, // Reduced padding
-                left: 12,
-                right: 12,
+                bottom: AppTheme.paddingMedium.bottom,
+                left: AppTheme.paddingMedium.left,
+                right: AppTheme.paddingMedium.right,
                 child: Text(
                   mainStory.title,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 18, // Slightly smaller font
+                  style: theme.textTheme.titleLarge?.copyWith(
+                    color: AppTheme.textOnPrimary,
                     fontWeight: FontWeight.bold,
                     shadows: [
                       Shadow(
-                        blurRadius: 2.0,
-                        color: Colors.black54,
-                        offset: Offset(1, 1),
+                        blurRadius: 3.0,
+                        color: AppTheme.shadowDark,
+                        offset: const Offset(1, 1),
                       )
                     ],
                   ),
@@ -233,16 +241,15 @@ class _HomeScreenState extends State<HomeScreen> {
     if (otherStories.isEmpty) return const SizedBox.shrink();
 
     return Container(
-      margin: const EdgeInsets.symmetric(
-          horizontal: 12, vertical: 8), // Tighter margins
+      margin: AppTheme.marginMedium,
       child: GridView.builder(
         shrinkWrap: true,
         physics: const NeverScrollableScrollPhysics(),
         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: 2,
-          childAspectRatio: 0.75, // More vertical space for better content fit
-          crossAxisSpacing: 6,
-          mainAxisSpacing: 6,
+          childAspectRatio: 0.75,
+          crossAxisSpacing: AppTheme.radiusSmall,
+          mainAxisSpacing: AppTheme.radiusSmall,
         ),
         itemCount: otherStories.length,
         itemBuilder: (context, index) {
@@ -261,25 +268,29 @@ class _HomeScreenState extends State<HomeScreen> {
       return _buildShimmerHorizontalList();
     }
     if (newsProvider.topStories.isEmpty) {
-      return const Center(
+      return Center(
         child: Padding(
-          padding: EdgeInsets.all(16.0),
-          child: Text('لا توجد أخبار هامة حالياً.'),
+          padding: AppTheme.paddingLarge,
+          child: Text(
+            'لا توجد أخبار هامة حالياً.',
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: AppTheme.textSecondaryColor,
+                ),
+          ),
         ),
       );
     }
 
     return SizedBox(
-      height: 120, // Reduced height
+      height: 140, // Increased for better content visibility
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(
-            horizontal: 8, vertical: 4), // Reduced padding
+        padding: AppTheme.paddingSmall,
         itemCount: newsProvider.topStories.length.clamp(0, 5),
         itemBuilder: (context, index) {
           final story = newsProvider.topStories[index];
           return SizedBox(
-            width: 260, // Reduced width
+            width: 280, // Increased width for better readability
             child: NewsCard(
               article: story,
               isHorizontal: true,
@@ -296,10 +307,15 @@ class _HomeScreenState extends State<HomeScreen> {
       return _buildShimmerVerticalList(itemCount: 2);
     }
     if (newsProvider.selectedColumns.isEmpty) {
-      return const Center(
+      return Center(
         child: Padding(
-          padding: EdgeInsets.all(16.0),
-          child: Text('لا توجد مقالات مختارة حالياً.'),
+          padding: AppTheme.paddingLarge,
+          child: Text(
+            'لا توجد مقالات مختارة حالياً.',
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: AppTheme.textSecondaryColor,
+                ),
+          ),
         ),
       );
     }
@@ -307,7 +323,7 @@ class _HomeScreenState extends State<HomeScreen> {
     return ListView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
-      padding: const EdgeInsets.symmetric(horizontal: 4), // Added padding
+      padding: AppTheme.paddingSmall,
       itemCount: newsProvider.selectedColumns.length.clamp(0, 3),
       itemBuilder: (context, index) {
         final column = newsProvider.selectedColumns[index];
@@ -346,10 +362,15 @@ class _HomeScreenState extends State<HomeScreen> {
       return _buildShimmerVerticalList(itemCount: 3);
     }
     if (newsProvider.mostReadStories.isEmpty) {
-      return const Center(
+      return Center(
         child: Padding(
-          padding: EdgeInsets.all(16.0),
-          child: Text('لا توجد أخبار رائجة حالياً.'),
+          padding: AppTheme.paddingLarge,
+          child: Text(
+            'لا توجد أخبار رائجة حالياً.',
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: AppTheme.textSecondaryColor,
+                ),
+          ),
         ),
       );
     }
@@ -357,7 +378,7 @@ class _HomeScreenState extends State<HomeScreen> {
     return ListView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
-      padding: const EdgeInsets.symmetric(horizontal: 4), // Added padding
+      padding: AppTheme.paddingSmall,
       itemCount: newsProvider.mostReadStories.length.clamp(0, 5),
       itemBuilder: (context, index) {
         final story = newsProvider.mostReadStories[index];
@@ -371,20 +392,21 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  // Shimmer widgets with reduced sizes
+  // Shimmer widgets using theme colors and spacing
   Widget _buildShimmerMainCard() {
     return Container(
-      height: 220, // Matching reduced height
-      margin: const EdgeInsets.fromLTRB(12, 8, 12, 4),
+      height: 240,
+      margin: AppTheme.marginMedium.copyWith(top: AppTheme.marginSmall.top),
       child: Shimmer.fromColors(
-        baseColor: Colors.grey[300]!,
-        highlightColor: Colors.grey[100]!,
+        baseColor: AppTheme.dividerColor,
+        highlightColor: AppTheme.surfaceVariant,
         child: Card(
           margin: EdgeInsets.zero,
           clipBehavior: Clip.antiAlias,
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)),
-          child: Container(color: Colors.white),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(AppTheme.radiusLarge),
+          ),
+          child: Container(color: AppTheme.backgroundColor),
         ),
       ),
     );
@@ -392,26 +414,27 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _buildShimmerGrid({int itemCount = 2}) {
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      margin: AppTheme.marginMedium,
       child: GridView.builder(
         shrinkWrap: true,
         physics: const NeverScrollableScrollPhysics(),
         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: 2,
           childAspectRatio: 0.75,
-          crossAxisSpacing: 6,
-          mainAxisSpacing: 6,
+          crossAxisSpacing: AppTheme.radiusSmall,
+          mainAxisSpacing: AppTheme.radiusSmall,
         ),
         itemCount: itemCount,
         itemBuilder: (context, index) {
           return Shimmer.fromColors(
-            baseColor: Colors.grey[300]!,
-            highlightColor: Colors.grey[100]!,
+            baseColor: AppTheme.dividerColor,
+            highlightColor: AppTheme.surfaceVariant,
             child: Card(
               clipBehavior: Clip.antiAlias,
               shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8.0)),
-              child: Container(color: Colors.white),
+                borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
+              ),
+              child: Container(color: AppTheme.backgroundColor),
             ),
           );
         },
@@ -421,22 +444,24 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _buildShimmerHorizontalList({int itemCount = 3}) {
     return SizedBox(
-      height: 120, // Matching reduced height
+      height: 140,
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+        padding: AppTheme.paddingSmall,
         itemCount: itemCount,
         itemBuilder: (context, index) {
           return Shimmer.fromColors(
-            baseColor: Colors.grey[300]!,
-            highlightColor: Colors.grey[100]!,
+            baseColor: AppTheme.dividerColor,
+            highlightColor: AppTheme.surfaceVariant,
             child: SizedBox(
-              width: 260,
+              width: 280,
               child: Card(
-                margin: const EdgeInsets.symmetric(horizontal: 4),
+                margin: EdgeInsets.symmetric(
+                    horizontal: AppTheme.marginSmall.horizontal / 2),
                 shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8.0)),
-                child: Container(color: Colors.white),
+                  borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
+                ),
+                child: Container(color: AppTheme.backgroundColor),
               ),
             ),
           );
@@ -452,16 +477,19 @@ class _HomeScreenState extends State<HomeScreen> {
       itemCount: itemCount,
       itemBuilder: (context, index) {
         return Shimmer.fromColors(
-          baseColor: Colors.grey[300]!,
-          highlightColor: Colors.grey[100]!,
+          baseColor: AppTheme.dividerColor,
+          highlightColor: AppTheme.surfaceVariant,
           child: Card(
-            margin: const EdgeInsets.symmetric(
-                horizontal: 12, vertical: 4), // Reduced margins
+            margin: AppTheme.marginMedium.copyWith(
+              top: AppTheme.marginSmall.top,
+              bottom: AppTheme.marginSmall.bottom,
+            ),
             shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8.0)),
+              borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
+            ),
             child: Container(
-              height: 90, // Reduced height
-              color: Colors.white,
+              height: 100, // Slightly increased for better proportions
+              color: AppTheme.backgroundColor,
             ),
           ),
         );
