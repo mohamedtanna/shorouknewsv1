@@ -50,12 +50,11 @@ class AppRouter {
             path: '/news',
             name: 'news',
             builder: (context, state) {
-              // final sectionId = state.uri.queryParameters['sectionId']; // Keep if NewsListScreen uses it
+              final sectionId = state.uri.queryParameters['sectionId'];
               final sectionName =
                   state.uri.queryParameters['sectionName'] ?? 'أحدث الأخبار';
-              // Assuming NewsListScreen requires a 'section' parameter based on previous errors.
-              // If NewsListScreen was updated to use sectionId and sectionName, adjust accordingly.
               return NewsListScreen(
+                sectionId: sectionId,
                 section: sectionName,
               );
             },

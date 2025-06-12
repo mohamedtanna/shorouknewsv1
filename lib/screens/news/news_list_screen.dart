@@ -1,142 +1,110 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
+
+import '../../core/theme.dart';
+import '../../models/new_model.dart';
+import '../../providers/news_provider.dart';
+import '../../widgets/news_card.dart';
 
 class NewsListScreen extends StatefulWidget {
+  final String? sectionId;
   final String section;
 
-  const NewsListScreen({super.key, required this.section});
+  const NewsListScreen({super.key, this.sectionId, required this.section});
 
   @override
-  _NewsListScreenState createState() => _NewsListScreenState();
+  State<NewsListScreen> createState() => _NewsListScreenState();
 }
 
 class _NewsListScreenState extends State<NewsListScreen> {
-  List<NewModel> newsList = [];
-  bool isLoading = true;
+  final ScrollController _scrollController = ScrollController();
+  final List<NewsArticle> _newsList = [];
+  bool _isLoading = true;
+  bool _isLoadingMore = false;
+  bool _hasMore = true;
 
   @override
   void initState() {
     super.initState();
-    _fetchNews();
+    _loadNews(refresh: true);
+    _scrollController.addListener(_onScroll);
   }
 
-  Future<void> _fetchNews() async {
-    // Replace with your actual data fetching logic (e.g., from an API)
-    // For now, using dummy data
-    await Future.delayed(const Duration(seconds: 2)); // Simulate network delay
+  @override
+  void dispose() {
+    _scrollController.removeListener(_onScroll);
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _loadNews({bool refresh = false}) async {
+    final provider = context.read<NewsProvider>();
+
+    if (refresh) {
+      setState(() {
+        _newsList.clear();
+        _isLoading = true;
+        _hasMore = true;
+      });
+    } else {
+      setState(() => _isLoadingMore = true);
+    }
+
+    final newItems = await provider.loadNews(
+      sectionId: widget.sectionId,
+      refresh: refresh,
+    );
+
+    if (!mounted) return;
+
     setState(() {
-      newsList = List.generate(
-        10,
-        (index) => NewModel(
-          id: index.toString(),
-          title: 'News Article Title ${index + 1}',
-          imageUrl: 'https://via.placeholder.com/150',
-          summary: 'This is a summary of the news article ${index + 1}.',
-          publishDate: DateTime.now().subtract(Duration(hours: index)),
-          section: widget.section,
-        ),
-      );
-      isLoading = false;
+      _isLoading = false;
+      _isLoadingMore = false;
+      _newsList.addAll(newItems);
+      if (newItems.isEmpty) _hasMore = false;
     });
+  }
+
+  void _onScroll() {
+    if (_scrollController.position.pixels >=
+            _scrollController.position.maxScrollExtent - 200 &&
+        !_isLoadingMore &&
+        _hasMore) {
+      _loadNews();
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('${widget.section} News'),
+        title: Text(widget.section),
       ),
-      body: isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : ListView.builder(
-              itemCount: newsList.length,
-              itemBuilder: (context, index) {
-                final newsItem = newsList[index];
-                return NewsCard(
-                  news: newsItem,
-                  onTap: () {
-                    // Navigate to news detail screen
-                    // Navigator.pushNamed(context, '/newsDetail', arguments: newsItem.id);
-                  },
-                );
-              },
-            ),
-    );
-  }
-}
-
-// Dummy NewModel class for demonstration
-class NewModel {
-  final String id;
-  final String title;
-  final String imageUrl;
-  final String summary;
-  final DateTime publishDate;
-  final String section;
-
-  NewModel({
-    required this.id,
-    required this.title,
-    required this.imageUrl,
-    required this.summary,
-    required this.publishDate,
-    required this.section,
-  });
-}
-
-// Dummy NewsCard widget for demonstration
-class NewsCard extends StatelessWidget {
-  final NewModel news;
-  final VoidCallback? onTap;
-
-  const NewsCard({super.key, required this.news, this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      child: InkWell(
-        onTap: onTap,
-        child: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Image.network(
-                news.imageUrl,
-                width: 100,
-                height: 100,
-                fit: BoxFit.cover,
+      body: RefreshIndicator(
+        onRefresh: () => _loadNews(refresh: true),
+        color: AppTheme.primaryColor,
+        child: _isLoading && _newsList.isEmpty
+            ? const Center(child: CircularProgressIndicator())
+            : ListView.builder(
+                controller: _scrollController,
+                itemCount: _newsList.length + (_isLoadingMore ? 1 : 0),
+                itemBuilder: (context, index) {
+                  if (index < _newsList.length) {
+                    final article = _newsList[index];
+                    return NewsCard(
+                      article: article,
+                      isHorizontal: true,
+                      onTap: () => context
+                          .go('/news/${article.cDate}/${article.id}'),
+                    );
+                  }
+                  return const Padding(
+                    padding: EdgeInsets.symmetric(vertical: 16),
+                    child: Center(child: CircularProgressIndicator()),
+                  );
+                },
               ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      news.title,
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      news.summary,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(fontSize: 14),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      'Published: ${news.publishDate.toLocal().toString().split(' ')[0]}',
-                      style: const TextStyle(fontSize: 12, color: Colors.grey),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
       ),
     );
   }
