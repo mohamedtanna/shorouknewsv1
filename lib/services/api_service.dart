@@ -28,67 +28,84 @@ class ApiService {
       headers: {
         'shorouknews-api-token': apiToken,
         'Content-Type': 'application/json',
-        // Consider adding other common headers like 'Accept' if needed
-        // 'Accept': 'application/json',
+        'Accept': 'application/json', // Added Accept header
+        'User-Agent': 'ShoroukeNewsApp/1.0', // Added User-Agent
       },
       connectTimeout: const Duration(seconds: 30), // 30 seconds
       receiveTimeout: const Duration(seconds: 30), // 30 seconds
     ));
 
-    // Add interceptors for logging and potentially error handling/retries
-    _dio.interceptors.add(LogInterceptor(
-      requestBody: true,
-      responseBody: true,
-      logPrint: (obj) =>
-          debugPrint(obj.toString()), // Use debugPrint for Flutter
-      requestHeader: true,
-      responseHeader:
-          false, // Avoid logging too much header info unless needed for debugging
-      error: true,
+    // Enhanced logging interceptor with better debugging
+    _dio.interceptors.add(InterceptorsWrapper(
+      onRequest: (options, handler) {
+        debugPrint('🚀 REQUEST: ${options.method} ${options.uri}');
+        debugPrint('📤 Headers: ${options.headers}');
+        debugPrint('📦 Query Parameters: ${options.queryParameters}');
+        if (options.data != null) {
+          debugPrint('📄 Request Data: ${options.data}');
+        }
+        return handler.next(options);
+      },
+      onResponse: (response, handler) {
+        debugPrint(
+            '✅ RESPONSE: ${response.statusCode} ${response.requestOptions.uri}');
+        debugPrint('📥 Data Type: ${response.data.runtimeType}');
+        if (response.data is List) {
+          debugPrint('📊 List Length: ${response.data.length}');
+        } else if (response.data is Map) {
+          debugPrint('📋 Map Keys: ${response.data.keys}');
+        }
+        return handler.next(response);
+      },
+      onError: (DioException e, handler) {
+        debugPrint('❌ ERROR: ${e.message}');
+        debugPrint('🔍 Endpoint: ${e.requestOptions.uri}');
+        debugPrint('📊 Status: ${e.response?.statusCode}');
+        debugPrint('📄 Error Data: ${e.response?.data}');
+        debugPrint('📤 Request Headers: ${e.requestOptions.headers}');
+        return handler.next(e);
+      },
     ));
+  }
 
-    // Example: Custom interceptor for more advanced error handling or token refresh
-    // _dio.interceptors.add(InterceptorsWrapper(
-    //   onRequest: (options, handler) {
-    //     // Do something before request is sent
-    //     // e.g., add dynamic token
-    //     return handler.next(options); //continue
-    //   },
-    //   onResponse: (response, handler) {
-    //     // Do something with response data
-    //     return handler.next(response); // continue
-    //   },
-    //   onError: (DioException e, handler) {
-    //     // Handle specific error codes, e.g., 401 for unauthorized
-    //     debugPrint('DioException: ${e.message}, Response: ${e.response?.data}');
-    //     // Potentially refresh token or navigate to login
-    //     return handler.next(e); // Forward the error or resolve it
-    //   },
-    // ));
+  // Test method to quickly verify authentication
+  Future<bool> testAuthentication() async {
+    try {
+      debugPrint('🧪 Testing API authentication...');
+      final response = await _dio.get('news/collections/topstories');
+      debugPrint('🎉 Authentication successful!');
+      debugPrint('Status: ${response.statusCode}');
+      debugPrint('Data type: ${response.data.runtimeType}');
+      if (response.data is List) {
+        debugPrint('Articles count: ${response.data.length}');
+        return response.data.length > 0;
+      }
+      return response.statusCode == 200;
+    } catch (e) {
+      debugPrint('🚫 Authentication failed: $e');
+      return false;
+    }
   }
 
   /// Checks internet connectivity.
   /// Returns true if connected to Mobile, WiFi, or Ethernet.
   Future<bool> _hasInternetConnection() async {
     try {
-      final List<ConnectivityResult> connectivityResults = (await Connectivity()
-          .checkConnectivity()) as List<ConnectivityResult>;
-      if (connectivityResults.contains(ConnectivityResult.none) &&
-          connectivityResults.length == 1) {
-        return false; // Explicitly offline
+      final connectivityResult = await Connectivity().checkConnectivity();
+
+      // Handle both single ConnectivityResult and List<ConnectivityResult>
+      if (connectivityResult is List) {
+        // New API returns List<ConnectivityResult>
+        final results = connectivityResult as List<ConnectivityResult>;
+        return results.isNotEmpty && !results.contains(ConnectivityResult.none);
+      } else {
+        // Old API returns single ConnectivityResult
+        return connectivityResult != ConnectivityResult.none;
       }
-      // If it's not 'none' or if the list contains other types like mobile, wifi, ethernet, vpn, etc.
-      // it's generally considered connected for basic purposes.
-      // For more granular control, you might check for specific types:
-      // return connectivityResults.any((result) =>
-      //   result == ConnectivityResult.mobile ||
-      //   result == ConnectivityResult.wifi ||
-      //   result == ConnectivityResult.ethernet);
-      return connectivityResults.isNotEmpty &&
-          !connectivityResults.contains(ConnectivityResult.none);
     } catch (e) {
       debugPrint("Error checking connectivity: $e");
-      return false; // Assume no connection if check fails
+      // If connectivity check fails, assume we have connection and let network request handle the actual error
+      return true;
     }
   }
 
@@ -113,7 +130,8 @@ class ApiService {
     T Function(Map<String, dynamic> json)? fromJson, // For single objects
     T Function(List<dynamic> jsonList)? fromJsonList, // For lists of objects
   }) async {
-    debugPrint('GET request to $endpoint with params: $queryParameters, useCache: $useCache');
+    debugPrint(
+        'GET request to $endpoint with params: $queryParameters, useCache: $useCache');
     final String cacheKey =
         useCache ? _generateCacheKey(endpoint, queryParameters) : endpoint;
 
@@ -147,7 +165,8 @@ class ApiService {
 
       if (response.statusCode == 200) {
         final data = response.data;
-        debugPrint('Response for $endpoint: ${response.statusCode}, data type: ${data.runtimeType}');
+        debugPrint(
+            'Response for $endpoint: ${response.statusCode}, data type: ${data.runtimeType}');
         if (useCache) {
           await _cacheData(cacheKey, data);
         }
@@ -400,7 +419,8 @@ class ApiService {
     String? nextPageToken,
   }) async {
     String endpoint = sectionId != null ? 'sections/$sectionId/news' : 'news';
-    debugPrint("getNews called: sectionId=$sectionId, currentPage=$currentPage, pageSize=$pageSize, nextPageToken=$nextPageToken");
+    debugPrint(
+        "getNews called: sectionId=$sectionId, currentPage=$currentPage, pageSize=$pageSize, nextPageToken=$nextPageToken");
     Map<String, dynamic> queryParams = {
       'currentpage': currentPage
           .toString(), // Ensure query params are strings if API expects

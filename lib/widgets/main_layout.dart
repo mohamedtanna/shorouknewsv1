@@ -83,7 +83,15 @@ class _MainLayoutState extends State<MainLayout> {
           if (!isHome)
             IconButton(
               icon: const Icon(Icons.arrow_forward),
-              onPressed: () => Navigator.pop(context),
+              onPressed: () {
+                // Use context.canPop() to check if we can pop
+                if (context.canPop()) {
+                  context.pop();
+                } else {
+                  // If we can't pop, go home
+                  context.go('/home');
+                }
+              },
             ),
           if (isHome)
             IconButton(
@@ -134,7 +142,9 @@ class _MainLayoutState extends State<MainLayout> {
                   ),
                   child: TextButton.icon(
                     onPressed: () {
-                      Navigator.pop(context);
+                      // Close drawer first
+                      Navigator.of(context).pop();
+                      // Then navigate
                       context.go('/settings');
                     },
                     icon: const Icon(Icons.settings, color: Colors.white),
@@ -159,7 +169,9 @@ class _MainLayoutState extends State<MainLayout> {
                 _buildDrawerItem(
                   title: 'الرئيسية',
                   onTap: () {
-                    Navigator.pop(context);
+                    // Close drawer
+                    Navigator.of(context).pop();
+                    // Navigate to home
                     context.go('/home');
                   },
                   isFirst: true,
@@ -167,14 +179,14 @@ class _MainLayoutState extends State<MainLayout> {
                 _buildDrawerItem(
                   title: 'رأي ومقالات',
                   onTap: () {
-                    Navigator.pop(context);
+                    Navigator.of(context).pop();
                     context.go('/columns');
                   },
                 ),
                 _buildDrawerItem(
                   title: 'أحدث الأخبار',
                   onTap: () {
-                    Navigator.pop(context);
+                    Navigator.of(context).pop();
                     context.go('/news');
                   },
                 ),
@@ -183,7 +195,7 @@ class _MainLayoutState extends State<MainLayout> {
                 ...sections.map((section) => _buildDrawerItem(
                       title: section.arName,
                       onTap: () {
-                        Navigator.pop(context);
+                        Navigator.of(context).pop();
                         context.go(
                             '/news?sectionId=${section.id}&sectionName=${section.arName}');
                       },
@@ -192,7 +204,7 @@ class _MainLayoutState extends State<MainLayout> {
                 _buildDrawerItem(
                   title: 'فيديو',
                   onTap: () {
-                    Navigator.pop(context);
+                    Navigator.of(context).pop();
                     context.go('/videos');
                   },
                   isTopBorder: true,
@@ -200,35 +212,35 @@ class _MainLayoutState extends State<MainLayout> {
                 _buildDrawerItem(
                   title: 'القائمة البريدية',
                   onTap: () {
-                    Navigator.pop(context);
+                    Navigator.of(context).pop();
                     context.go('/newsletter');
                   },
                 ),
                 _buildDrawerItem(
                   title: 'اتصل بنا',
                   onTap: () {
-                    Navigator.pop(context);
+                    Navigator.of(context).pop();
                     context.go('/contact');
                   },
                 ),
                 _buildDrawerItem(
                   title: 'شروط الاستخدام',
                   onTap: () {
-                    Navigator.pop(context);
+                    Navigator.of(context).pop();
                     context.go('/terms');
                   },
                 ),
                 _buildDrawerItem(
                   title: 'سياسة الخصوصية',
                   onTap: () {
-                    Navigator.pop(context);
+                    Navigator.of(context).pop();
                     context.go('/privacy');
                   },
                 ),
                 _buildDrawerItem(
                   title: 'عن البرنامج',
                   onTap: () {
-                    Navigator.pop(context);
+                    Navigator.of(context).pop();
                     context.go('/about');
                   },
                 ),
