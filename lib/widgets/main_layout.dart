@@ -25,7 +25,9 @@ class _MainLayoutState extends State<MainLayout> {
   @override
   void initState() {
     super.initState();
-    _loadSections();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadSections();
+    });
   }
 
   Future<void> _loadSections() async {
