@@ -94,14 +94,9 @@ class ApiService {
       final connectivityResult = await Connectivity().checkConnectivity();
 
       // Handle both single ConnectivityResult and List<ConnectivityResult>
-      if (connectivityResult is List) {
-        // New API returns List<ConnectivityResult>
-        final results = connectivityResult as List<ConnectivityResult>;
-        return results.isNotEmpty && !results.contains(ConnectivityResult.none);
-      } else {
-        // Old API returns single ConnectivityResult
-        return connectivityResult != ConnectivityResult.none;
-      }
+      // New API returns List<ConnectivityResult>
+      final results = connectivityResult;
+      return results.isNotEmpty && !results.contains(ConnectivityResult.none);
     } catch (e) {
       debugPrint("Error checking connectivity: $e");
       // If connectivity check fails, assume we have connection and let network request handle the actual error
