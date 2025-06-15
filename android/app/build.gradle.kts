@@ -9,17 +9,25 @@ android {
     namespace = "com.example.shorouk_news"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = "27.0.12077973"  // Updated NDK version
-
+    
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
         isCoreLibraryDesugaringEnabled = true  // Enable core library desugaring
     }
-
+    
     kotlinOptions {
         jvmTarget = JavaVersion.VERSION_11.toString()
     }
-
+    
+    // Add detailed compiler warnings
+    tasks.withType<JavaCompile> {
+        options.compilerArgs.addAll(listOf(
+            "-Xlint:deprecation",
+            "-Xlint:unchecked"
+        ))
+    }
+    
     defaultConfig {
         // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
         applicationId = "com.example.shorouk_news"
@@ -30,7 +38,7 @@ android {
         versionCode = flutter.versionCode
         versionName = flutter.versionName
     }
-
+    
     buildTypes {
         release {
             // TODO: Add your own signing config for the release build.
