@@ -361,7 +361,7 @@ class NotificationService {
         tzScheduledDate,
         notificationDetails,
         androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-        uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.absoluteTime,
+      //  uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.absoluteTime,
         payload: jsonEncode(payload.toJson()),
         matchDateTimeComponents: DateTimeComponents.time, // Or .dateAndTime depending on needs
       );

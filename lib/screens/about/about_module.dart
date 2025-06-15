@@ -40,7 +40,8 @@ class AppInfo {
 }
 
 /// Data class for holding device information.
-class DeviceInfoModel { // Renamed to avoid conflict with DeviceInfo from device_info_plus
+class DeviceInfoModel {
+  // Renamed to avoid conflict with DeviceInfo from device_info_plus
   final String deviceType;
   final String deviceModel;
   final String osVersion;
@@ -100,7 +101,7 @@ class AboutModule {
   static const String companyName = 'جريدة الشروق';
   static const String supportEmail = 'support@shorouknews.com';
   static const String websiteUrl = 'https://www.shorouknews.com';
-  
+
   // Social media links
   static const Map<String, String> socialLinks = {
     'facebook': 'https://www.facebook.com/shorouknews',
@@ -128,7 +129,8 @@ class AboutModule {
   static const Map<String, String> legalInfo = {
     'copyright': '© ${2025} جريدة الشروق. جميع الحقوق محفوظة.', // Dynamic year
     'license': 'مرخص لجريدة الشروق المصرية للاستخدام عبر هذا التطبيق.',
-    'disclaimer': 'جميع المحتويات المنشورة تعبر عن رأي كاتبيها ولا تعكس بالضرورة رأي المؤسسة.',
+    'disclaimer':
+        'جميع المحتويات المنشورة تعبر عن رأي كاتبيها ولا تعكس بالضرورة رأي المؤسسة.',
   };
 
   // Instance members for services if non-static methods need them
@@ -139,13 +141,14 @@ class AboutModule {
   static Future<AppInfo> getAppInfo() async {
     try {
       final packageInfo = await PackageInfo.fromPlatform();
-      
+
       return AppInfo(
         appName: packageInfo.appName,
         packageName: packageInfo.packageName,
         version: packageInfo.version,
         buildNumber: packageInfo.buildNumber,
-        buildSignature: packageInfo.buildSignature, // May be empty on some platforms
+        buildSignature:
+            packageInfo.buildSignature, // May be empty on some platforms
         installerStore: packageInfo.installerStore ?? 'unknown',
       );
     } catch (e) {
@@ -172,20 +175,21 @@ class AboutModule {
     String identifier = 'unknown_id';
     bool isPhysicalDevice = true; // Assume physical unless known otherwise
     Map<String, dynamic> additionalInfo = {};
-    
+
     try {
       if (Platform.isAndroid) {
         final androidInfo = await deviceInfoPlugin.androidInfo;
         deviceType = 'Android';
         deviceModel = '${androidInfo.manufacturer} ${androidInfo.model}';
-        osVersion = 'Android ${androidInfo.version.release} (API ${androidInfo.version.sdkInt})';
+        osVersion =
+            'Android ${androidInfo.version.release} (API ${androidInfo.version.sdkInt})';
         platform = 'Android';
         identifier = androidInfo.id; // Use id, androidId is deprecated
         isPhysicalDevice = androidInfo.isPhysicalDevice;
         additionalInfo = {
           'brand': androidInfo.brand,
           'device': androidInfo.device,
-          'display': androidInfo.displayMetrics.toString(), // More detailed display info
+          // 'display': androidInfo.displayMetrics.toString(), // More detailed display info
           'fingerprint': androidInfo.fingerprint,
           'hardware': androidInfo.hardware,
           'host': androidInfo.host,
@@ -217,7 +221,7 @@ class AboutModule {
     } catch (e) {
       debugPrint('Error getting device info: $e');
     }
-    
+
     return DeviceInfoModel(
       deviceType: deviceType,
       deviceModel: deviceModel,
@@ -233,7 +237,7 @@ class AboutModule {
   static Future<SystemInfo> getSystemInfo() async {
     final appInfo = await getAppInfo();
     final deviceInfo = await getDeviceInfo(); // Uses renamed DeviceInfoModel
-    
+
     return SystemInfo(
       appInfo: appInfo,
       deviceInfo: deviceInfo,
@@ -256,7 +260,8 @@ class AboutModule {
   }
 
   // Open email client
-  static Future<void> openEmail(String email, {String? subject, String? body}) async {
+  static Future<void> openEmail(String email,
+      {String? subject, String? body}) async {
     try {
       final uri = Uri(
         scheme: 'mailto',
@@ -266,7 +271,7 @@ class AboutModule {
           if (body != null && body.isNotEmpty) 'body': body,
         }),
       );
-      
+
       if (!await launchUrl(uri)) {
         throw Exception('Could not launch email client for $email');
       }
@@ -293,7 +298,7 @@ $appDescription
 
 #الشروق #أخبار #مصر
       '''; // Remember to replace YOUR_APP_STORE_ID_HERE
-      
+
       await Share.share(
         shareText,
         subject: 'تطبيق ${appInfo.appName}',
@@ -305,12 +310,15 @@ $appDescription
   }
 
   // Copy to clipboard
-  static Future<void> copyToClipboard(String text, {BuildContext? context}) async {
+  static Future<void> copyToClipboard(String text,
+      {BuildContext? context}) async {
     try {
       await Clipboard.setData(ClipboardData(text: text));
       if (context != null && context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('تم النسخ إلى الحافظة'), duration: Duration(seconds: 2)),
+          const SnackBar(
+              content: Text('تم النسخ إلى الحافظة'),
+              duration: Duration(seconds: 2)),
         );
       }
     } catch (e) {
@@ -324,20 +332,23 @@ $appDescription
     try {
       final appInfo = await getAppInfo();
       String storeUrl;
-      
+
       if (Platform.isAndroid) {
         storeUrl = 'market://details?id=${appInfo.packageName}';
         // Fallback for web if market URI fails or Play Store not installed
-        final webStoreUrl = 'https://play.google.com/store/apps/details?id=${appInfo.packageName}';
-        if (!await launchUrl(Uri.parse(storeUrl), mode: LaunchMode.externalApplication)) {
-            await openUrl(webStoreUrl);
+        final webStoreUrl =
+            'https://play.google.com/store/apps/details?id=${appInfo.packageName}';
+        if (!await launchUrl(Uri.parse(storeUrl),
+            mode: LaunchMode.externalApplication)) {
+          await openUrl(webStoreUrl);
         }
       } else if (Platform.isIOS) {
         // IMPORTANT: Replace 'YOUR_APP_STORE_ID_HERE' with your actual Apple App Store ID
-        storeUrl = 'https://apps.apple.com/app/idYOUR_APP_STORE_ID_HERE'; 
+        storeUrl = 'https://apps.apple.com/app/idYOUR_APP_STORE_ID_HERE';
         await openUrl(storeUrl);
       } else {
-        debugPrint('Rating not supported on this platform: ${Platform.operatingSystem}');
+        debugPrint(
+            'Rating not supported on this platform: ${Platform.operatingSystem}');
         return; // Or throw an exception
       }
     } catch (e) {
@@ -345,7 +356,8 @@ $appDescription
       // General fallback if specific platform logic fails
       final appInfo = await getAppInfo();
       if (Platform.isAndroid) {
-        await openUrl('https://play.google.com/store/apps/details?id=${appInfo.packageName}');
+        await openUrl(
+            'https://play.google.com/store/apps/details?id=${appInfo.packageName}');
       } else if (Platform.isIOS) {
         await openUrl('https://apps.apple.com/app/idYOUR_APP_STORE_ID_HERE');
       }
@@ -356,7 +368,8 @@ $appDescription
   static Future<void> sendFeedback() async {
     try {
       final systemInfo = await getSystemInfo();
-      final subject = 'ملاحظات على تطبيق الشروق - إصدار ${systemInfo.appInfo.version}';
+      final subject =
+          'ملاحظات على تطبيق الشروق - إصدار ${systemInfo.appInfo.version}';
       final body = '''
 مرحباً فريق الشروق،
 
@@ -372,7 +385,7 @@ $appDescription
 معرف الجهاز: ${systemInfo.deviceInfo.identifier}
 التاريخ: ${systemInfo.timestamp.toIso8601String()}
       ''';
-      
+
       await openEmail(supportEmail, subject: subject, body: body);
     } catch (e) {
       debugPrint('Error preparing feedback email: $e');
@@ -414,7 +427,7 @@ $appDescription
 معرف الجهاز: ${systemInfo.deviceInfo.identifier}
 التاريخ: ${systemInfo.timestamp.toIso8601String()}
       ''';
-      
+
       await openEmail(supportEmail, subject: subject, body: body);
     } catch (e) {
       debugPrint('Error preparing bug report email: $e');
@@ -471,7 +484,8 @@ $appDescription
         'rating': '4.3', // Placeholder
         'lastUpdated': '2025-05-20', // Placeholder
         'supportedLanguages': ['العربية'],
-        'minOSVersion': Platform.isAndroid ? 'Android 5.0 (Lollipop)' : 'iOS 12.0',
+        'minOSVersion':
+            Platform.isAndroid ? 'Android 5.0 (Lollipop)' : 'iOS 12.0',
         'appSize': Platform.isAndroid ? '~20 MB' : '~35 MB', // Approximate
         'currentVersion': systemInfo.appInfo.version,
         'buildNumber': systemInfo.appInfo.buildNumber,
@@ -497,7 +511,7 @@ $appDescription
     return '''
 سياسة الخصوصية لتطبيق الشروق نيوز
 
-آخر تحديث: ${DateTime.now().year}-${DateTime.now().month.toString().padLeft(2,'0')}-${DateTime.now().day.toString().padLeft(2,'0')}
+آخر تحديث: ${DateTime.now().year}-${DateTime.now().month.toString().padLeft(2, '0')}-${DateTime.now().day.toString().padLeft(2, '0')}
 
 مقدمة:
 نحن في جريدة الشروق ("نحن"، "لنا"، أو "الخاص بنا") نحترم خصوصيتك ونلتزم بحمايتها من خلال امتثالنا لهذه السياسة.
@@ -534,7 +548,7 @@ $appDescription
     return '''
 شروط استخدام تطبيق الشروق نيوز
 
-آخر تحديث: ${DateTime.now().year}-${DateTime.now().month.toString().padLeft(2,'0')}-${DateTime.now().day.toString().padLeft(2,'0')}
+آخر تحديث: ${DateTime.now().year}-${DateTime.now().month.toString().padLeft(2, '0')}-${DateTime.now().day.toString().padLeft(2, '0')}
 
 مقدمة:
 مرحباً بك في تطبيق الشروق نيوز. باستخدامك لهذا التطبيق، فإنك توافق على الالتزام بهذه الشروط والأحكام.
@@ -562,6 +576,7 @@ $appDescription
     // If _apiService or _firebaseService had their own dispose methods that needed calling:
     // _apiService.dispose();
     // _firebaseService.dispose();
-    debugPrint('AboutModule disposed (if instance methods were used extensively).');
+    debugPrint(
+        'AboutModule disposed (if instance methods were used extensively).');
   }
 }
