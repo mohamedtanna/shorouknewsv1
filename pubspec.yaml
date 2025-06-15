@@ -65,7 +65,6 @@ dependencies:
   
   # Icons and fonts
   flutter_svg: ^2.0.9
-  flutter_local_notifications: ^19.2.1
   video_player: ^2.10.0
   timezone: ^0.10.1
 

@@ -18,15 +18,13 @@ import '../screens/terms/terms_screen.dart';
 import '../screens/privacy/privacy_screen.dart';
 import '../screens/search/search_screen.dart'; // Assumes this contains the SearchScreen class
 import '../screens/search/search_results_screen.dart'; // Assumes this contains SearchResultsScreen
-import '../screens/notifications/notifications_screen.dart';
-import '../screens/notifications/notification_detail_screen.dart';
 import '../screens/gallery/photo_gallery_screen.dart';
 import '../screens/gallery/image_viewer_screen.dart';
 import '../screens/error/error_screen.dart';
 
 // Import models if passed via 'extra'
 import 'package:shorouk_news/models/new_model.dart';
-import '../services/notification_service.dart' show NotificationPayload;
+//import '../services/notification_service.dart' show NotificationPayload;
 
 // Import the main layout shell
 import '../widgets/main_layout.dart';
@@ -172,24 +170,6 @@ class AppRouter {
               final decodedQuery = Uri.decodeComponent(query);
               // This assumes SearchResultsScreen class is correctly defined in search_results_screen.dart
               return SearchResultsScreen(query: decodedQuery);
-            },
-          ),
-          GoRoute(
-            path: '/notifications',
-            name: 'notifications',
-            builder: (context, state) => const NotificationsScreen(),
-          ),
-          GoRoute(
-            path: '/notification-detail',
-            name: 'notification-detail',
-            builder: (context, state) {
-              final NotificationPayload? notification =
-                  state.extra as NotificationPayload?;
-              if (notification != null) {
-                return NotificationDetailScreen(notification: notification);
-              }
-              return const ErrorScreen(
-                  errorMessage: 'تفاصيل الإشعار غير متوفرة.');
             },
           ),
           GoRoute(
