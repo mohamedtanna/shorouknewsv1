@@ -36,9 +36,9 @@ dependencies:
   flutter_html_iframe: ^3.0.0
   
   # Push notifications
-  firebase_core: ^2.24.2
-  firebase_messaging: ^14.7.9
-  firebase_in_app_messaging: ^0.8.1+7
+  firebase_core: any
+  firebase_messaging: any
+  firebase_in_app_messaging: any
   # firebase_analytics: ^10.7.4
   
   # Social sharing
