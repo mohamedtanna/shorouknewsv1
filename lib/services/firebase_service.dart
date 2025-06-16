@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:firebase_in_app_messaging/firebase_in_app_messaging.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'notification_service.dart';
@@ -21,6 +22,8 @@ class FirebaseService {
     try {
       await Firebase.initializeApp();
       _messaging = FirebaseMessaging.instance;
+      // Initialize Firebase In-App Messaging
+      FirebaseInAppMessaging.instance.triggerEvent('app_launch');
 
       NotificationSettings settings = await _messaging.requestPermission();
       debugPrint('Firebase Messaging permission status: ${settings.authorizationStatus}');
