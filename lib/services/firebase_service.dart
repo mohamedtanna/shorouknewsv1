@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:firebase_core/firebase_core.dart';
+import '../firebase_options.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:firebase_in_app_messaging/firebase_in_app_messaging.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -20,7 +21,9 @@ class FirebaseService {
   /// Initializes Firebase and Firebase Messaging.
   Future<void> initialize() async {
     try {
-      await Firebase.initializeApp();
+      await Firebase.initializeApp(
+        options: DefaultFirebaseOptions.currentPlatform,
+      );
       _messaging = FirebaseMessaging.instance;
       // Initialize Firebase In-App Messaging
       FirebaseInAppMessaging.instance.triggerEvent('app_launch');
@@ -120,7 +123,9 @@ class FirebaseService {
 
 /// Top level background message handler used by Firebase Messaging.
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
-  await Firebase.initializeApp();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
   final notification = message.notification;
   final data = message.data;
   if (notification != null) {
