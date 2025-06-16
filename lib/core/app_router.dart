@@ -24,6 +24,7 @@ import '../screens/notifications/notifications_screen.dart';
 import '../screens/notifications/notification_detail_screen.dart';
 import '../services/notification_service.dart' show NotificationPayload;
 import '../screens/error/error_screen.dart';
+import '../screens/splash/splash_screen.dart';
 
 // Import models if passed via 'extra'
 import 'package:shorouk_news/models/new_model.dart';
@@ -34,9 +35,14 @@ import '../widgets/main_layout.dart';
 
 class AppRouter {
   static final GoRouter router = GoRouter(
-    initialLocation: '/home',
+    initialLocation: '/splash',
     debugLogDiagnostics: true,
     routes: [
+      GoRoute(
+        path: '/splash',
+        name: 'splash',
+        builder: (context, state) => const SplashScreen(),
+      ),
       ShellRoute(
         builder: (context, state, child) {
           return MainLayout(child: child);
