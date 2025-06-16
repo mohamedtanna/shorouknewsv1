@@ -20,6 +20,9 @@ import '../screens/search/search_screen.dart'; // Assumes this contains the Sear
 import '../screens/search/search_results_screen.dart'; // Assumes this contains SearchResultsScreen
 import '../screens/gallery/photo_gallery_screen.dart';
 import '../screens/gallery/image_viewer_screen.dart';
+import '../screens/notifications/notifications_screen.dart';
+import '../screens/notifications/notification_detail_screen.dart';
+import '../services/notification_service.dart' show NotificationPayload;
 import '../screens/error/error_screen.dart';
 
 // Import models if passed via 'extra'
@@ -154,6 +157,22 @@ class AppRouter {
             path: '/privacy',
             name: 'privacy',
             builder: (context, state) => const PrivacyScreen(),
+          ),
+          GoRoute(
+            path: '/notifications',
+            name: 'notifications',
+            builder: (context, state) => const NotificationsScreen(),
+          ),
+          GoRoute(
+            path: '/notification-detail',
+            name: 'notification-detail',
+            builder: (context, state) {
+              final payload = state.extra as NotificationPayload?;
+              if (payload != null) {
+                return NotificationDetailScreen(notification: payload);
+              }
+              return const ErrorScreen(errorMessage: 'بيانات الإشعار غير متوفرة');
+            },
           ),
           GoRoute(
             path: '/search',
