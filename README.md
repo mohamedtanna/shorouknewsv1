@@ -14,3 +14,10 @@ A few resources to get you started if this is your first Flutter project:
 For help getting started with Flutter development, view the
 [online documentation](https://docs.flutter.dev/), which offers tutorials,
 samples, guidance on mobile development, and a full API reference.
+
+## Push Notifications
+
+This project integrates Firebase Cloud Messaging together with
+`flutter_local_notifications` to display notifications when messages arrive.
+Ensure you have added the appropriate Firebase configuration files for each
+platform before building the app.
