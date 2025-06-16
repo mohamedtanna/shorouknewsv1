@@ -336,7 +336,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         : (bool value) {
                             settingsProvider.toggleSection(section.id, value);
                           },
-                    activeColor: AppTheme.tertiaryColor, // Use a distinct active color
+                    activeThumbColor: AppTheme.tertiaryColor, // Use a distinct active color
                     dense: true, // Makes the tile more compact
                     contentPadding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 4.0),
                   ),
