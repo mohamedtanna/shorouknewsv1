@@ -1,9 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
-import 'package:firebase_core/firebase_core.dart';
-import 'firebase_options.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
 // import 'package:google_mobile_ads/google_mobile_ads.dart';
 
 import 'core/app_router.dart';
@@ -14,13 +11,6 @@ import 'providers/auth_provider.dart';
 import 'services/firebase_service.dart';
 import 'services/notification_service.dart';
 
-// Firebase background message handler
-Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
-  await FirebaseService().initialize();
-}
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -31,7 +21,6 @@ void main() async {
   // Initialize Mobile Ads
   // MobileAds.instance.initialize();
 
-  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
 
   // Set preferred orientations
   SystemChrome.setPreferredOrientations([
