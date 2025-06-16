@@ -1,0 +1,28 @@
+{
+  "project_info": {
+    "project_number": "767709623298",
+    "project_id": "shorouknewsapp",
+    "storage_bucket": "shorouknewsapp.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:767709623298:android:TODO_APP_ID",
+        "android_client_info": {
+          "package_name": "com.priland.shorouknews"
+        }
+      },
+      "api_key": [
+        {
+          "current_key": "AAAAsr8PNAI:APA91bEMkBjBBLZb2B4qsrmVcSaxkn7VbpwurKlaRQcx6I2_6fveS42fF-d6XuRzY1wNwnbulfrapLyRFO-qSLNtbeAWC5NXD8g6wEOt0uBKGX9CVH73L6XFf-jbRXZCrJ9t-CyUPgAi"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
