@@ -255,16 +255,16 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
               Positioned.fill(
                 child: Container(
-                  decoration: const BoxDecoration(
+                  decoration: BoxDecoration(
                     gradient: LinearGradient(
                       begin: Alignment.topCenter,
                       end: Alignment.bottomCenter,
                       colors: [
                         Colors.transparent,
-                        // Colors.black.withOpacity(0.3),
-                        // Colors.black.withOpacity(0.8),
+                        Colors.black.withOpacity(0.3),
+                        Colors.black.withOpacity(0.8),
                       ],
-                      stops: [0.0, 0.6, 1.0],
+                      stops: const [0.0, 0.6, 1.0],
                     ),
                   ),
                 ),
