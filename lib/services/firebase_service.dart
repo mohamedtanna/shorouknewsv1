@@ -63,10 +63,6 @@ class FirebaseService {
     return prefs.getStringList('user_subscribed_fcm_topics') ?? [];
   }
 
-  /// Exposes saving of subscribed topics for callers outside this service.
-  Future<void> saveSubscribedTopicsToLocal(List<String> topics) async {
-    await _saveSubscribedTopicsToLocal(topics);
-  }
 
   Future<void> _saveSubscribedTopicsToLocal(List<String> topics) async {
     final prefs = await SharedPreferences.getInstance();
