@@ -237,6 +237,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: CachedNetworkImage(
                   imageUrl: mainStory.photoUrl,
                   fit: BoxFit.cover,
+                  filterQuality: FilterQuality.high,
                   placeholder: (context, url) => Shimmer.fromColors(
                     baseColor: AppTheme.dividerColor,
                     highlightColor: AppTheme.surfaceVariant,
@@ -348,6 +349,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     ? story.thumbnailPhotoUrl
                     : story.photoUrl,
                 fit: BoxFit.cover,
+                filterQuality: FilterQuality.high,
                 placeholder: (context, url) => Container(
                   color: Colors.grey[300],
                   child: const Center(
@@ -544,6 +546,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   width: 100,
                   height: 80,
                   fit: BoxFit.cover,
+                  filterQuality: FilterQuality.high,
                   placeholder: (context, url) => Container(
                     width: 100,
                     height: 80,

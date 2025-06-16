@@ -823,6 +823,7 @@ class _AuthorsListScreenState extends State<AuthorsListScreen>
                 child: CachedNetworkImage(
                   imageUrl: author.photoUrl,
                   fit: BoxFit.cover,
+                  filterQuality: FilterQuality.high,
                   placeholder: (context, url) => Container(
                     color: Colors.grey[300],
                     child: const Icon(Icons.person),
@@ -896,6 +897,7 @@ class _AuthorsListScreenState extends State<AuthorsListScreen>
                         child: CachedNetworkImage(
                           imageUrl: author.photoUrl,
                           fit: BoxFit.cover,
+                          filterQuality: FilterQuality.high,
                           placeholder: (context, url) => Container(
                             color: Colors.grey[300],
                             child: const Icon(Icons.person, size: 40),
@@ -1015,6 +1017,7 @@ Widget _buildAuthorListCard(AuthorModel author) {
                         child: CachedNetworkImage(
                           imageUrl: author.photoUrl,
                           fit: BoxFit.cover,
+                          filterQuality: FilterQuality.high,
                           placeholder: (context, url) => Container(
                             color: Colors.grey[300],
                             child: const Icon(Icons.person, size: 30),

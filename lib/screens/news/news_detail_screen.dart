@@ -395,6 +395,7 @@ class _NewsDetailScreenState extends State<NewsDetailScreen> {
               child: CachedNetworkImage(
                 imageUrl: _newsDetail!.photoUrl,
                 fit: BoxFit.cover,
+                filterQuality: FilterQuality.high,
                 placeholder: (context, url) => Shimmer.fromColors(
                   baseColor: Colors.grey[300]!,
                   highlightColor: Colors.grey[100]!,
@@ -669,6 +670,7 @@ class _NewsDetailScreenState extends State<NewsDetailScreen> {
                                 ? photo.thumbnailPhotoUrl
                                 : photo.photoUrl,
                             fit: BoxFit.cover,
+                            filterQuality: FilterQuality.high,
                             placeholder: (context, url) => Shimmer.fromColors(
                                 baseColor: Colors.grey[300]!,
                                 highlightColor: Colors.grey[100]!,
