@@ -8,13 +8,12 @@ import 'core/theme.dart';
 import 'providers/news_provider.dart';
 import 'providers/settings_provider.dart';
 import 'providers/auth_provider.dart';
-import 'services/notification_service.dart';
+
 
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  await NotificationService().initialize();
 
   // Initialize Mobile Ads
   // MobileAds.instance.initialize();

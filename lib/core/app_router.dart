@@ -22,13 +22,13 @@ import '../screens/gallery/photo_gallery_screen.dart';
 import '../screens/gallery/image_viewer_screen.dart';
 import '../screens/notifications/notifications_screen.dart';
 import '../screens/notifications/notification_detail_screen.dart';
-import '../services/notification_service.dart' show NotificationPayload;
+import '../screens/notifications/notifications_module.dart'
+    show NotificationPayload;
 import '../screens/error/error_screen.dart';
 import '../screens/splash/splash_screen.dart';
 
 // Import models if passed via 'extra'
 import 'package:shorouk_news/models/new_model.dart';
-//import '../services/notification_service.dart' show NotificationPayload;
 
 // Import the main layout shell
 import '../widgets/main_layout.dart';
