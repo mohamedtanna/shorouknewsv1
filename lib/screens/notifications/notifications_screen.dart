@@ -3,7 +3,6 @@ import 'package:go_router/go_router.dart';
 // If you decide to use a provider for notifications state
 import 'package:shimmer/shimmer.dart';
 
-import '../../services/notification_service.dart'; // Your main notification service
 import '../../core/theme.dart';
 // import '../../widgets/ad_banner.dart';
 import 'notifications_module.dart'; // For utility functions like formatting
@@ -18,7 +17,6 @@ class NotificationsScreen extends StatefulWidget {
 class _NotificationsScreenState extends State<NotificationsScreen> {
   List<NotificationPayload> _notifications = [];
   bool _isLoading = true;
-  final NotificationService _notificationService = NotificationService();
 
   @override
   void initState() {
@@ -28,9 +26,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
 
   Future<void> _loadNotifications() async {
     setState(() => _isLoading = true);
-    // Ensure service is initialized (it should handle its own initialization state)
-    await _notificationService.initialize();
-    final history = _notificationService.getNotificationHistory();
+    final history = await NotificationsModule.loadNotificationHistory();
     if (mounted) {
       setState(() {
         _notifications = List.from(history); // Make a mutable copy
@@ -61,7 +57,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
     );
 
     if (confirm == true) {
-      await _notificationService.clearNotificationHistory();
+      await NotificationsModule.clearNotificationHistory();
       _loadNotifications(); // Refresh the list
     }
   }

@@ -5,9 +5,8 @@ import 'package:go_router/go_router.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import '../../services/notification_service.dart'; // For NotificationPayload
+import 'notifications_module.dart'; // For NotificationPayload and utilities
 import '../../core/theme.dart';
-import 'notifications_module.dart'; // For utility functions
 
 class NotificationDetailScreen extends StatelessWidget {
   final NotificationPayload notification;
