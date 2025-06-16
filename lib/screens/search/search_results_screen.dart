@@ -177,18 +177,9 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        automaticallyImplyLeading: false,
         title: Text('نتائج البحث عن: "${widget.query}"',
             style: const TextStyle(fontSize: 18)),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () {
-            if (context.canPop()) {
-              context.pop();
-            } else {
-              context.push('/search'); // Fallback to search screen if cannot pop
-            }
-          },
-        ),
       ),
         body: Column(
           children: [
