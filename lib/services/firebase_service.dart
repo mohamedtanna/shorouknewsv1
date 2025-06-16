@@ -11,7 +11,7 @@ class FirebaseService {
   factory FirebaseService() => _instance;
   FirebaseService._internal();
 
-  final FirebaseMessaging _messaging = FirebaseMessaging.instance;
+  late final FirebaseMessaging _messaging;
   String? _fcmToken;
 
   String? get fcmToken => _fcmToken;
@@ -20,6 +20,7 @@ class FirebaseService {
   Future<void> initialize() async {
     try {
       await Firebase.initializeApp();
+      _messaging = FirebaseMessaging.instance;
 
       NotificationSettings settings = await _messaging.requestPermission();
       debugPrint('Firebase Messaging permission status: ${settings.authorizationStatus}');
