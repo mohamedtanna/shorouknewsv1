@@ -167,11 +167,8 @@ class _AboutScreenState extends State<AboutScreen> with TickerProviderStateMixin
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        automaticallyImplyLeading: false,
         title: const Text('عن البرنامج'),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => context.pop(),
-        ),
         actions: [
           IconButton(
             icon: Icon(_isCheckingUpdates ? Icons.hourglass_empty : Icons.system_update),

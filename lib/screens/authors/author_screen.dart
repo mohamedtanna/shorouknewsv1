@@ -257,16 +257,7 @@ class _AuthorScreenState extends State<AuthorScreen>
   PreferredSizeWidget _buildAppBar() {
     return AppBar(
       title: Text(_author?.arName ?? 'الكاتب'),
-      leading: IconButton(
-        icon: const Icon(Icons.arrow_back),
-        onPressed: () {
-          if (context.canPop()) {
-            context.pop();
-          } else {
-            context.push('/authors');
-          } 
-        },
-      ),
+      automaticallyImplyLeading: false,
       actions: [
         if (_author != null) ...[
           IconButton(
