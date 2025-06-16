@@ -17,17 +17,5 @@ samples, guidance on mobile development, and a full API reference.
 
 ## Push Notifications
 
-This project integrates Firebase Cloud Messaging together with
-`flutter_local_notifications` to display notifications when messages arrive.
-Ensure you have added the appropriate Firebase configuration files for each
-platform before building the app.
-
-The repository includes a `lib/firebase_options.dart` file with placeholder
-values. Replace these placeholders with your actual Firebase project settings
-or regenerate the file using the FlutterFire CLI:
-
-```bash
-flutterfire configure
-```
-
-After updating the configuration, rebuild the application.
+Firebase Cloud Messaging support has been removed from this project.
+Local notifications remain available through `flutter_local_notifications`.
