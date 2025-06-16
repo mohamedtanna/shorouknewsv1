@@ -6,7 +6,6 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:share_plus/share_plus.dart';
 import 'dart:io' show Platform; // Explicitly import Platform
 
-import '../../services/firebase_service.dart';
 import '../../services/api_service.dart';
 
 /// Data class for holding application information.
@@ -133,8 +132,7 @@ class AboutModule {
         'جميع المحتويات المنشورة تعبر عن رأي كاتبيها ولا تعكس بالضرورة رأي المؤسسة.',
   };
 
-  // Instance members for services if non-static methods need them
-  final FirebaseService _firebaseService = FirebaseService();
+  // Instance member for services if non-static methods need them
   final ApiService _apiService = ApiService();
 
   // Get app information
@@ -444,16 +442,10 @@ $appDescription
     }
   }
 
-  // Track app version click (Instance method as it uses _firebaseService)
+  // Track app version click
   Future<void> trackVersionClick() async {
     try {
-      // Corrected: Call announceUserForVersionTracking
-      await _firebaseService.announceUserForVersionTracking();
-      // Corrected: Call logAnalyticsEvent
-      await _firebaseService.logAnalyticsEvent('version_clicked', parameters: {
-        'timestamp': DateTime.now().millisecondsSinceEpoch,
-      });
-      debugPrint("Version click tracked.");
+      debugPrint('Version click tracked.');
     } catch (e) {
       debugPrint('Error tracking version click: $e');
     }
@@ -571,11 +563,10 @@ $appDescription
   /// Call this method when the module instance is no longer needed,
   /// e.g., if it were managed by a Provider that gets disposed.
   /// For a module with mostly static methods, this might not be strictly necessary
-  /// unless the instance members (_firebaseService, _apiService) need explicit disposal.
+  /// unless the instance member (_apiService) needs explicit disposal.
   void dispose() {
-    // If _apiService or _firebaseService had their own dispose methods that needed calling:
+    // If _apiService had its own dispose method that needed calling:
     // _apiService.dispose();
-    // _firebaseService.dispose();
     debugPrint(
         'AboutModule disposed (if instance methods were used extensively).');
   }

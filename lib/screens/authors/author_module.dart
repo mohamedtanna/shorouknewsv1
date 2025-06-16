@@ -7,7 +7,6 @@ import 'dart:convert';
 import '../../models/additional_models.dart'; // Contains AuthorModel and others
 import '../../models/column_model.dart';
 import '../../services/api_service.dart';
-import '../../services/firebase_service.dart';
 
 // Data class for Author Statistics (if not already in additional_models.dart)
 // Assuming AuthorStats, AuthorSocialLinks, AuthorSearchFilters, AuthorColumnSortBy
@@ -223,7 +222,6 @@ enum AuthorColumnSortBy {
 
 class AuthorModule {
   final ApiService _apiService = ApiService();
-  final FirebaseService _firebaseService = FirebaseService();
 
   // Cache for authors data
   final Map<String, AuthorModel> _authorsCache = {};
@@ -448,16 +446,10 @@ class AuthorModule {
   Future<void> toggleFavoriteAuthor(String authorId) async {
     if (_favoriteAuthorIds.contains(authorId)) {
       _favoriteAuthorIds.remove(authorId);
-      // Corrected: Call logAnalyticsEvent
-      await _firebaseService.logAnalyticsEvent('author_unfavorited', parameters: {
-        'author_id': authorId,
-      });
+      debugPrint('Author unfavorited: $authorId');
     } else {
       _favoriteAuthorIds.add(authorId);
-      // Corrected: Call logAnalyticsEvent
-      await _firebaseService.logAnalyticsEvent('author_favorited', parameters: {
-        'author_id': authorId,
-      });
+      debugPrint('Author favorited: $authorId');
     }
     await _saveFavoriteAuthors();
   }
@@ -510,11 +502,7 @@ class AuthorModule {
   Future<void> _trackAuthorView(String authorId) async {
     _authorVisitHistory[authorId] = DateTime.now();
     await _saveAuthorVisitHistory();
-    // Corrected: Call logAnalyticsEvent
-    await _firebaseService.logAnalyticsEvent('author_viewed', parameters: {
-      'author_id': authorId,
-      'timestamp': DateTime.now().millisecondsSinceEpoch,
-    });
+    debugPrint('Author viewed: $authorId');
   }
 
   Future<void> _saveAuthorVisitHistory() async {
@@ -568,11 +556,7 @@ ${author.description.isNotEmpty ? author.description : 'كاتب ومحلل في
         shareText,
         subject: 'كاتب من الشروق - ${author.arName}',
       );
-      // Corrected: Call logAnalyticsEvent
-      await _firebaseService.logAnalyticsEvent('author_shared', parameters: {
-        'author_id': author.id,
-        'author_name': author.arName,
-      });
+      debugPrint('Author shared: ${author.id}');
     } catch (e) {
       debugPrint('Error sharing author: $e');
       // Do not throw exception to UI, just log.
@@ -603,11 +587,7 @@ ${author.description.isNotEmpty ? author.description : 'كاتب ومحلل في
                (author.description.isNotEmpty && author.description.toLowerCase().contains(query.toLowerCase()));
       }).toList();
 
-      // Corrected: Call logAnalyticsEvent
-      await _firebaseService.logAnalyticsEvent('authors_searched', parameters: {
-        'query': query,
-        'results_count': searchResults.length,
-      });
+      debugPrint('Authors searched: $query, results: ${searchResults.length}');
       return searchResults;
     } catch (e) {
       debugPrint('Error searching authors: $e');
@@ -699,14 +679,7 @@ ${author.description.isNotEmpty ? author.description : 'كاتب ومحلل في
     required String authorId,
     required String columnTitle,
   }) async {
-    await _firebaseService.logAnalyticsEvent(
-      'author_column_shared',
-      parameters: {
-        'column_id': columnId,
-        'author_id': authorId,
-        'column_title': columnTitle,
-      },
-    );
+    debugPrint('Column shared from author screen: $columnId for $authorId');
   }
 
   void dispose() {
