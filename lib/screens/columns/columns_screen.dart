@@ -991,6 +991,7 @@ class _ColumnsScreenState extends State<ColumnsScreen>
                   child: CachedNetworkImage(
                     imageUrl: _author!.photoUrl,
                     fit: BoxFit.cover,
+                    filterQuality: FilterQuality.high,
                     placeholder: (context, url) => Container(
                       color: Colors.grey[300],
                       child: const Icon(Icons.person, size: 40),
@@ -1221,6 +1222,7 @@ class _ColumnsScreenState extends State<ColumnsScreen>
                         child: CachedNetworkImage(
                           imageUrl: column.columnistPhotoUrl,
                           fit: BoxFit.cover,
+                          filterQuality: FilterQuality.high,
                           placeholder: (context, url) => Container(
                             color: Colors.grey[300],
                             child: const Icon(Icons.person, size: 20),
@@ -1385,6 +1387,7 @@ class _ColumnsScreenState extends State<ColumnsScreen>
                         child: CachedNetworkImage(
                           imageUrl: column.columnistPhotoUrl,
                           fit: BoxFit.cover,
+                          filterQuality: FilterQuality.high,
                           placeholder: (context, url) => Container(
                             color: Colors.grey[300],
                             child: const Icon(Icons.person, size: 18),
@@ -1545,6 +1548,7 @@ class _ColumnsScreenState extends State<ColumnsScreen>
                         child: CachedNetworkImage(
                           imageUrl: column.columnistPhotoUrl,
                           fit: BoxFit.cover,
+                          filterQuality: FilterQuality.high,
                           placeholder: (context, url) => Container(
                             color: Colors.grey[300],
                             child: const Icon(Icons.person, size: 30),
