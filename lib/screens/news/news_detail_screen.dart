@@ -195,6 +195,8 @@ class _NewsDetailScreenState extends State<NewsDetailScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(_newsDetail?.sectionArName ?? 'تفاصيل الخبر'),
+        automaticallyImplyLeading:
+            false, // This enables the default back button
         actions: [
           if (_newsDetail != null)
             IconButton(
