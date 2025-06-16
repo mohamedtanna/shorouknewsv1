@@ -252,6 +252,7 @@ class _PhotoGalleryScreenState extends State<PhotoGalleryScreen> {
                     ? photo.thumbnailPhotoUrl
                     : photo.photoUrl, // Fallback to full photo if thumb is empty
                 fit: BoxFit.cover,
+                filterQuality: FilterQuality.high,
                 placeholder: (context, url) => Shimmer.fromColors(
                   baseColor: Colors.grey[300]!,
                   highlightColor: Colors.grey[100]!,

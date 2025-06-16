@@ -116,6 +116,7 @@ class NewsCard extends StatelessWidget {
                 width: 100,
                 height: 80,
                 fit: BoxFit.cover,
+                filterQuality: FilterQuality.high,
                 placeholder: (context, url) => Container(
                   width: 100,
                   height: 80,
@@ -167,6 +168,7 @@ class NewsCard extends StatelessWidget {
                   CachedNetworkImage(
                     imageUrl: article.photoUrl,
                     fit: BoxFit.cover,
+                    filterQuality: FilterQuality.high,
                     placeholder: (context, url) => Container(
                       color: AppTheme.surfaceVariant,
                       child: const Center(
