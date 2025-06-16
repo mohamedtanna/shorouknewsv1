@@ -63,6 +63,13 @@ class FirebaseService {
     return prefs.getStringList('user_subscribed_fcm_topics') ?? [];
   }
 
+  /// Persists the list of subscribed topics locally so that other
+  /// parts of the app can update the cache without performing FCM
+  /// operations.
+  Future<void> saveSubscribedTopicsToLocal(List<String> topics) async {
+    await _saveSubscribedTopicsToLocal(topics);
+  }
+
 
   Future<void> _saveSubscribedTopicsToLocal(List<String> topics) async {
     final prefs = await SharedPreferences.getInstance();
