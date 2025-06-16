@@ -8,6 +8,7 @@ import '../core/theme.dart';
 class NewsCard extends StatelessWidget {
   final NewsArticle article;
   final VoidCallback? onTap;
+  final VoidCallback? onLongPress;
   final bool isHorizontal;
   final bool showDate;
 
@@ -15,6 +16,7 @@ class NewsCard extends StatelessWidget {
     super.key,
     required this.article,
     this.onTap,
+    this.onLongPress,
     this.isHorizontal = false,
     this.showDate = true,
   });
@@ -31,6 +33,7 @@ class NewsCard extends StatelessWidget {
   Widget _buildHorizontalCard(BuildContext context) {
     return InkWell(
       onTap: onTap,
+      onLongPress: onLongPress,
       child: Container(
         padding: const EdgeInsets.all(12),
         decoration: const BoxDecoration(
@@ -156,6 +159,7 @@ class NewsCard extends StatelessWidget {
       ),
       child: InkWell(
         onTap: onTap,
+        onLongPress: onLongPress,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
