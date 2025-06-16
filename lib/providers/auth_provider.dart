@@ -5,7 +5,6 @@ import 'package:package_info_plus/package_info_plus.dart';
 import 'dart:convert';
 import 'dart:io' show Platform;
 
-import '../services/firebase_service.dart';
 import '../services/api_service.dart';
 
 // User Model (assuming it's defined as you provided)
@@ -104,7 +103,6 @@ class User {
 }
 
 class AuthProvider extends ChangeNotifier {
-  final FirebaseService _firebaseService = FirebaseService();
   final ApiService _apiService = ApiService();
 
   User? _currentUser;
@@ -157,7 +155,6 @@ class AuthProvider extends ChangeNotifier {
 
     try {
       await _loadUserData();
-      await _firebaseService.initialize(); // Ensure Firebase is initialized first
       await _createOrUpdateUser();
       await _loadUserPreferences();
       await _loadAppStatistics();
@@ -207,21 +204,14 @@ class AuthProvider extends ChangeNotifier {
 
   Future<void> _createOrUpdateUser() async {
     try {
-      final fcmToken = _firebaseService.fcmToken; // Assumes FirebaseService.initialize() was called
-      if (fcmToken == null || fcmToken.isEmpty) {
-        debugPrint('FCM token not available for user creation/update.');
-        // Decide if this is a critical error or if the app can proceed without backend user sync
-        // For now, we'll let it proceed but it won't sync with backend.
-        return; 
-      }
-
       final deviceInfoMap = await _getDeviceInfo();
       final packageInfo = await PackageInfo.fromPlatform();
-      final userId = _generateUserId(fcmToken);
-      
+      final seed = deviceInfoMap['deviceId'] as String;
+      final userId = _generateUserId(seed);
+
       _currentUser = User(
         id: userId,
-        fcmToken: fcmToken,
+        fcmToken: '',
         deviceId: deviceInfoMap['deviceId'] as String,
         deviceType: deviceInfoMap['deviceType'] as String,
         deviceModel: deviceInfoMap['deviceModel'] as String,
@@ -234,7 +224,7 @@ class AuthProvider extends ChangeNotifier {
 
       // Call API to create/update user on the backend
       await _apiService.createUser(
-        token: fcmToken,
+        token: '',
         os: _currentUser!.osType,
         deviceType: _currentUser!.deviceType,
         deviceModel: _currentUser!.deviceModel,
@@ -284,9 +274,9 @@ class AuthProvider extends ChangeNotifier {
     };
   }
 
-  String _generateUserId(String fcmToken) {
-    // Using a simple hash of FCM token. Consider a more robust unique ID generation if needed.
-    return fcmToken.hashCode.abs().toString().padLeft(10, '0'); // Ensure some length
+  String _generateUserId(String seed) {
+    // Simple hash-based ID from provided seed.
+    return seed.hashCode.abs().toString().padLeft(10, '0');
   }
 
   Future<void> _loadUserPreferences() async {
@@ -364,11 +354,7 @@ class AuthProvider extends ChangeNotifier {
     _lastUsedDate = DateTime.now();
     await _saveAppStatistics();
     
-    // Corrected: Call logAnalyticsEvent from FirebaseService
-    await _firebaseService.logAnalyticsEvent('app_open', parameters: {
-      'open_count': _appOpenCount,
-      'user_id': _currentUser?.id ?? 'anonymous', // Provide a fallback
-    });
+    debugPrint('App open count: $_appOpenCount');
     
     notifyListeners();
   }
@@ -408,12 +394,7 @@ class AuthProvider extends ChangeNotifier {
     
     try {
       await _apiService.trackNewsView(newsId);
-      // Corrected: Call logAnalyticsEvent from FirebaseService
-      await _firebaseService.logAnalyticsEvent('news_read', parameters: {
-        'news_id': newsId,
-        'user_id': _currentUser?.id ?? 'anonymous',
-        'total_read_count': _newsReadCount,
-      });
+      debugPrint('News read: $newsId');
     } catch (e) {
       debugPrint("Error tracking news view on API/Analytics: $e");
     }
@@ -426,12 +407,7 @@ class AuthProvider extends ChangeNotifier {
     
     try {
       await _apiService.trackVideoView(videoId);
-      // Corrected: Call logAnalyticsEvent from FirebaseService
-      await _firebaseService.logAnalyticsEvent('video_watched', parameters: {
-        'video_id': videoId,
-        'user_id': _currentUser?.id ?? 'anonymous',
-        'total_watched_count': _videosWatchedCount,
-      });
+      debugPrint('Video watched: $videoId');
     } catch (e) {
        debugPrint("Error tracking video view on API/Analytics: $e");
     }
@@ -444,12 +420,7 @@ class AuthProvider extends ChangeNotifier {
     
     try {
       await _apiService.trackColumnView(columnId);
-      // Corrected: Call logAnalyticsEvent from FirebaseService
-      await _firebaseService.logAnalyticsEvent('column_read', parameters: {
-        'column_id': columnId,
-        'user_id': _currentUser?.id ?? 'anonymous',
-        'total_read_count': _columnsReadCount,
-      });
+      debugPrint('Column read: $columnId');
     } catch (e) {
       debugPrint("Error tracking column view on API/Analytics: $e");
     }
@@ -477,14 +448,7 @@ class AuthProvider extends ChangeNotifier {
 
   Future<void> refreshFCMToken() async {
     try {
-      final newToken = await _firebaseService.refreshToken(); // This now re-registers device
-      if (newToken != null && _currentUser != null && _currentUser!.fcmToken != newToken) {
-        _currentUser = _currentUser!.copyWith(fcmToken: newToken);
-        await _saveUserData();
-        // _createOrUpdateUser(); // refreshToken in FirebaseService already calls _registerDeviceWithBackend
-        notifyListeners();
-         debugPrint("AuthProvider: FCM token updated and user data saved.");
-      }
+      debugPrint('refreshFCMToken called but Firebase is disabled.');
     } catch (e) {
       debugPrint('Error refreshing FCM token in AuthProvider: $e');
     }
@@ -492,8 +456,7 @@ class AuthProvider extends ChangeNotifier {
 
   Future<void> announceUser() async {
     try {
-      // Corrected: Call announceUserForVersionTracking from FirebaseService
-      await _firebaseService.announceUserForVersionTracking();
+      debugPrint('announceUser called.');
     } catch (e) {
       debugPrint('Error announcing user from AuthProvider: $e');
     }

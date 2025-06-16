@@ -5,11 +5,9 @@ import 'dart:convert'; // Required for jsonEncode and jsonDecode
 import 'package:shorouk_news/models/new_model.dart';
 import '../models/additional_models.dart'; // For NotificationSettings
 import '../services/api_service.dart';
-import '../services/firebase_service.dart';
 
 class SettingsProvider extends ChangeNotifier {
   final ApiService _apiService = ApiService();
-  final FirebaseService _firebaseService = FirebaseService();
 
   bool _isLoading = false;
   List<NewsSection> _sections = [];
@@ -30,7 +28,7 @@ class SettingsProvider extends ChangeNotifier {
   Set<String> get pendingChanges =>
       Set.unmodifiable(_pendingChanges); // Expose for UI if needed
 
-  // Load settings (sections from API, notification preferences from local storage & Firebase)
+  // Load settings (sections from API and notification preferences from local storage)
   Future<void> loadSettings() async {
     if (_isLoading) return;
 
@@ -44,12 +42,7 @@ class SettingsProvider extends ChangeNotifier {
       // Load user's notification preferences from local storage
       await _loadNotificationSettings();
 
-      // Sync these preferences with the actual FCM subscriptions
-      // This step ensures that what's stored locally reflects what Firebase *should* be doing.
-      // The initial source of truth for *current* subscriptions might be what FirebaseService reports,
-      // or we can assume local settings are the desired state and sync them TO Firebase.
-      // For this implementation, we'll load local, then sync local state with Firebase state.
-      await _syncWithFirebase();
+      // Preferences are stored locally only; Firebase integration removed.
     } catch (e) {
       debugPrint('Error loading settings in SettingsProvider: $e');
       // Optionally, set an error state to be displayed in the UI
@@ -105,63 +98,6 @@ class SettingsProvider extends ChangeNotifier {
     }
   }
 
-  // Sync local settings with Firebase subscriptions state
-  Future<void> _syncWithFirebase() async {
-    if (_sections.isEmpty) {
-      debugPrint("Skipping Firebase sync: Sections not loaded yet.");
-      return;
-    }
-    try {
-      // Corrected: Call getSubscribedTopicsFromLocal from FirebaseService
-      final List<String> subscribedTopics =
-          await _firebaseService.getSubscribedTopicsFromLocal();
-
-      final Map<String, bool> syncedSettings = {};
-      bool settingsChangedBasedOnFirebase = false;
-
-      for (final section in _sections) {
-        final bool isLocallyEnabled =
-            _notificationSettings.sections[section.id] ??
-                false; // Default to false if not in local
-        final bool isSubscribedToFirebase =
-            subscribedTopics.contains(section.id);
-
-        // If there's a mismatch, prioritize what Firebase says for the initial sync,
-        // or decide on a conflict resolution strategy.
-        // For now, let's assume local settings are the "desired state" and FirebaseService
-        // should reflect that. This _syncWithFirebase is more about ensuring the UI
-        // reflects what the app *believes* are the current subscriptions.
-        // A more robust sync might involve comparing and resolving.
-        // Here, we're essentially ensuring our local _notificationSettings map is up-to-date
-        // with what FirebaseService reports as locally cached subscriptions.
-        if (isLocallyEnabled != isSubscribedToFirebase) {
-          // This indicates a potential desync. For now, we'll trust the local settings
-          // and the saveSettings() method will handle the actual Firebase subscribe/unsubscribe.
-          // However, for initial load, it might be better to update local based on Firebase.
-          // Let's update local based on what Firebase thinks it's subscribed to for now.
-          syncedSettings[section.id] = isSubscribedToFirebase;
-          if (isLocallyEnabled != isSubscribedToFirebase) {
-            settingsChangedBasedOnFirebase = true;
-          }
-        } else {
-          syncedSettings[section.id] = isLocallyEnabled;
-        }
-      }
-
-      if (settingsChangedBasedOnFirebase) {
-        _notificationSettings = NotificationSettings(sections: syncedSettings);
-        debugPrint('Notification settings synced with Firebase local cache.');
-        // Persist these synced settings locally
-        await _saveNotificationSettings();
-        notifyListeners(); // Notify if changes were made based on Firebase state
-      } else {
-        debugPrint(
-            'Local notification settings are already in sync with Firebase local cache.');
-      }
-    } catch (e) {
-      debugPrint('Error syncing settings with Firebase: $e');
-    }
-  }
 
   /// Checks if notifications for a given section ID are enabled.
   bool isSectionEnabled(String sectionId) {
@@ -179,7 +115,7 @@ class SettingsProvider extends ChangeNotifier {
     _notificationSettings =
         _notificationSettings.copyWith(sections: updatedSections);
 
-    // Track pending changes for Firebase subscription
+    // Track pending changes for topic subscriptions
     final subscribeKey = 'subscribe_$sectionId';
     final unsubscribeKey = 'unsubscribe_$sectionId';
 
@@ -227,8 +163,7 @@ class SettingsProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// Saves the pending notification settings to Firebase (by subscribing/unsubscribing)
-  /// and persists the settings locally.
+  /// Saves the pending notification settings and persists them locally.
   Future<void> saveSettings() async {
     if (_pendingChanges.isEmpty && !_isLoading) {
       return; // No changes to save or already saving
@@ -249,31 +184,10 @@ class SettingsProvider extends ChangeNotifier {
         }
       }
 
-      // Perform Firebase operations
-      if (toUnsubscribe.isNotEmpty) {
-        await _firebaseService.unsubscribeFromTopics(toUnsubscribe);
-      }
-
-      if (toSubscribe.isNotEmpty) {
-        await _firebaseService.subscribeToTopics(toSubscribe);
-      }
-      // This logic for 'deactivateAll' might be too simplistic if user can have mixed states.
-      // It's better to let FirebaseService handle the 'deactivateAll' logic internally if needed
-      // based on the overall state of subscriptions (e.g., if all user-selectable topics are off).
-      // For now, if toSubscribe is empty AND toUnsubscribe is not, it implies user might be deactivating all.
-      // The FirebaseService's subscribeToTopics/unsubscribeFromTopics should ideally handle this.
-      // Example: if (toUnsubscribe.isNotEmpty && toSubscribe.isEmpty && _notificationSettings.sections.values.every((enabled) => !enabled)) {
-      //   await _firebaseService.subscribeToTopics(['deactivateAll']);
-      // }
+      // Firebase messaging removed; subscriptions are stored locally only.
 
       // Persist the current state of _notificationSettings (which reflects user's choices)
       await _saveNotificationSettings();
-      // Also save the list of topics the app now believes it's subscribed to in FirebaseService's local cache
-      await _firebaseService.saveSubscribedTopicsToLocal(_notificationSettings
-          .sections.entries
-          .where((entry) => entry.value)
-          .map((entry) => entry.key)
-          .toList());
 
       _pendingChanges.clear(); // Clear pending changes after successful save
       debugPrint('Settings saved successfully.');
