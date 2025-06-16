@@ -106,11 +106,8 @@ class _NewsletterScreenState extends State<NewsletterScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        automaticallyImplyLeading: false,
         title: const Text('القائمة البريدية'), // "Newsletter"
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => context.pop(),
-        ),
       ),
         body: SingleChildScrollView(
           child: Column(

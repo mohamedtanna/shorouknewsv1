@@ -373,10 +373,7 @@ class _AuthorsListScreenState extends State<AuthorsListScreen>
   PreferredSizeWidget _buildAppBar() {
     return AppBar(
       title: const Text('الكتّاب'),
-      leading: IconButton(
-        icon: const Icon(Icons.arrow_back),
-        onPressed: () => context.pop(),
-      ),
+      automaticallyImplyLeading: false,
       actions: [
         IconButton(
           icon: const Icon(Icons.search),

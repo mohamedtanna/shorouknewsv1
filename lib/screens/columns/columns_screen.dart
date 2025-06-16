@@ -513,10 +513,7 @@ class _ColumnsScreenState extends State<ColumnsScreen>
   PreferredSizeWidget _buildAppBar() {
     return AppBar(
       title: Text(_getAppBarTitle()),
-      leading: IconButton(
-        icon: const Icon(Icons.arrow_back),
-        onPressed: () => context.pop(),
-      ),
+      automaticallyImplyLeading: false,
       actions: [
         IconButton(
           icon: const Icon(Icons.search),
