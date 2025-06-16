@@ -781,9 +781,10 @@ class _AuthorScreenState extends State<AuthorScreen>
 
     return NewsCard(
       article: tempArticleForCard,
-      isHorizontal: true, 
+      isHorizontal: true,
       onTap: () => context.push('/column/${column.cDate}/${column.id}'),
-      showDate: true, 
+      onLongPress: () => _showColumnPreview(column),
+      showDate: true,
     );
   }
 
