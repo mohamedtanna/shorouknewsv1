@@ -479,11 +479,7 @@ class _HomeScreenState extends State<HomeScreen> {
           relatedPhotos: [],
           relatedNews: [],
         );
-        return GestureDetector(
-          onTap: () => context.push('/column/${column.cDate}/${column.id}'),
-          child:
-              _buildHorizontalNewsCard(article, showDate: true, isColumn: true),
-        );
+        return _buildHorizontalNewsCard(article, showDate: true, isColumn: true);
       },
     );
   }
@@ -524,7 +520,9 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget _buildHorizontalNewsCard(NewsArticle article,
       {bool showDate = true, bool isColumn = false}) {
     return GestureDetector(
-      onTap: () => context.push('/news/${article.cDate}/${article.id}'),
+      onTap: () => context.push(isColumn
+          ? '/column/${article.cDate}/${article.id}'
+          : '/news/${article.cDate}/${article.id}'),
       child: Card(
         margin: const EdgeInsets.symmetric(vertical: 4),
         elevation: 2,
