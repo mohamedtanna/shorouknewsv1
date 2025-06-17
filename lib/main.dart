@@ -15,6 +15,7 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
 
+
   // Initialize Mobile Ads
   // MobileAds.instance.initialize();
 
