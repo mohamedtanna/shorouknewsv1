@@ -16,6 +16,7 @@ import '../screens/contact/contact_screen.dart';
 import '../screens/about/about_screen.dart';
 import '../screens/terms/terms_screen.dart';
 import '../screens/privacy/privacy_screen.dart';
+import '../screens/search/search_screen.dart';
 import '../screens/gallery/photo_gallery_screen.dart';
 import '../screens/gallery/image_viewer_screen.dart';
 import '../screens/notifications/notifications_screen.dart';
