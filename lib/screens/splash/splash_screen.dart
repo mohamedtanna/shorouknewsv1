@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 import '../../core/theme.dart';
 
@@ -68,7 +69,8 @@ class _SplashScreenState extends State<SplashScreen>
     _startAnimations();
 
     // Navigate after 6 seconds
-    Future.delayed(const Duration(seconds: 6), () {
+    Future.delayed(const Duration(seconds: 6), () async {
+      await _requestLocationPermission();
       if (mounted) {
         context.go('/home');
       }
@@ -237,6 +239,13 @@ class _SplashScreenState extends State<SplashScreen>
         ),
       ),
     );
+  }
+
+  Future<void> _requestLocationPermission() async {
+    final status = await Permission.location.request();
+    if (status.isPermanentlyDenied) {
+      await openAppSettings();
+    }
   }
 }
 
