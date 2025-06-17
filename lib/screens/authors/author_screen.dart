@@ -7,6 +7,7 @@ import 'package:shimmer/shimmer.dart'; // For loading shimmer
 // Added import for Share
 import 'package:shorouk_news/models/new_model.dart';
 import 'package:shorouk_news/widgets/news_card.dart';
+import '../../widgets/section_app_bar.dart';
 
 import '../../models/additional_models.dart'; // Contains AuthorModel and other models
 import '../../models/column_model.dart';
@@ -255,7 +256,7 @@ class _AuthorScreenState extends State<AuthorScreen>
   }
 
   PreferredSizeWidget _buildAppBar() {
-    return AppBar(
+    return SectionAppBar(
       title: Text(_author?.arName ?? 'الكاتب'),
       automaticallyImplyLeading: false,
       actions: [

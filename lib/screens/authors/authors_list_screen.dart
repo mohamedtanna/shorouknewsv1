@@ -8,6 +8,7 @@ import 'package:shimmer/shimmer.dart';
 import '../../models/additional_models.dart';
 // import '../../widgets/ad_banner.dart';
 import '../../widgets/section_header.dart';
+import '../../widgets/section_app_bar.dart';
 import '../../core/theme.dart';
 import 'author_module.dart';
 
@@ -371,7 +372,7 @@ class _AuthorsListScreenState extends State<AuthorsListScreen>
   }
 
   PreferredSizeWidget _buildAppBar() {
-    return AppBar(
+    return SectionAppBar(
       title: const Text('الكتّاب'),
       automaticallyImplyLeading: false,
       actions: [

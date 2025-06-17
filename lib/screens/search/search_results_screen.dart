@@ -6,6 +6,7 @@ import 'package:shorouk_news/models/new_model.dart';
 import '../../widgets/news_card.dart'; // To display each search result
 // import '../../widgets/ad_banner.dart';
 import '../../core/theme.dart';
+import '../../widgets/section_app_bar.dart';
 import 'search_module.dart'; // To perform the search
 
 class SearchResultsScreen extends StatefulWidget {
@@ -176,10 +177,10 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        automaticallyImplyLeading: false,
+      appBar: SectionAppBar(
         title: Text('نتائج البحث عن: "${widget.query}"',
             style: const TextStyle(fontSize: 18)),
+        automaticallyImplyLeading: false,
       ),
         body: Column(
           children: [

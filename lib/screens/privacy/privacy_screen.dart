@@ -5,6 +5,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../../core/theme.dart';
 // import '../../widgets/ad_banner.dart';
+import '../../widgets/section_app_bar.dart';
 import 'privacy_module.dart'; // Import the module
 
 class PrivacyScreen extends StatefulWidget {
@@ -70,9 +71,9 @@ class _PrivacyScreenState extends State<PrivacyScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
+      appBar: SectionAppBar(
+        title: const Text('سياسة الخصوصية'),
         automaticallyImplyLeading: false,
-        title: const Text('سياسة الخصوصية'), // "Privacy Policy"
       ),
         body: Column(
         children: [

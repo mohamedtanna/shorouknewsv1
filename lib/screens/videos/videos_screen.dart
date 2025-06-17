@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../core/theme.dart';
+import '../../widgets/section_app_bar.dart';
 
 class VideosScreen extends StatelessWidget {
   const VideosScreen({super.key});
@@ -8,7 +9,7 @@ class VideosScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
+      appBar: SectionAppBar(
         title: const Text('Videos'),
       ),
       body: Center(
