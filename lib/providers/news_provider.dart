@@ -152,8 +152,6 @@ class NewsProvider extends ChangeNotifier {
         sectionId: sectionId,
         currentPage: currentPage,
       );
-      await LocalSearchService().saveArticles(news);
-
       _currentPages[key] = currentPage + 1;
       _hasMoreData[key] = news.isNotEmpty;
 

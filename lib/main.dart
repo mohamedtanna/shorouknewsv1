@@ -18,6 +18,7 @@ void main() async {
   await LocalSearchService().init();
 
 
+
   // Initialize Mobile Ads
   // MobileAds.instance.initialize();
 
