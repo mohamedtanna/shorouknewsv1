@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:shorouk_news/models/new_model.dart';
 import '../models/column_model.dart';
 import '../services/api_service.dart';
+import '../services/local_search_service.dart';
 
 class NewsProvider extends ChangeNotifier {
   final ApiService _apiService = ApiService();
@@ -47,6 +48,7 @@ class NewsProvider extends ChangeNotifier {
 
     try {
       _mainStories = await _apiService.getMainStories();
+      await LocalSearchService().saveArticles(_mainStories);
     } catch (e) {
       debugPrint('Error loading main stories: $e');
     } finally {
@@ -64,6 +66,7 @@ class NewsProvider extends ChangeNotifier {
 
     try {
       _topStories = await _apiService.getTopStories();
+      await LocalSearchService().saveArticles(_topStories);
     } catch (e) {
       debugPrint('Error loading top stories: $e');
     } finally {
@@ -81,6 +84,7 @@ class NewsProvider extends ChangeNotifier {
 
     try {
       _mostReadStories = await _apiService.getMostReadStories();
+      await LocalSearchService().saveArticles(_mostReadStories);
     } catch (e) {
       debugPrint('Error loading most read stories: $e');
     } finally {
