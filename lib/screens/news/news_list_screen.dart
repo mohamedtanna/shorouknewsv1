@@ -91,6 +91,14 @@ class _NewsListScreenState extends State<NewsListScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.section),
+        elevation: 4.0,
+        automaticallyImplyLeading: false,
+        bottom: PreferredSize(
+            preferredSize:
+                const Size.fromHeight(10.0), // Adjust height as needed
+            child: Container(
+                color: Colors.grey[300],
+                height: 10.0)), // Adjust color and thickness as needed
       ),
       body: RefreshIndicator(
         onRefresh: () => _loadNews(refresh: true),
