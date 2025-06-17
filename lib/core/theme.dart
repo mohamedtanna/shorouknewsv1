@@ -55,7 +55,7 @@ class AppTheme {
   static ThemeData get lightTheme {
     return ThemeData(
       useMaterial3: true,
-      fontFamily: 'Tajawal',
+      fontFamily: 'Cairo',
 
       colorScheme: ColorScheme.fromSeed(
         seedColor: primaryColor,
@@ -97,7 +97,7 @@ class AppTheme {
         shadowColor: shadowMedium,
         centerTitle: true,
         titleTextStyle: const TextStyle(
-          fontFamily: 'Tajawal',
+          fontFamily: 'Cairo',
           fontSize: 22,
           fontWeight: FontWeight.w600,
           color: textOnPrimary,
@@ -129,7 +129,7 @@ class AppTheme {
           elevation: elevationMedium,
           shadowColor: shadowMedium,
           textStyle: const TextStyle(
-            fontFamily: 'Tajawal',
+            fontFamily: 'Cairo',
             fontWeight: FontWeight.w600,
             fontSize: 18,
             letterSpacing: 0.5,
@@ -149,7 +149,7 @@ class AppTheme {
           disabledForegroundColor: textDisabledColor,
           side: const BorderSide(color: primaryColor, width: 1.5),
           textStyle: const TextStyle(
-            fontFamily: 'Tajawal',
+            fontFamily: 'Cairo',
             fontWeight: FontWeight.w600,
             fontSize: 18,
             letterSpacing: 0.5,
@@ -167,7 +167,7 @@ class AppTheme {
           foregroundColor: primaryColor,
           disabledForegroundColor: textDisabledColor,
           textStyle: const TextStyle(
-            fontFamily: 'Tajawal',
+            fontFamily: 'Cairo',
             fontWeight: FontWeight.w600,
             fontSize: 18,
             letterSpacing: 0.5,
@@ -187,7 +187,7 @@ class AppTheme {
           disabledBackgroundColor: textDisabledColor,
           disabledForegroundColor: Colors.white,
           textStyle: const TextStyle(
-            fontFamily: 'Tajawal',
+            fontFamily: 'Cairo',
             fontWeight: FontWeight.w600,
             fontSize: 18,
             letterSpacing: 0.5,
@@ -216,7 +216,7 @@ class AppTheme {
       textTheme: const TextTheme(
         // Display styles
         displayLarge: TextStyle(
-          fontFamily: 'Tajawal',
+          fontFamily: 'Cairo',
           fontSize: 64,
           fontWeight: FontWeight.w400,
           color: textPrimaryColor,
@@ -224,7 +224,7 @@ class AppTheme {
           height: 1.12,
         ),
         displayMedium: TextStyle(
-          fontFamily: 'Tajawal',
+          fontFamily: 'Cairo',
           fontSize: 52,
           fontWeight: FontWeight.w400,
           color: textPrimaryColor,
@@ -232,7 +232,7 @@ class AppTheme {
           height: 1.16,
         ),
         displaySmall: TextStyle(
-          fontFamily: 'Tajawal',
+          fontFamily: 'Cairo',
           fontSize: 40,
           fontWeight: FontWeight.w400,
           color: textPrimaryColor,
@@ -242,7 +242,7 @@ class AppTheme {
 
         // Headline styles
         headlineLarge: TextStyle(
-          fontFamily: 'Tajawal',
+          fontFamily: 'Cairo',
           fontSize: 36,
           fontWeight: FontWeight.w600,
           color: primaryColor,
@@ -250,7 +250,7 @@ class AppTheme {
           height: 1.25,
         ),
         headlineMedium: TextStyle(
-          fontFamily: 'Tajawal',
+          fontFamily: 'Cairo',
           fontSize: 32,
           fontWeight: FontWeight.w600,
           color: primaryColor,
@@ -258,7 +258,7 @@ class AppTheme {
           height: 1.29,
         ),
         headlineSmall: TextStyle(
-          fontFamily: 'Tajawal',
+          fontFamily: 'Cairo',
           fontSize: 28,
           fontWeight: FontWeight.w600,
           color: primaryColor,
@@ -268,7 +268,7 @@ class AppTheme {
 
         // Title styles
         titleLarge: TextStyle(
-          fontFamily: 'Tajawal',
+          fontFamily: 'Cairo',
           fontSize: 24,
           fontWeight: FontWeight.w600,
           color: primaryColor,
@@ -276,7 +276,7 @@ class AppTheme {
           height: 1.27,
         ),
         titleMedium: TextStyle(
-          fontFamily: 'Tajawal',
+          fontFamily: 'Cairo',
           fontSize: 20,
           fontWeight: FontWeight.w600,
           color: textPrimaryColor,
@@ -284,7 +284,7 @@ class AppTheme {
           height: 1.33,
         ),
         titleSmall: TextStyle(
-          fontFamily: 'Tajawal',
+          fontFamily: 'Cairo',
           fontSize: 18,
           fontWeight: FontWeight.w600,
           color: textSecondaryColor,
@@ -294,7 +294,7 @@ class AppTheme {
 
         // Body styles
         bodyLarge: TextStyle(
-          fontFamily: 'Tajawal',
+          fontFamily: 'Cairo',
           fontSize: 18,
           fontWeight: FontWeight.w400,
           color: textPrimaryColor,
@@ -302,7 +302,7 @@ class AppTheme {
           height: 1.5,
         ),
         bodyMedium: TextStyle(
-          fontFamily: 'Tajawal',
+          fontFamily: 'Cairo',
           fontSize: 16,
           fontWeight: FontWeight.w400,
           color: textPrimaryColor,
@@ -310,7 +310,7 @@ class AppTheme {
           height: 1.43,
         ),
         bodySmall: TextStyle(
-          fontFamily: 'Tajawal',
+          fontFamily: 'Cairo',
           fontSize: 14,
           fontWeight: FontWeight.w400,
           color: textSecondaryColor,
@@ -320,7 +320,7 @@ class AppTheme {
 
         // Label styles
         labelLarge: TextStyle(
-          fontFamily: 'Tajawal',
+          fontFamily: 'Cairo',
           fontSize: 16,
           fontWeight: FontWeight.w600,
           color: textOnPrimary,
@@ -328,7 +328,7 @@ class AppTheme {
           height: 1.43,
         ),
         labelMedium: TextStyle(
-          fontFamily: 'Tajawal',
+          fontFamily: 'Cairo',
           fontSize: 14,
           fontWeight: FontWeight.w600,
           color: textSecondaryColor,
@@ -336,7 +336,7 @@ class AppTheme {
           height: 1.33,
         ),
         labelSmall: TextStyle(
-          fontFamily: 'Tajawal',
+          fontFamily: 'Cairo',
           fontSize: 12,
           fontWeight: FontWeight.w600,
           color: textSecondaryColor,
@@ -353,12 +353,12 @@ class AppTheme {
         type: BottomNavigationBarType.fixed,
         elevation: elevationHigh,
         selectedLabelStyle: TextStyle(
-          fontFamily: 'Tajawal',
+          fontFamily: 'Cairo',
           fontSize: 12,
           fontWeight: FontWeight.w600,
         ),
         unselectedLabelStyle: TextStyle(
-          fontFamily: 'Tajawal',
+          fontFamily: 'Cairo',
           fontSize: 12,
           fontWeight: FontWeight.w400,
         ),
@@ -374,12 +374,12 @@ class AppTheme {
         selectedIconTheme: IconThemeData(color: tertiaryColor, size: 24),
         unselectedIconTheme: IconThemeData(color: Colors.white70, size: 22),
         selectedLabelTextStyle: TextStyle(
-          fontFamily: 'Tajawal',
+          fontFamily: 'Cairo',
           color: tertiaryColor,
           fontWeight: FontWeight.w600,
         ),
         unselectedLabelTextStyle: TextStyle(
-          fontFamily: 'Tajawal',
+          fontFamily: 'Cairo',
           color: Colors.white70,
           fontWeight: FontWeight.w400,
         ),
@@ -414,19 +414,19 @@ class AppTheme {
         horizontalTitleGap: 16,
         minVerticalPadding: 8,
         titleTextStyle: TextStyle(
-          fontFamily: 'Tajawal',
+          fontFamily: 'Cairo',
           fontSize: 16,
           fontWeight: FontWeight.w500,
           color: textOnPrimary,
         ),
         subtitleTextStyle: TextStyle(
-          fontFamily: 'Tajawal',
+          fontFamily: 'Cairo',
           fontSize: 14,
           fontWeight: FontWeight.w400,
           color: Colors.white70,
         ),
         leadingAndTrailingTextStyle: TextStyle(
-          fontFamily: 'Tajawal',
+          fontFamily: 'Cairo',
           fontSize: 14,
           fontWeight: FontWeight.w400,
           color: Colors.white70,
@@ -462,25 +462,25 @@ class AppTheme {
           borderSide: const BorderSide(color: textDisabledColor, width: 1),
         ),
         labelStyle: const TextStyle(
-          fontFamily: 'Tajawal',
+          fontFamily: 'Cairo',
           color: primaryColor,
           fontWeight: FontWeight.w500,
           fontSize: 18,
         ),
         floatingLabelStyle: const TextStyle(
-          fontFamily: 'Tajawal',
+          fontFamily: 'Cairo',
           color: primaryColor,
           fontWeight: FontWeight.w600,
           fontSize: 16,
         ),
         hintStyle: const TextStyle(
-          fontFamily: 'Tajawal',
+          fontFamily: 'Cairo',
           color: textDisabledColor,
           fontWeight: FontWeight.w400,
           fontSize: 18,
         ),
         errorStyle: const TextStyle(
-          fontFamily: 'Tajawal',
+          fontFamily: 'Cairo',
           color: errorColor,
           fontWeight: FontWeight.w400,
           fontSize: 14,
@@ -500,13 +500,13 @@ class AppTheme {
         indicatorColor: tertiaryColor,
         indicatorSize: TabBarIndicatorSize.tab,
         labelStyle: TextStyle(
-          fontFamily: 'Tajawal',
+          fontFamily: 'Cairo',
           fontWeight: FontWeight.w600,
           fontSize: 16,
           letterSpacing: 0.5,
         ),
         unselectedLabelStyle: TextStyle(
-          fontFamily: 'Tajawal',
+          fontFamily: 'Cairo',
           fontWeight: FontWeight.w400,
           fontSize: 16,
           letterSpacing: 0.5,
@@ -557,7 +557,7 @@ class AppTheme {
       snackBarTheme: const SnackBarThemeData(
         backgroundColor: Color(0xFF323232),
         contentTextStyle: TextStyle(
-          fontFamily: 'Tajawal',
+          fontFamily: 'Cairo',
           color: Colors.white,
           fontSize: 14,
           fontWeight: FontWeight.w400,
@@ -583,14 +583,14 @@ class AppTheme {
           borderRadius: BorderRadius.all(Radius.circular(radiusLarge)),
         ),
         titleTextStyle: TextStyle(
-          fontFamily: 'Tajawal',
+          fontFamily: 'Cairo',
           color: primaryColor,
           fontSize: 22,
           fontWeight: FontWeight.w600,
           letterSpacing: 0.15,
         ),
         contentTextStyle: TextStyle(
-          fontFamily: 'Tajawal',
+          fontFamily: 'Cairo',
           color: textPrimaryColor,
           fontSize: 18,
           fontWeight: FontWeight.w400,
@@ -610,12 +610,12 @@ class AppTheme {
         secondarySelectedColor: tertiaryColor,
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         labelStyle: const TextStyle(
-          fontFamily: 'Tajawal',
+          fontFamily: 'Cairo',
           fontSize: 16,
           fontWeight: FontWeight.w500,
         ),
         secondaryLabelStyle: const TextStyle(
-          fontFamily: 'Tajawal',
+          fontFamily: 'Cairo',
           fontSize: 16,
           fontWeight: FontWeight.w500,
           color: Colors.white,
@@ -640,7 +640,7 @@ class AppTheme {
         overlayColor: primaryColor.withAlpha(50),
         valueIndicatorColor: primaryColor,
         valueIndicatorTextStyle: const TextStyle(
-          fontFamily: 'Tajawal',
+          fontFamily: 'Cairo',
           color: Colors.white,
           fontSize: 14,
           fontWeight: FontWeight.w500,
