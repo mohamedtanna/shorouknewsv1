@@ -442,7 +442,7 @@ class _ColumnDetailScreenState extends State<ColumnDetailScreen> {
                   overflow: TextOverflow.ellipsis,
                 ),
                 subtitle: Text(
-                  column.creationDateFormatted,
+                  column.creationDateFormattedDateTime,
                   style: TextStyle(color: Colors.grey[600], fontSize: 12),
                 ),
                 onTap: () => context.push('/column/${column.cDate}/${column.id}'),

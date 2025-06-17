@@ -470,7 +470,7 @@ class _HomeScreenState extends State<HomeScreen> {
           sectionId: '',
           sectionArName: column.columnistArName,
           publishDate: column.creationDate,
-          publishDateFormatted: column.creationDateFormatted,
+          publishDateFormatted: column.creationDateFormattedDateTime,
           publishTimeFormatted: '',
           lastModificationDate: column.creationDate,
           lastModificationDateFormatted: column.creationDateFormattedDateTime,
@@ -588,9 +588,13 @@ class _HomeScreenState extends State<HomeScreen> {
                           ),
                           const SizedBox(width: 4),
                           Text(
-                            article.publishDateFormatted.isNotEmpty
-                                ? article.publishDateFormatted
-                                : 'منذ قليل',
+                            article.lastModificationDateFormatted.isNotEmpty
+                                ? article.lastModificationDateFormatted
+                                : article.publishDateFormatted.isNotEmpty
+                                    ? article.publishTimeFormatted.isNotEmpty
+                                        ? '${article.publishDateFormatted} - ${article.publishTimeFormatted}'
+                                        : article.publishDateFormatted
+                                    : 'منذ قليل',
                             style: TextStyle(
                               fontSize: 12,
                               color: Colors.grey[600],

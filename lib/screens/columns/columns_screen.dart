@@ -1832,25 +1832,7 @@ class _ColumnsScreenState extends State<ColumnsScreen>
   }
 
   String _formatDate(DateTime date) {
-    final now = DateTime.now();
-    final difference = now.difference(date);
-    
-    if (difference.inDays == 0) {
-      return 'اليوم';
-    } else if (difference.inDays == 1) {
-      return 'أمس';
-    } else if (difference.inDays < 7) {
-      return 'منذ ${difference.inDays} أيام';
-    } else if (difference.inDays < 30) {
-      final weeks = (difference.inDays / 7).floor();
-      return weeks == 1 ? 'منذ أسبوع' : 'منذ $weeks أسابيع';
-    } else if (difference.inDays < 365) {
-      final months = (difference.inDays / 30).floor();
-      return months == 1 ? 'منذ شهر' : 'منذ $months أشهر';
-    } else {
-      // Use actual date formatter for older dates
-      return DateFormat('d MMMM yyyy', 'ar').format(date);
-    }
+    return DateFormat('yyyy/MM/dd HH:mm', 'ar').format(date);
   }
 
   String _formatNumber(int number) {

@@ -49,29 +49,7 @@ class NotificationsModule {
   // Helper function to format the timestamp of a notification for display.
   // Example: "منذ 5 دقائق", "أمس الساعة 10:30 ص", "2023-03-15"
   static String formatTimestamp(DateTime timestamp, {bool detailed = false}) {
-    final now = DateTime.now();
-    final difference = now.difference(timestamp);
-
-    if (difference.inDays == 0) {
-      if (difference.inHours < 1) {
-        if (difference.inMinutes < 1) {
-          return 'الآن';
-        }
-        return 'منذ ${difference.inMinutes} ${difference.inMinutes == 1 ? 'دقيقة' : 'دقائق'}';
-      }
-      if (detailed) {
-        return 'اليوم, ${DateFormat('h:mm a', 'ar').format(timestamp)}';
-      }
-      return 'منذ ${difference.inHours} ${difference.inHours == 1 ? 'ساعة' : 'ساعات'}';
-    } else if (difference.inDays == 1) {
-      return 'أمس, ${DateFormat('h:mm a', 'ar').format(timestamp)}';
-    } else if (difference.inDays < 7) {
-      // Within the last week, show day name and time
-      return '${DateFormat('EEEE', 'ar').format(timestamp)}, ${DateFormat('h:mm a', 'ar').format(timestamp)}';
-    } else {
-      // Older than a week, show full date
-      return DateFormat('yyyy/MM/dd', 'ar').format(timestamp);
-    }
+    return DateFormat('yyyy/MM/dd HH:mm', 'ar').format(timestamp);
   }
 
   // Helper to get a relevant icon for a notification type (if you add types)
