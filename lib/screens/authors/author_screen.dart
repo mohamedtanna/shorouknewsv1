@@ -15,6 +15,7 @@ import '../../models/column_model.dart';
 import '../../widgets/section_header.dart';
 import '../../core/theme.dart';
 import 'author_module.dart'; // Contains AuthorModule and its models like AuthorStats etc.
+import 'package:intl/intl.dart';
 
 class AuthorScreen extends StatefulWidget {
   final String authorId;
@@ -770,8 +771,8 @@ class _AuthorScreenState extends State<AuthorScreen>
       sectionId: '', 
       sectionArName: column.columnistArName, 
       publishDate: column.creationDate,
-      publishDateFormatted: column.creationDateFormatted,
-      publishTimeFormatted: '', 
+      publishDateFormatted: column.creationDateFormattedDateTime,
+      publishTimeFormatted: '',
       lastModificationDate: column.creationDate,
       lastModificationDateFormatted: column.creationDateFormattedDateTime,
       editorAndSource: column.columnistArName,
@@ -922,16 +923,6 @@ class _AuthorScreenState extends State<AuthorScreen>
 
   String _formatDate(DateTime? date) {
     if (date == null) return 'غير محدد';
-    final now = DateTime.now();
-    final difference = now.difference(date);
-
-    if (difference.inSeconds < 60) return 'الآن';
-    if (difference.inMinutes < 60) return 'منذ ${difference.inMinutes} د';
-    if (difference.inHours < 24) return 'منذ ${difference.inHours} س';
-    if (difference.inDays == 1) return 'أمس';
-    if (difference.inDays < 7) return 'منذ ${difference.inDays} أيام';
-    if (difference.inDays < 30) return 'منذ ${(difference.inDays / 7).floor()} أسابيع'; // Corrected typo
-    if (difference.inDays < 365) return 'منذ ${(difference.inDays / 30).floor()} شهر';
-    return 'منذ ${(difference.inDays / 365).floor()} سنة';
+    return DateFormat('yyyy/MM/dd HH:mm', 'ar').format(date);
   }
 }

@@ -79,9 +79,13 @@ class NewsCard extends StatelessWidget {
                         ),
                         const SizedBox(width: 4),
                         Text(
-                          article.publishDateFormatted.isNotEmpty
-                              ? article.publishDateFormatted
-                              : 'منذ قليل',
+                          article.lastModificationDateFormatted.isNotEmpty
+                              ? article.lastModificationDateFormatted
+                              : article.publishDateFormatted.isNotEmpty
+                                  ? article.publishTimeFormatted.isNotEmpty
+                                      ? '${article.publishDateFormatted} - ${article.publishTimeFormatted}'
+                                      : article.publishDateFormatted
+                                  : 'منذ قليل',
                           style: const TextStyle(
                             fontSize: 12,
                             color: AppTheme.textSecondaryColor,

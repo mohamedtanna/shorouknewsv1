@@ -11,6 +11,7 @@ import '../../widgets/section_header.dart';
 import '../../widgets/section_app_bar.dart';
 import '../../core/theme.dart';
 import 'author_module.dart';
+import 'package:intl/intl.dart';
 
 class AuthorsListScreen extends StatefulWidget {
   const AuthorsListScreen({super.key});
@@ -1243,25 +1244,7 @@ Widget _buildAuthorListCard(AuthorModel author) {
   }
 
   String _formatDate(DateTime date) {
-    final now = DateTime.now();
-    final difference = now.difference(date);
-    
-    if (difference.inDays == 0) {
-      return 'اليوم';
-    } else if (difference.inDays == 1) {
-      return 'أمس';
-    } else if (difference.inDays < 7) {
-      return 'منذ ${difference.inDays} أيام';
-    } else if (difference.inDays < 30) {
-      final weeks = (difference.inDays / 7).floor();
-      return weeks == 1 ? 'منذ أسبوع' : 'منذ $weeks أسابيع';
-    } else if (difference.inDays < 365) {
-      final months = (difference.inDays / 30).floor();
-      return months == 1 ? 'منذ شهر' : 'منذ $months أشهر';
-    } else {
-      final years = (difference.inDays / 365).floor();
-      return years == 1 ? 'منذ سنة' : 'منذ $years سنوات';
-    }
+    return DateFormat('yyyy/MM/dd HH:mm', 'ar').format(date);
   }
 }
 
