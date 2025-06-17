@@ -600,7 +600,7 @@ class ApiService {
     int pageSize = 10,
   }) async {
     return await _get<List<NewsArticle>>(
-      'news/search',
+      'news',
       queryParameters: {
         'q': query,
         'currentpage': currentPage.toString(),

@@ -80,6 +80,10 @@ class _MainLayoutState extends State<MainLayout> {
           ),
         ),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.search),
+            onPressed: () => context.push('/search'),
+          ),
           if (!isHome)
             IconButton(
               icon: const Icon(Icons.arrow_forward),
