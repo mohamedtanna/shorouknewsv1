@@ -135,28 +135,7 @@ class _MainLayoutState extends State<MainLayout> {
                   },
                 ),
                 const SizedBox(height: 20),
-                Container(
-                  decoration: BoxDecoration(
-                    color: AppTheme.tertiaryColor,
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: TextButton.icon(
-                    onPressed: () {
-                      // Close drawer first
-                      Navigator.of(context).pop();
-                      // Then navigate
-                      context.push('/settings');
-                    },
-                    icon: const Icon(Icons.settings, color: Colors.white),
-                    label: const Text(
-                      'الإعدادات',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                ),
+                const SizedBox(height: 40),
               ],
             ),
           ),
