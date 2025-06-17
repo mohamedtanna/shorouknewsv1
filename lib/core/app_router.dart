@@ -16,7 +16,7 @@ import '../screens/contact/contact_screen.dart';
 import '../screens/about/about_screen.dart';
 import '../screens/terms/terms_screen.dart';
 import '../screens/privacy/privacy_screen.dart';
-import '../screens/search/search_screen.dart'; // Assumes this contains the SearchScreen class
+import '../screens/search/local_search_screen.dart';
 import '../screens/search/search_results_screen.dart'; // Assumes this contains SearchResultsScreen
 import '../screens/gallery/photo_gallery_screen.dart';
 import '../screens/gallery/image_viewer_screen.dart';
@@ -183,9 +183,7 @@ class AppRouter {
           GoRoute(
             path: '/search',
             name: 'search',
-            // This assumes SearchScreen class is correctly defined in search_screen.dart
-            // and the ambiguous import error is resolved by renaming the class in search_results_screen.dart
-            builder: (context, state) => const SearchScreen(),
+            builder: (context, state) => const LocalSearchScreen(),
           ),
           GoRoute(
             path: '/search-results',
