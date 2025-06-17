@@ -16,8 +16,6 @@ import '../screens/contact/contact_screen.dart';
 import '../screens/about/about_screen.dart';
 import '../screens/terms/terms_screen.dart';
 import '../screens/privacy/privacy_screen.dart';
-import '../screens/search/local_search_screen.dart';
-import '../screens/search/search_results_screen.dart'; // Assumes this contains SearchResultsScreen
 import '../screens/gallery/photo_gallery_screen.dart';
 import '../screens/gallery/image_viewer_screen.dart';
 import '../screens/notifications/notifications_screen.dart';
@@ -183,17 +181,6 @@ class AppRouter {
           GoRoute(
             path: '/search',
             name: 'search',
-            builder: (context, state) => const LocalSearchScreen(),
-          ),
-          GoRoute(
-            path: '/search-results',
-            name: 'search-results',
-            builder: (context, state) {
-              final query = state.uri.queryParameters['query'] ?? '';
-              final decodedQuery = Uri.decodeComponent(query);
-              // This assumes SearchResultsScreen class is correctly defined in search_results_screen.dart
-              return SearchResultsScreen(query: decodedQuery);
-            },
           ),
           GoRoute(
             path: '/gallery',
