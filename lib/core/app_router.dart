@@ -22,6 +22,7 @@ import '../screens/notifications/notifications_screen.dart';
 import '../screens/notifications/notification_detail_screen.dart';
 import '../screens/notifications/notifications_module.dart'
     show NotificationPayload;
+import '../screens/search/search_screen.dart';
 import '../screens/error/error_screen.dart';
 import '../screens/splash/splash_screen.dart';
 
@@ -181,6 +182,7 @@ class AppRouter {
           GoRoute(
             path: '/search',
             name: 'search',
+            builder: (context, state) => const SearchScreen(),
           ),
           GoRoute(
             path: '/gallery',
