@@ -6,6 +6,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shimmer/shimmer.dart'; // For loading effects
+import '../../widgets/section_app_bar.dart';
 import 'package:url_launcher/url_launcher.dart'; // For opening external links
 
 // Models
@@ -193,10 +194,9 @@ class _NewsDetailScreenState extends State<NewsDetailScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
+      appBar: SectionAppBar(
         title: Text(_newsDetail?.sectionArName ?? 'تفاصيل الخبر'),
-        automaticallyImplyLeading:
-            false, // This enables the default back button
+        automaticallyImplyLeading: false,
         actions: [
           if (_newsDetail != null)
             IconButton(

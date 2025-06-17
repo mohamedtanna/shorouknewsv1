@@ -4,6 +4,7 @@ import 'package:shimmer/shimmer.dart'; // For loading suggestions
 
 import '../../core/theme.dart';
 // import '../../widgets/ad_banner.dart';
+import '../../widgets/section_app_bar.dart';
 import 'search_module.dart'; // Import the module
 
 class SearchScreen extends StatefulWidget {
@@ -163,9 +164,9 @@ class _SearchScreenState extends State<SearchScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        automaticallyImplyLeading: false,
+      appBar: SectionAppBar(
         title: const Text('البحث في الشروق'),
+        automaticallyImplyLeading: false,
       ),
         body: Column(
           children: [

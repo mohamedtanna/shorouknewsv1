@@ -10,6 +10,7 @@ import 'package:share_plus/share_plus.dart';
 import '../../models/column_model.dart';
 import '../../models/additional_models.dart';
 // import '../../widgets/ad_banner.dart';
+import '../../widgets/section_app_bar.dart';
 import '../../widgets/section_header.dart';
 import '../../core/theme.dart';
 import 'columns_module.dart';
@@ -511,7 +512,7 @@ class _ColumnsScreenState extends State<ColumnsScreen>
   }
 
   PreferredSizeWidget _buildAppBar() {
-    return AppBar(
+    return SectionAppBar(
       title: Text(_getAppBarTitle()),
       automaticallyImplyLeading: false,
       actions: [

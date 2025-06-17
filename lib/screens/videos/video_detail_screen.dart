@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
 
 import '../../core/theme.dart';
+import '../../widgets/section_app_bar.dart';
 
 class VideoDetailScreen extends StatefulWidget {
   final String videoUrl;
@@ -48,7 +49,7 @@ class _VideoDetailScreenState extends State<VideoDetailScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
+      appBar: SectionAppBar(
         title: Text(widget.videoTitle),
       ),
       body: Center(

@@ -5,6 +5,7 @@ import 'package:shimmer/shimmer.dart';
 
 import '../../core/theme.dart';
 // import '../../widgets/ad_banner.dart';
+import '../../widgets/section_app_bar.dart';
 import 'notifications_module.dart'; // For utility functions like formatting
 
 class NotificationsScreen extends StatefulWidget {
@@ -95,13 +96,14 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
+      appBar: SectionAppBar(
         title: const Text('سجل الإشعارات'),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => context.pop(),
-        ),
+        automaticallyImplyLeading: false,
         actions: [
+          IconButton(
+            icon: const Icon(Icons.arrow_back),
+            onPressed: () => context.pop(),
+          ),
           if (_notifications.isNotEmpty && !_isLoading)
             IconButton(
               icon: const Icon(Icons.delete_sweep_outlined),
