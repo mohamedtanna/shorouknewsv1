@@ -8,6 +8,7 @@ import 'core/theme.dart';
 import 'providers/news_provider.dart';
 import 'providers/settings_provider.dart';
 import 'providers/auth_provider.dart';
+import 'providers/weather_provider.dart';
 import 'services/local_search_service.dart';
 
 
@@ -43,6 +44,7 @@ class ShoroukNewsApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => NewsProvider()),
         ChangeNotifierProvider(create: (_) => SettingsProvider()),
         ChangeNotifierProvider(create: (_) => AuthProvider()),
+        ChangeNotifierProvider(create: (_) => WeatherProvider()),
       ],
       child: Consumer<SettingsProvider>(
         builder: (context, settingsProvider, child) {

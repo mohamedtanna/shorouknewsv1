@@ -6,9 +6,11 @@ import 'package:shimmer/shimmer.dart';
 
 // Provider for fetching news and column data
 import '../../providers/news_provider.dart';
+import '../../providers/weather_provider.dart';
 
 // Data models for news articles and columns
 import 'package:shorouk_news/models/new_model.dart';
+import '../../widgets/weather_widget.dart';
 
 // Reusable widgets for displaying content and ads
 //import 'package:shorouk_news/widgets/news_card.dart';
@@ -32,6 +34,7 @@ class _HomeScreenState extends State<HomeScreen> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _loadData();
+      context.read<WeatherProvider>().requestWeatherForCurrentLocation();
     });
   }
 
@@ -111,6 +114,21 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
                 SliverToBoxAdapter(
                   child: _buildSelectedColumnsList(newsProvider),
+                ),
+
+                // Weather widget before most read section
+                SliverToBoxAdapter(
+                  child: Consumer<WeatherProvider>(
+                    builder: (context, weatherProvider, child) {
+                      if (weatherProvider.isLoading) {
+                        return const Padding(
+                          padding: EdgeInsets.all(16),
+                          child: Center(child: CircularProgressIndicator()),
+                        );
+                      }
+                      return WeatherWidget(info: weatherProvider.info);
+                    },
+                  ),
                 ),
 
                 // Most Read Stories Section with blue header
