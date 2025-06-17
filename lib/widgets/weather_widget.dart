@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+
 import 'package:intl/intl.dart';
+
+
 
 import '../core/theme.dart';
 import '../models/weather_model.dart';
@@ -21,6 +24,7 @@ class WeatherWidget extends StatelessWidget {
         borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
         boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 4)],
       ),
+
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -82,6 +86,18 @@ class WeatherWidget extends StatelessWidget {
                   ),
                 );
               },
+
+      child: Row(
+        children: [
+          const Icon(Icons.wb_sunny, color: AppTheme.primaryColor),
+          const SizedBox(width: 8),
+          Text(
+            '${info!.temperature.toStringAsFixed(1)}°C',
+            style: const TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              fontFamily: 'Cairo',
+
             ),
           ),
         ],
