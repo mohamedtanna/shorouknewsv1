@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../services/local_search_service.dart';
 import '../../widgets/news_card.dart';
-import '../../core/theme.dart';
 import '../../models/new_model.dart';
 
 class LocalSearchScreen extends StatefulWidget {
@@ -76,6 +75,7 @@ class _LocalSearchScreenState extends State<LocalSearchScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Search'),
+        automaticallyImplyLeading: false,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () => context.pop(),
@@ -88,15 +88,10 @@ class _LocalSearchScreenState extends State<LocalSearchScreen> {
             child: TextField(
               controller: _controller,
               decoration: const InputDecoration(
-                prefixIcon: Icon(Icons.search),
-                hintText: 'Search...'
-              ),
+                  prefixIcon: Icon(Icons.search), hintText: 'Search...'),
             ),
           ),
-          if (_controller.text.isEmpty)
-            _buildLatest()
-          else
-            _buildResults(),
+          if (_controller.text.isEmpty) _buildLatest() else _buildResults(),
         ],
       ),
     );
@@ -104,8 +99,7 @@ class _LocalSearchScreenState extends State<LocalSearchScreen> {
 
   Widget _buildLatest() {
     if (_initLoading) {
-      return const Expanded(
-          child: Center(child: CircularProgressIndicator()));
+      return const Expanded(child: Center(child: CircularProgressIndicator()));
     }
     if (_latest.isEmpty) {
       return const Expanded(
@@ -135,24 +129,20 @@ class _LocalSearchScreenState extends State<LocalSearchScreen> {
       child: ListView(
         children: [
           if (_suggestions.isNotEmpty)
-            ..._suggestions
-                .map((s) => ListTile(
-                      title: Text(s),
-                      leading: const Icon(Icons.history),
-                      onTap: () {
-                        _controller.text = s;
-                        _onChanged();
-                      },
-                    ))
-                .toList(),
-          ..._results
-              .map((article) => NewsCard(
-                    article: article,
-                    isHorizontal: true,
-                    onTap: () =>
-                        context.push('/news/${article.cDate}/${article.id}'),
-                  ))
-              .toList(),
+            ..._suggestions.map((s) => ListTile(
+                  title: Text(s),
+                  leading: const Icon(Icons.history),
+                  onTap: () {
+                    _controller.text = s;
+                    _onChanged();
+                  },
+                )),
+          ..._results.map((article) => NewsCard(
+                article: article,
+                isHorizontal: true,
+                onTap: () =>
+                    context.push('/news/${article.cDate}/${article.id}'),
+              )),
         ],
       ),
     );

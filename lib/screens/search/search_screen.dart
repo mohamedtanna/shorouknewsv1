@@ -4,7 +4,6 @@ import 'package:go_router/go_router.dart';
 import '../../services/api_service.dart';
 import 'search_module.dart';
 import '../../widgets/news_card.dart';
-import '../../core/theme.dart';
 import '../../models/new_model.dart';
 
 class SearchScreen extends StatefulWidget {
@@ -94,6 +93,7 @@ class _SearchScreenState extends State<SearchScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Search'),
+        automaticallyImplyLeading: false,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () => context.pop(),
@@ -106,15 +106,10 @@ class _SearchScreenState extends State<SearchScreen> {
             child: TextField(
               controller: _controller,
               decoration: const InputDecoration(
-                prefixIcon: Icon(Icons.search),
-                hintText: 'Search...'
-              ),
+                  prefixIcon: Icon(Icons.search), hintText: 'Search...'),
             ),
           ),
-          if (_controller.text.isEmpty)
-            _buildLatest()
-          else
-            _buildResults(),
+          if (_controller.text.isEmpty) _buildLatest() else _buildResults(),
         ],
       ),
     );
@@ -177,10 +172,8 @@ String normalizeArabic(String input) {
   result = result.replaceAll('ة', 'ه');
   result = result.replaceAll('ؤ', 'و');
   result = result.replaceAll(RegExp('[\\u064B-\\u0652]'), '');
-  result = result.replaceAll(RegExp('[\\u061B\\u061F\\u066A-\\u066D\\u06D4\\u060C.,!?]'), '');
+  result = result.replaceAll(
+      RegExp('[\\u061B\\u061F\\u066A-\\u066D\\u06D4\\u060C.,!?]'), '');
   result = result.trim();
   return result;
 }
-
-
-
