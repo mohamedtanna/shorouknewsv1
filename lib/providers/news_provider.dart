@@ -148,7 +148,6 @@ class NewsProvider extends ChangeNotifier {
         sectionId: sectionId,
         currentPage: currentPage,
       );
-
       _currentPages[key] = currentPage + 1;
       _hasMoreData[key] = news.isNotEmpty;
 
