@@ -6,6 +6,7 @@ import 'package:shimmer/shimmer.dart';
 import '../../models/new_model.dart'; // For RelatedPhoto
 import '../../core/theme.dart';
 // import '../../widgets/ad_banner.dart';
+import '../../widgets/section_app_bar.dart';
 import 'gallery_module.dart'; // For GalleryAlbum if you use it
 // Import ImageViewerScreen if you navigate directly, or rely on router
 // import 'image_viewer_screen.dart';
@@ -131,9 +132,9 @@ class _PhotoGalleryScreenState extends State<PhotoGalleryScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        automaticallyImplyLeading: false,
+      appBar: SectionAppBar(
         title: Text(widget.galleryTitle ?? 'معرض الصور'),
+        automaticallyImplyLeading: false,
       ),
         body: Column(
           children: [

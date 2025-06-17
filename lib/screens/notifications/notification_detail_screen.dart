@@ -7,6 +7,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 import 'notifications_module.dart'; // For NotificationPayload and utilities
 import '../../core/theme.dart';
+import '../../widgets/section_app_bar.dart';
 
 class NotificationDetailScreen extends StatelessWidget {
   final NotificationPayload notification;
@@ -97,19 +98,20 @@ class NotificationDetailScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
+      appBar: SectionAppBar(
         title: Text(notification.title ?? 'تفاصيل الإشعار'),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () {
-            if (context.canPop()) {
-              context.pop();
-            } else {
-              context.push('/notifications'); // Fallback
-            }
-          },
-        ),
+        automaticallyImplyLeading: false,
         actions: [
+          IconButton(
+            icon: const Icon(Icons.arrow_back),
+            onPressed: () {
+              if (context.canPop()) {
+                context.pop();
+              } else {
+                context.push('/notifications');
+              }
+            },
+          ),
           IconButton(
             icon: const Icon(Icons.share_outlined),
             onPressed: _shareNotification,

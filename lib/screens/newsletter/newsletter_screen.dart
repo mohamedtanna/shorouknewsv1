@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart'; // For navigation
 import '../../core/theme.dart'; // For consistent styling
+import '../../widgets/section_app_bar.dart';
 // import '../../widgets/ad_banner.dart'; // For displaying ads
 import '../../models/additional_models.dart'; // For SubscriptionStatus enum
 import 'newsletter_module.dart'; // The module handling newsletter logic
@@ -105,9 +106,9 @@ class _NewsletterScreenState extends State<NewsletterScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
+      appBar: SectionAppBar(
+        title: const Text('القائمة البريدية'),
         automaticallyImplyLeading: false,
-        title: const Text('القائمة البريدية'), // "Newsletter"
       ),
         body: SingleChildScrollView(
           child: Column(

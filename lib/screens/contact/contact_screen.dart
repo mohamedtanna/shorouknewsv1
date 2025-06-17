@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../core/theme.dart';
 // import '../../widgets/ad_banner.dart';
+import '../../widgets/section_app_bar.dart';
 import 'contact_module.dart'; // Import the module
 
 class ContactScreen extends StatefulWidget {
@@ -117,9 +118,9 @@ class _ContactScreenState extends State<ContactScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        automaticallyImplyLeading: false,
+      appBar: SectionAppBar(
         title: const Text('اتصل بنا'),
+        automaticallyImplyLeading: false,
       ),
       body: SingleChildScrollView(
           child: Column(

@@ -6,6 +6,7 @@ import '../../core/theme.dart';
 import '../../models/new_model.dart';
 import '../../providers/news_provider.dart';
 import '../../widgets/news_card.dart';
+import '../../widgets/section_app_bar.dart';
 
 class NewsListScreen extends StatefulWidget {
   final String? sectionId;
@@ -89,7 +90,7 @@ class _NewsListScreenState extends State<NewsListScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
+      appBar: SectionAppBar(
         title: Text(widget.section),
         elevation: 4.0,
         automaticallyImplyLeading: false,

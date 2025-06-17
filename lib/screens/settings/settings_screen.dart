@@ -6,6 +6,7 @@ import 'package:shimmer/shimmer.dart'; // For loading shimmer effect
 import '../../providers/settings_provider.dart'; // Manages settings state and logic
 // For NewsSection model
 // import '../../widgets/ad_banner.dart'; // For displaying ads
+import '../../widgets/section_app_bar.dart';
 import '../../core/theme.dart'; // For consistent app styling
 
 class SettingsScreen extends StatefulWidget {
@@ -84,9 +85,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
+      appBar: SectionAppBar(
+        title: const Text('ضبط إعدادات الإشعارات'),
         automaticallyImplyLeading: false,
-        title: const Text('ضبط إعدادات الإشعارات'), // "Notification Settings"
       ),
         body: Column(
         children: [

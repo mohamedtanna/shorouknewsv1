@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart'; // For navigation
 import '../../core/theme.dart'; // For consistent styling
+import '../../widgets/section_app_bar.dart';
 
 class ErrorScreen extends StatelessWidget {
   final String? errorMessage;
@@ -25,9 +26,9 @@ class ErrorScreen extends StatelessWidget {
     final displayErrorDetails = errorDetails ?? 'يرجى المحاولة مرة أخرى لاحقاً أو الاتصال بالدعم الفني إذا استمرت المشكلة.';
 
     return Scaffold(
-      appBar: AppBar(
+      appBar: SectionAppBar(
+        title: const Text('خطأ'),
         automaticallyImplyLeading: false,
-        title: const Text('خطأ'), // Arabic title: "Error"
       ),
       body: Center(
         child: Padding(

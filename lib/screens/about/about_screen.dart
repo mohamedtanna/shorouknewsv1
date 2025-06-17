@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 // import '../../widgets/ad_banner.dart';
 import '../../core/theme.dart';
+import '../../widgets/section_app_bar.dart';
 import 'about_module.dart';
 
 class AboutScreen extends StatefulWidget {
@@ -166,9 +167,9 @@ class _AboutScreenState extends State<AboutScreen> with TickerProviderStateMixin
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        automaticallyImplyLeading: false,
+      appBar: SectionAppBar(
         title: const Text('عن البرنامج'),
+        automaticallyImplyLeading: false,
         actions: [
           IconButton(
             icon: Icon(_isCheckingUpdates ? Icons.hourglass_empty : Icons.system_update),

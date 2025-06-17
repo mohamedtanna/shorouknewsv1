@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../core/theme.dart';
+import '../../widgets/section_app_bar.dart';
 
 class TermsScreen extends StatelessWidget {
   const TermsScreen({super.key});
@@ -8,7 +9,7 @@ class TermsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
+      appBar: SectionAppBar(
         title: const Text('Terms of Service'),
       ),
       body: SingleChildScrollView(

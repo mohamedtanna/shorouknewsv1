@@ -8,6 +8,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../models/column_model.dart';
 // For consistency, though columns might have their own provider
+import '../../widgets/section_app_bar.dart';
 import '../../services/api_service.dart'; // To fetch column details
 // import '../../widgets/ad_banner.dart';
 import '../../widgets/section_header.dart';
@@ -131,7 +132,7 @@ class _ColumnDetailScreenState extends State<ColumnDetailScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
+      appBar: SectionAppBar(
         title: Text(_columnDetail?.columnistArName ?? 'تفاصيل المقال'),
         actions: [
           if (_columnDetail != null)

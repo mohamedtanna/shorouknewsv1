@@ -5,6 +5,7 @@ import 'package:photo_view/photo_view_gallery.dart';
 import 'package:share_plus/share_plus.dart';
 
 import '../../core/theme.dart';
+import '../../widgets/section_app_bar.dart';
 
 import '../../models/new_model.dart'; // For RelatedPhoto
 
@@ -121,8 +122,7 @@ class _ImageViewerScreenState extends State<ImageViewerScreen> {
                 top: 0,
                 left: 0,
                 right: 0,
-                child: AppBar(
-                  // ignore: deprecated_member_use
+                child: SectionAppBar(
                   backgroundColor: Colors.black.withOpacity(0.5),
                   elevation: 0,
                   iconTheme: const IconThemeData(color: AppTheme.textOnPrimary),
