@@ -425,14 +425,44 @@ class _AuthorScreenState extends State<AuthorScreen>
               const CircleAvatar(radius: 40, backgroundColor: Colors.white),
               const SizedBox(width: 16),
               Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                Container(height: 20, width: 150, color: Colors.white, margin: const EdgeInsets.only(bottom: 8), decoration: BoxDecoration(borderRadius: BorderRadius.circular(4))),
-                Container(height: 14, width: 100, color: Colors.white, decoration: BoxDecoration(borderRadius: BorderRadius.circular(4))),
+                Container(
+                  height: 20,
+                  width: 150,
+                  margin: const EdgeInsets.only(bottom: 8),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                ),
+                Container(
+                  height: 14,
+                  width: 100,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                ),
               ])),
             ]),
             const SizedBox(height: 16),
-            Container(height: 60, width: double.infinity, color: Colors.white, decoration: BoxDecoration(borderRadius: BorderRadius.circular(8))),
+            Container(
+              height: 60,
+              width: double.infinity,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
             const SizedBox(height: 24),
-            Container(height: 24, width: 200, color: Colors.white, margin: const EdgeInsets.only(bottom: 16), decoration: BoxDecoration(borderRadius: BorderRadius.circular(4))),
+            Container(
+              height: 24,
+              width: 200,
+              margin: const EdgeInsets.only(bottom: 16),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(4),
+              ),
+            ),
             ...List.generate(3, (index) => Padding(
               padding: const EdgeInsets.only(bottom: 12.0),
               child: Container(height: 120, width: double.infinity, decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(8))),
