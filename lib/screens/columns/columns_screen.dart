@@ -1238,27 +1238,32 @@ class _ColumnsScreenState extends State<ColumnsScreen>
                     const SizedBox(width: 8),
                     // Author name
                     Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            column.columnistArName,
-                            style: const TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.bold,
-                              color: AppTheme.primaryColor,
+                      child: GestureDetector(
+                        behavior: HitTestBehavior.opaque,
+                        onTap: () =>
+                            context.push('/author/${column.columnistId}'),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              column.columnistArName,
+                              style: const TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.bold,
+                                color: AppTheme.primaryColor,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
                             ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                          Text(
-                            _formatDate(DateTime.parse(column.creationDate)),
-                            style: TextStyle(
-                              fontSize: 10,
-                              color: Colors.grey[600],
+                            Text(
+                              _formatDate(DateTime.parse(column.creationDate)),
+                              style: TextStyle(
+                                fontSize: 10,
+                                color: Colors.grey[600],
+                              ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                     ),
                     // Read indicator
@@ -1377,34 +1382,42 @@ class _ColumnsScreenState extends State<ColumnsScreen>
                 // Author info
                 Row(
                   children: [
-                    Container(
-                      width: 36,
-                      height: 36,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        border: Border.all(color: AppTheme.tertiaryColor),
-                      ),
-                      child: ClipOval(
-                        child: CachedNetworkImage(
-                          imageUrl: column.columnistPhotoUrl,
-                          fit: BoxFit.cover,
-                          filterQuality: FilterQuality.high,
-                          placeholder: (context, url) => Container(
-                            color: Colors.grey[300],
-                            child: const Icon(Icons.person, size: 18),
-                          ),
-                          errorWidget: (context, url, error) => Container(
-                            color: Colors.grey[300],
-                            child: const Icon(Icons.person, size: 18),
+                    GestureDetector(
+                      onTap: () =>
+                          context.push('/author/${column.columnistId}'),
+                      child: Container(
+                        width: 36,
+                        height: 36,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          border: Border.all(color: AppTheme.tertiaryColor),
+                        ),
+                        child: ClipOval(
+                          child: CachedNetworkImage(
+                            imageUrl: column.columnistPhotoUrl,
+                            fit: BoxFit.cover,
+                            filterQuality: FilterQuality.high,
+                            placeholder: (context, url) => Container(
+                              color: Colors.grey[300],
+                              child: const Icon(Icons.person, size: 18),
+                            ),
+                            errorWidget: (context, url, error) => Container(
+                              color: Colors.grey[300],
+                              child: const Icon(Icons.person, size: 18),
+                            ),
                           ),
                         ),
                       ),
                     ),
                     const SizedBox(width: 8),
                     Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
+                      child: GestureDetector(
+                        behavior: HitTestBehavior.opaque,
+                        onTap: () =>
+                            context.push('/author/${column.columnistId}'),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
                           Text(
                             column.columnistArName,
                             style: const TextStyle(
@@ -1528,35 +1541,39 @@ class _ColumnsScreenState extends State<ColumnsScreen>
                 child: Row(
                   children: [
                     // Author photo
-                    Container(
-                      width: 60,
-                      height: 60,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        border: Border.all(
-                          color: AppTheme.tertiaryColor,
-                          width: 2,
+                    GestureDetector(
+                      onTap: () =>
+                          context.push('/author/${column.columnistId}'),
+                      child: Container(
+                        width: 60,
+                        height: 60,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          border: Border.all(
+                            color: AppTheme.tertiaryColor,
+                            width: 2,
+                          ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.1),
+                              blurRadius: 8,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
                         ),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.1),
-                            blurRadius: 8,
-                            offset: const Offset(0, 2),
-                          ),
-                        ],
-                      ),
-                      child: ClipOval(
-                        child: CachedNetworkImage(
-                          imageUrl: column.columnistPhotoUrl,
-                          fit: BoxFit.cover,
-                          filterQuality: FilterQuality.high,
-                          placeholder: (context, url) => Container(
-                            color: Colors.grey[300],
-                            child: const Icon(Icons.person, size: 30),
-                          ),
-                          errorWidget: (context, url, error) => Container(
-                            color: Colors.grey[300],
-                            child: const Icon(Icons.person, size: 30),
+                        child: ClipOval(
+                          child: CachedNetworkImage(
+                            imageUrl: column.columnistPhotoUrl,
+                            fit: BoxFit.cover,
+                            filterQuality: FilterQuality.high,
+                            placeholder: (context, url) => Container(
+                              color: Colors.grey[300],
+                              child: const Icon(Icons.person, size: 30),
+                            ),
+                            errorWidget: (context, url, error) => Container(
+                              color: Colors.grey[300],
+                              child: const Icon(Icons.person, size: 30),
+                            ),
                           ),
                         ),
                       ),
@@ -1588,15 +1605,20 @@ class _ColumnsScreenState extends State<ColumnsScreen>
                           Row(
                             children: [
                               Expanded(
-                                child: Text(
-                                  column.columnistArName,
-                                  style: const TextStyle(
-                                    fontSize: 13,
-                                    fontWeight: FontWeight.w500,
-                                    color: AppTheme.tertiaryColor,
+                                child: GestureDetector(
+                                  behavior: HitTestBehavior.opaque,
+                                  onTap: () => context
+                                      .push('/author/${column.columnistId}'),
+                                  child: Text(
+                                    column.columnistArName,
+                                    style: const TextStyle(
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.w500,
+                                      color: AppTheme.tertiaryColor,
+                                    ),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
                                   ),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
                                 ),
                               ),
                               Text(
