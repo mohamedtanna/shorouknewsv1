@@ -413,7 +413,7 @@ class _ColumnDetailScreenState extends State<ColumnDetailScreen> {
     }
     if (_relatedColumns.isEmpty) return [];
 
-    final columns = _relatedColumns.take(3).toList();
+    final columns = List<ColumnModel>.from(_relatedColumns);
 
     return [
       SliverToBoxAdapter(
@@ -435,7 +435,7 @@ class _ColumnDetailScreenState extends State<ColumnDetailScreen> {
               margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
               child: ListTile(
                 title: Text(
-                  column.title,
+                  column.title.isNotEmpty ? column.title : column.summary,
                   style: const TextStyle(
                       fontWeight: FontWeight.bold, fontSize: 14),
                   maxLines: 2,

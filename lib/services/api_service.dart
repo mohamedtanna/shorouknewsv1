@@ -544,6 +544,22 @@ class ApiService {
     );
   }
 
+  Future<List<AuthorModel>> getColumnists({
+    int currentPage = 1,
+    int pageSize = 50,
+  }) async {
+    return await _get<List<AuthorModel>>(
+      'columnists/list',
+      queryParameters: {
+        'currentpage': currentPage.toString(),
+        'pagesize': pageSize.toString(),
+      },
+      fromJsonList: (list) => list
+          .map((item) => AuthorModel.fromJson(item as Map<String, dynamic>))
+          .toList(),
+    );
+  }
+
   Future<int> subscribeToNewsletter(String email) async {
     try {
       final result = await _post<dynamic>(
