@@ -1406,7 +1406,7 @@ class _ColumnsScreenState extends State<ColumnsScreen>
                               ),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
-                            ),
+
                             Text(
                               _formatDate(DateTime.parse(column.creationDate)),
                               style: TextStyle(
@@ -1608,6 +1608,7 @@ class _ColumnsScreenState extends State<ColumnsScreen>
                               Expanded(
                                 child: GestureDetector(
                                   behavior: HitTestBehavior.opaque,
+
                                   onTap: () => context.push(
                                     '/author/${column.columnistId}',
                                   ),
