@@ -155,7 +155,10 @@ class _AuthorScreenState extends State<AuthorScreen>
   }
 
   Future<void> _loadMoreData() async {
-    if (_isLoadingMore || !_hasMoreData || !mounted) return;
+    if (_isLoadingMore || !_hasMoreData || !mounted) {
+      _refreshController.loadComplete();
+      return;
+    }
 
     setState(() => _isLoadingMore = true);
 
@@ -167,17 +170,23 @@ class _AuthorScreenState extends State<AuthorScreen>
         filters: _filters,
       );
 
-      if (mounted) {
-        setState(() {
-          _columns.addAll(newColumns);
-          _currentPage++;
-          _hasMoreData = newColumns.length >= _pageSize;
-          _isLoadingMore = false;
-        });
+      if (!mounted) return;
+
+      setState(() {
+        _columns.addAll(newColumns);
+        _currentPage++;
+        _hasMoreData = newColumns.length >= _pageSize;
+        _isLoadingMore = false;
+      });
+
+      _refreshController.loadComplete();
+      if (!_hasMoreData) {
+        _refreshController.loadNoData();
       }
     } catch (e) {
       if (mounted) {
         setState(() => _isLoadingMore = false);
+        _refreshController.loadFailed();
         _showMessage('فشل في تحميل المزيد من المقالات', isError: true);
         debugPrint("Error in _loadMoreData for author ${widget.authorId}: $e");
       }
@@ -199,7 +208,10 @@ class _AuthorScreenState extends State<AuthorScreen>
     _authorModule
         .clearCache(); // Clear module specific cache on pull-to-refresh
     await _loadData(refresh: true);
-    if (mounted) _refreshController.refreshCompleted();
+    if (mounted) {
+      _refreshController.refreshCompleted();
+      _refreshController.resetNoData();
+    }
   }
 
   void _showMessage(String message, {bool isError = false}) {
