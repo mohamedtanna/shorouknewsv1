@@ -270,6 +270,25 @@ class AuthorModule {
     }
   }
 
+  Future<List<AuthorModel>> getAllAuthors({bool forceRefresh = false}) async {
+    if (!forceRefresh && _authorsCache.isNotEmpty) {
+      return _authorsCache.values.toList();
+    }
+    try {
+      final authors = await _apiService.getColumnists();
+      for (final author in authors) {
+        _authorsCache[author.id] = author;
+      }
+      return authors;
+    } catch (e) {
+      debugPrint('Error getting authors list: $e');
+      if (_authorsCache.isNotEmpty) {
+        return _authorsCache.values.toList();
+      }
+      rethrow;
+    }
+  }
+
   // Get author columns with pagination and filtering
   Future<List<ColumnModel>> getAuthorColumns(
     String authorId, {

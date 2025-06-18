@@ -21,12 +21,8 @@ import '../../services/analytics_service.dart';
 class ColumnsScreen extends StatefulWidget {
   final String? authorId;
   final String? categoryId;
-  
-  const ColumnsScreen({
-    super.key,
-    this.authorId,
-    this.categoryId,
-  });
+
+  const ColumnsScreen({super.key, this.authorId, this.categoryId});
 
   @override
   State<ColumnsScreen> createState() => _ColumnsScreenState();
@@ -111,26 +107,19 @@ class _ColumnsScreenState extends State<ColumnsScreen>
       vsync: this,
     );
 
-    _fadeAnimation = Tween<double>(
-      begin: 0.0,
-      end: 1.0,
-    ).animate(CurvedAnimation(
-      parent: _fadeController,
-      curve: Curves.easeInOut,
-    ));
+    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _fadeController, curve: Curves.easeInOut),
+    );
 
-    _slideAnimation = Tween<Offset>(
-      begin: const Offset(0, -1),
-      end: Offset.zero,
-    ).animate(CurvedAnimation(
-      parent: _slideController,
-      curve: Curves.easeOutQuad,
-    ));
+    _slideAnimation =
+        Tween<Offset>(begin: const Offset(0, -1), end: Offset.zero).animate(
+          CurvedAnimation(parent: _slideController, curve: Curves.easeOutQuad),
+        );
   }
 
   Future<void> _initializeModule() async {
     await _columnsModule.initialize();
-    
+
     // Listen to column events
     _columnsModule.eventStream.listen((event) {
       if (mounted) {
@@ -147,7 +136,7 @@ class _ColumnsScreenState extends State<ColumnsScreen>
         }
       }
     });
-    
+
     await _loadData();
   }
 
@@ -234,33 +223,33 @@ class _ColumnsScreenState extends State<ColumnsScreen>
       pageSize: _pageSize,
       forceRefresh: _currentPage == 1,
     );
-    
+
     if (_currentPage == 1) {
       _allColumns = columns;
     } else {
       _allColumns.addAll(columns);
     }
-    
+
     _filteredColumns = List.from(_allColumns);
     _hasMoreData = columns.length >= _pageSize;
   }
 
   Future<void> _loadAuthorColumns() async {
     if (widget.authorId == null) return;
-    
+
     final columns = await _columnsModule.getColumnsByAuthor(
       widget.authorId!,
       page: _currentPage,
       pageSize: _pageSize,
       forceRefresh: _currentPage == 1,
     );
-    
+
     if (_currentPage == 1) {
       _allColumns = columns;
     } else {
       _allColumns.addAll(columns);
     }
-    
+
     _filteredColumns = List.from(_allColumns);
     _hasMoreData = columns.length >= _pageSize;
   }
@@ -268,20 +257,20 @@ class _ColumnsScreenState extends State<ColumnsScreen>
   Future<void> _loadCategoryColumns() async {
     final categoryId = _selectedCategoryId ?? widget.categoryId;
     if (categoryId == null) return;
-    
+
     final columns = await _columnsModule.getColumnsByCategory(
       categoryId,
       page: _currentPage,
       pageSize: _pageSize,
       forceRefresh: _currentPage == 1,
     );
-    
+
     if (_currentPage == 1) {
       _allColumns = columns;
     } else {
       _allColumns.addAll(columns);
     }
-    
+
     _filteredColumns = List.from(_allColumns);
     _hasMoreData = columns.length >= _pageSize;
   }
@@ -320,13 +309,13 @@ class _ColumnsScreenState extends State<ColumnsScreen>
 
   Future<void> _loadMoreData() async {
     if (_isLoadingMore || !_hasMoreData) return;
-    
+
     setState(() {
       _isLoadingMore = true;
     });
-    
+
     _currentPage++;
-    
+
     try {
       if (widget.authorId != null) {
         await _loadAuthorColumns();
@@ -339,7 +328,7 @@ class _ColumnsScreenState extends State<ColumnsScreen>
       _currentPage--;
       debugPrint('Error loading more columns: $e');
     }
-    
+
     setState(() {
       _isLoadingMore = false;
     });
@@ -366,9 +355,13 @@ class _ColumnsScreenState extends State<ColumnsScreen>
         _filteredColumns = List.from(_allColumns);
       } else {
         _filteredColumns = _allColumns.where((column) {
-          return column.title.toLowerCase().contains(_searchQuery.toLowerCase()) ||
-                 column.columnistArName.toLowerCase().contains(_searchQuery.toLowerCase()) ||
-                 column.summary.toLowerCase().contains(_searchQuery.toLowerCase());
+          return column.title.toLowerCase().contains(
+                _searchQuery.toLowerCase(),
+              ) ||
+              column.columnistArName.toLowerCase().contains(
+                _searchQuery.toLowerCase(),
+              ) ||
+              column.summary.toLowerCase().contains(_searchQuery.toLowerCase());
         }).toList();
       }
     });
@@ -379,7 +372,7 @@ class _ColumnsScreenState extends State<ColumnsScreen>
     setState(() {
       _filteredColumns.sort((a, b) {
         int comparison = 0;
-        
+
         switch (_sortBy) {
           case ColumnSortBy.date:
             comparison = a.creationDate.compareTo(b.creationDate);
@@ -412,7 +405,7 @@ class _ColumnsScreenState extends State<ColumnsScreen>
     setState(() {
       _showSearchBar = !_showSearchBar;
     });
-    
+
     if (_showSearchBar) {
       _slideController.forward();
     } else {
@@ -435,18 +428,20 @@ class _ColumnsScreenState extends State<ColumnsScreen>
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            ...ColumnSortBy.values.map((sortBy) => RadioListTile<ColumnSortBy>(
-              title: Text(_getSortByLabel(sortBy)),
-              value: sortBy,
-              groupValue: _sortBy,
-              onChanged: (value) {
-                setState(() {
-                  _sortBy = value!;
-                });
-                _applySorting();
-                Navigator.pop(context);
-              },
-            )),
+            ...ColumnSortBy.values.map(
+              (sortBy) => RadioListTile<ColumnSortBy>(
+                title: Text(_getSortByLabel(sortBy)),
+                value: sortBy,
+                groupValue: _sortBy,
+                onChanged: (value) {
+                  setState(() {
+                    _sortBy = value!;
+                  });
+                  _applySorting();
+                  Navigator.pop(context);
+                },
+              ),
+            ),
             const Divider(),
             SwitchListTile(
               title: const Text('ترتيب تصاعدي'),
@@ -495,10 +490,7 @@ class _ColumnsScreenState extends State<ColumnsScreen>
 
   void _showMessage(String message) {
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: AppTheme.primaryColor,
-      ),
+      SnackBar(content: Text(message), backgroundColor: AppTheme.primaryColor),
     );
   }
 
@@ -506,7 +498,9 @@ class _ColumnsScreenState extends State<ColumnsScreen>
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: _buildAppBar(),
-      body: _isLoading && _currentPage == 1 ? _buildLoadingWidget() : _buildContent(),
+      body: _isLoading && _currentPage == 1
+          ? _buildLoadingWidget()
+          : _buildContent(),
       floatingActionButton: _buildFloatingActionButton(),
     );
   }
@@ -516,21 +510,15 @@ class _ColumnsScreenState extends State<ColumnsScreen>
       title: Text(_getAppBarTitle()),
       automaticallyImplyLeading: false,
       actions: [
-        IconButton(
-          icon: const Icon(Icons.search),
-          onPressed: _toggleSearch,
-        ),
-        IconButton(
-          icon: const Icon(Icons.sort),
-          onPressed: _showSortDialog,
-        ),
+        IconButton(icon: const Icon(Icons.search), onPressed: _toggleSearch),
+        IconButton(icon: const Icon(Icons.sort), onPressed: _showSortDialog),
         PopupMenuButton<String>(
           onSelected: (value) {
             switch (value) {
               case 'view_mode':
                 setState(() {
-                  _viewMode = _viewMode == ColumnViewMode.list 
-                      ? ColumnViewMode.grid 
+                  _viewMode = _viewMode == ColumnViewMode.list
+                      ? ColumnViewMode.grid
                       : ColumnViewMode.list;
                 });
                 break;
@@ -554,9 +542,15 @@ class _ColumnsScreenState extends State<ColumnsScreen>
               value: 'view_mode',
               child: Row(
                 children: [
-                  Icon(_viewMode == ColumnViewMode.list ? Icons.grid_view : Icons.list),
+                  Icon(
+                    _viewMode == ColumnViewMode.list
+                        ? Icons.grid_view
+                        : Icons.list,
+                  ),
                   const SizedBox(width: 8),
-                  Text(_viewMode == ColumnViewMode.list ? 'عرض شبكة' : 'عرض قائمة'),
+                  Text(
+                    _viewMode == ColumnViewMode.list ? 'عرض شبكة' : 'عرض قائمة',
+                  ),
                 ],
               ),
             ),
@@ -594,7 +588,9 @@ class _ColumnsScreenState extends State<ColumnsScreen>
         ),
       ],
       bottom: PreferredSize(
-        preferredSize: Size.fromHeight(_showSearchBar ? 120 : (_showFilters ? 60 : 0)),
+        preferredSize: Size.fromHeight(
+          _showSearchBar ? 120 : (_showFilters ? 60 : 0),
+        ),
         child: Column(
           children: [
             if (_showSearchBar) _buildSearchBar(),
@@ -637,9 +633,7 @@ class _ColumnsScreenState extends State<ColumnsScreen>
                     },
                   )
                 : null,
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-            ),
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
             filled: true,
             fillColor: Colors.white,
           ),
@@ -668,19 +662,21 @@ class _ColumnsScreenState extends State<ColumnsScreen>
               checkmarkColor: AppTheme.primaryColor,
             ),
           ),
-          
+
           // Category filters
-          ..._categories.map((category) => Padding(
-            padding: const EdgeInsets.only(left: 8),
-            child: FilterChip(
-              label: Text('${category.name} (${category.columnsCount})'),
-              selected: _selectedCategoryId == category.id,
-              onSelected: (_) => _selectCategory(category.id),
-              backgroundColor: Colors.grey[200],
-              selectedColor: AppTheme.primaryColor.withOpacity(0.2),
-              checkmarkColor: AppTheme.primaryColor,
+          ..._categories.map(
+            (category) => Padding(
+              padding: const EdgeInsets.only(left: 8),
+              child: FilterChip(
+                label: Text('${category.name} (${category.columnsCount})'),
+                selected: _selectedCategoryId == category.id,
+                onSelected: (_) => _selectCategory(category.id),
+                backgroundColor: Colors.grey[200],
+                selectedColor: AppTheme.primaryColor.withOpacity(0.2),
+                checkmarkColor: AppTheme.primaryColor,
+              ),
             ),
-          )),
+          ),
         ],
       ),
     );
@@ -690,8 +686,8 @@ class _ColumnsScreenState extends State<ColumnsScreen>
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
       child: Column(
-          children: [
-            // const AdBanner(adUnit: '/21765378867/ShorouknewsApp_LeaderBoard2'),
+        children: [
+          // const AdBanner(adUnit: '/21765378867/ShorouknewsApp_LeaderBoard2'),
           const SizedBox(height: 16),
           ...List.generate(5, (index) => _buildShimmerColumnCard()),
         ],
@@ -730,11 +726,7 @@ class _ColumnsScreenState extends State<ColumnsScreen>
                         color: Colors.white,
                       ),
                       const SizedBox(height: 8),
-                      Container(
-                        width: 150,
-                        height: 12,
-                        color: Colors.white,
-                      ),
+                      Container(width: 150, height: 12, color: Colors.white),
                       const SizedBox(height: 8),
                       Container(
                         width: double.infinity,
@@ -766,51 +758,41 @@ class _ColumnsScreenState extends State<ColumnsScreen>
         onRefresh: _onRefresh,
         child: CustomScrollView(
           controller: _scrollController,
-            slivers: [
-              // Ad Banner
-              // const SliverToBoxAdapter(
-              //   child: AdBanner(adUnit: '/21765378867/ShorouknewsApp_LeaderBoard2'),
-              // ),
+          slivers: [
+            // Ad Banner
+            // const SliverToBoxAdapter(
+            //   child: AdBanner(adUnit: '/21765378867/ShorouknewsApp_LeaderBoard2'),
+            // ),
 
             // Breadcrumb
-            SliverToBoxAdapter(
-              child: _buildBreadcrumb(),
-            ),
+            SliverToBoxAdapter(child: _buildBreadcrumb()),
 
             // Author Section (if applicable)
             if (_author != null)
-              SliverToBoxAdapter(
-                child: _buildAuthorSection(),
-              ),
+              SliverToBoxAdapter(child: _buildAuthorSection()),
 
             // Quick Stats
             if (_stats != null && widget.authorId == null)
-              SliverToBoxAdapter(
-                child: _buildQuickStats(),
-              ),
+              SliverToBoxAdapter(child: _buildQuickStats()),
 
             // Selected Columns Section
             if (_selectedColumns.isNotEmpty && widget.authorId == null)
-              SliverToBoxAdapter(
-                child: _buildSelectedColumnsSection(),
-              ),
+              SliverToBoxAdapter(child: _buildSelectedColumnsSection()),
 
             // Favorite Columns Section
             if (_showFavorites && _favoriteColumns.isNotEmpty)
-              SliverToBoxAdapter(
-                child: _buildFavoriteColumnsSection(),
-              ),
+              SliverToBoxAdapter(child: _buildFavoriteColumnsSection()),
 
             // Recent Columns Section
             if (_showRecent && _recentColumns.isNotEmpty)
-              SliverToBoxAdapter(
-                child: _buildRecentColumnsSection(),
-              ),
+              SliverToBoxAdapter(child: _buildRecentColumnsSection()),
 
             // All Columns Section
             SliverToBoxAdapter(
               child: SectionHeader(
-                title: _searchQuery.isNotEmpty ? 'نتائج البحث' : 'جميع المقالات',
+                title: _searchQuery.isNotEmpty
+                    ? 'نتائج البحث'
+                    : 'جميع المقالات',
                 subtitle: '${_filteredColumns.length} مقال',
                 icon: Icons.article,
               ),
@@ -825,27 +807,21 @@ class _ColumnsScreenState extends State<ColumnsScreen>
                   crossAxisSpacing: 8,
                   mainAxisSpacing: 8,
                 ),
-                delegate: SliverChildBuilderDelegate(
-                  (context, index) {
-                    if (index < _filteredColumns.length) {
-                      return _buildColumnGridCard(_filteredColumns[index]);
-                    }
-                    return null;
-                  },
-                  childCount: _filteredColumns.length,
-                ),
+                delegate: SliverChildBuilderDelegate((context, index) {
+                  if (index < _filteredColumns.length) {
+                    return _buildColumnGridCard(_filteredColumns[index]);
+                  }
+                  return null;
+                }, childCount: _filteredColumns.length),
               )
             else
               SliverList(
-                delegate: SliverChildBuilderDelegate(
-                  (context, index) {
-                    if (index < _filteredColumns.length) {
-                      return _buildColumnListCard(_filteredColumns[index]);
-                    }
-                    return null;
-                  },
-                  childCount: _filteredColumns.length,
-                ),
+                delegate: SliverChildBuilderDelegate((context, index) {
+                  if (index < _filteredColumns.length) {
+                    return _buildColumnListCard(_filteredColumns[index]);
+                  }
+                  return null;
+                }, childCount: _filteredColumns.length),
               ),
 
             // Loading more indicator
@@ -860,14 +836,10 @@ class _ColumnsScreenState extends State<ColumnsScreen>
 
             // Empty State
             if (_filteredColumns.isEmpty && !_isLoading)
-              SliverToBoxAdapter(
-                child: _buildEmptyState(),
-              ),
+              SliverToBoxAdapter(child: _buildEmptyState()),
 
             // Bottom spacing
-            const SliverToBoxAdapter(
-              child: SizedBox(height: 80),
-            ),
+            const SliverToBoxAdapter(child: SizedBox(height: 80)),
           ],
         ),
       ),
@@ -879,11 +851,7 @@ class _ColumnsScreenState extends State<ColumnsScreen>
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Icon(
-            Icons.error_outline,
-            size: 64,
-            color: Colors.grey,
-          ),
+          const Icon(Icons.error_outline, size: 64, color: Colors.grey),
           const SizedBox(height: 16),
           Text(
             _errorMessage!,
@@ -971,7 +939,7 @@ class _ColumnsScreenState extends State<ColumnsScreen>
 
   Widget _buildAuthorSection() {
     if (_author == null) return const SizedBox.shrink();
-    
+
     return Container(
       margin: const EdgeInsets.all(16),
       child: Card(
@@ -1004,9 +972,9 @@ class _ColumnsScreenState extends State<ColumnsScreen>
                   ),
                 ),
               ),
-              
+
               const SizedBox(width: 16),
-              
+
               // Author Info
               Expanded(
                 child: Column(
@@ -1052,7 +1020,7 @@ class _ColumnsScreenState extends State<ColumnsScreen>
 
   Widget _buildQuickStats() {
     if (_stats == null) return const SizedBox.shrink();
-    
+
     return Container(
       margin: const EdgeInsets.all(16),
       padding: const EdgeInsets.all(20),
@@ -1107,10 +1075,7 @@ class _ColumnsScreenState extends State<ColumnsScreen>
           ),
           Text(
             label,
-            style: const TextStyle(
-              color: Colors.white70,
-              fontSize: 11,
-            ),
+            style: const TextStyle(color: Colors.white70, fontSize: 11),
             textAlign: TextAlign.center,
           ),
         ],
@@ -1190,7 +1155,7 @@ class _ColumnsScreenState extends State<ColumnsScreen>
   Widget _buildHorizontalColumnCard(ColumnModel column) {
     final isFavorite = _columnsModule.isColumnFavorite(column.id);
     final isRead = _columnsModule.isColumnRead(column.id);
-    
+
     return Container(
       width: 220,
       margin: const EdgeInsets.only(left: 12),
@@ -1207,7 +1172,9 @@ class _ColumnsScreenState extends State<ColumnsScreen>
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
                   color: AppTheme.primaryColor.withOpacity(0.05),
-                  borderRadius: const BorderRadius.vertical(top: Radius.circular(8)),
+                  borderRadius: const BorderRadius.vertical(
+                    top: Radius.circular(8),
+                  ),
                 ),
                 child: Row(
                   children: [
@@ -1217,7 +1184,10 @@ class _ColumnsScreenState extends State<ColumnsScreen>
                       height: 40,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        border: Border.all(color: AppTheme.tertiaryColor, width: 2),
+                        border: Border.all(
+                          color: AppTheme.tertiaryColor,
+                          width: 2,
+                        ),
                       ),
                       child: ClipOval(
                         child: CachedNetworkImage(
@@ -1238,27 +1208,32 @@ class _ColumnsScreenState extends State<ColumnsScreen>
                     const SizedBox(width: 8),
                     // Author name
                     Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            column.columnistArName,
-                            style: const TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.bold,
-                              color: AppTheme.primaryColor,
+                      child: GestureDetector(
+                        behavior: HitTestBehavior.opaque,
+                        onTap: () =>
+                            context.push('/author/${column.columnistId}'),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              column.columnistArName,
+                              style: const TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.bold,
+                                color: AppTheme.primaryColor,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
                             ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                          Text(
-                            _formatDate(DateTime.parse(column.creationDate)),
-                            style: TextStyle(
-                              fontSize: 10,
-                              color: Colors.grey[600],
+                            Text(
+                              _formatDate(DateTime.parse(column.creationDate)),
+                              style: TextStyle(
+                                fontSize: 10,
+                                color: Colors.grey[600],
+                              ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                     ),
                     // Read indicator
@@ -1271,7 +1246,7 @@ class _ColumnsScreenState extends State<ColumnsScreen>
                   ],
                 ),
               ),
-              
+
               // Title
               Padding(
                 padding: const EdgeInsets.all(12),
@@ -1286,7 +1261,7 @@ class _ColumnsScreenState extends State<ColumnsScreen>
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
-              
+
               // Summary
               Expanded(
                 child: Padding(
@@ -1303,7 +1278,7 @@ class _ColumnsScreenState extends State<ColumnsScreen>
                   ),
                 ),
               ),
-              
+
               // Actions
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
@@ -1313,11 +1288,20 @@ class _ColumnsScreenState extends State<ColumnsScreen>
                     // Views count
                     Row(
                       children: [
-                        Icon(Icons.visibility, size: 14, color: Colors.grey[600]),
+                        Icon(
+                          Icons.visibility,
+                          size: 14,
+                          color: Colors.grey[600],
+                        ),
                         const SizedBox(width: 4),
                         Text(
-                          _formatNumber(_columnsModule.getColumnViewCount(column.id)),
-                          style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                          _formatNumber(
+                            _columnsModule.getColumnViewCount(column.id),
+                          ),
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Colors.grey[600],
+                          ),
                         ),
                       ],
                     ),
@@ -1361,7 +1345,7 @@ class _ColumnsScreenState extends State<ColumnsScreen>
     final isFavorite = _columnsModule.isColumnFavorite(column.id);
     final isRead = _columnsModule.isColumnRead(column.id);
     final isBookmarked = _columnsModule.isColumnBookmarked(column.id);
-    
+
     return Container(
       margin: const EdgeInsets.all(8),
       child: Card(
@@ -1377,52 +1361,61 @@ class _ColumnsScreenState extends State<ColumnsScreen>
                 // Author info
                 Row(
                   children: [
-                    Container(
-                      width: 36,
-                      height: 36,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        border: Border.all(color: AppTheme.tertiaryColor),
-                      ),
-                      child: ClipOval(
-                        child: CachedNetworkImage(
-                          imageUrl: column.columnistPhotoUrl,
-                          fit: BoxFit.cover,
-                          filterQuality: FilterQuality.high,
-                          placeholder: (context, url) => Container(
-                            color: Colors.grey[300],
-                            child: const Icon(Icons.person, size: 18),
-                          ),
-                          errorWidget: (context, url, error) => Container(
-                            color: Colors.grey[300],
-                            child: const Icon(Icons.person, size: 18),
+                    GestureDetector(
+                      onTap: () =>
+                          context.push('/author/${column.columnistId}'),
+                      child: Container(
+                        width: 36,
+                        height: 36,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          border: Border.all(color: AppTheme.tertiaryColor),
+                        ),
+                        child: ClipOval(
+                          child: CachedNetworkImage(
+                            imageUrl: column.columnistPhotoUrl,
+                            fit: BoxFit.cover,
+                            filterQuality: FilterQuality.high,
+                            placeholder: (context, url) => Container(
+                              color: Colors.grey[300],
+                              child: const Icon(Icons.person, size: 18),
+                            ),
+                            errorWidget: (context, url, error) => Container(
+                              color: Colors.grey[300],
+                              child: const Icon(Icons.person, size: 18),
+                            ),
                           ),
                         ),
                       ),
                     ),
                     const SizedBox(width: 8),
                     Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            column.columnistArName,
-                            style: const TextStyle(
-                              fontSize: 11,
-                              fontWeight: FontWeight.bold,
-                              color: AppTheme.primaryColor,
+                      child: GestureDetector(
+                        behavior: HitTestBehavior.opaque,
+                        onTap: () =>
+                            context.push('/author/${column.columnistId}'),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              column.columnistArName,
+                              style: const TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.bold,
+                                color: AppTheme.primaryColor,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
                             ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                          Text(
+                            Text(
                               _formatDate(DateTime.parse(column.creationDate)),
-                            style: TextStyle(
-                              fontSize: 9,
-                              color: Colors.grey[600],
+                              style: TextStyle(
+                                fontSize: 9,
+                                color: Colors.grey[600],
+                              ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                     ),
                     if (isRead)
@@ -1433,9 +1426,9 @@ class _ColumnsScreenState extends State<ColumnsScreen>
                       ),
                   ],
                 ),
-                
+
                 const SizedBox(height: 8),
-                
+
                 // Title
                 Text(
                   column.title,
@@ -1447,9 +1440,9 @@ class _ColumnsScreenState extends State<ColumnsScreen>
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                 ),
-                
+
                 const SizedBox(height: 8),
-                
+
                 // Summary
                 Expanded(
                   child: Text(
@@ -1463,9 +1456,9 @@ class _ColumnsScreenState extends State<ColumnsScreen>
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),
-                
+
                 const SizedBox(height: 8),
-                
+
                 // Bottom row
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -1473,11 +1466,20 @@ class _ColumnsScreenState extends State<ColumnsScreen>
                     // Views
                     Row(
                       children: [
-                        Icon(Icons.visibility, size: 12, color: Colors.grey[600]),
+                        Icon(
+                          Icons.visibility,
+                          size: 12,
+                          color: Colors.grey[600],
+                        ),
                         const SizedBox(width: 2),
                         Text(
-                          _formatNumber(_columnsModule.getColumnViewCount(column.id)),
-                          style: TextStyle(fontSize: 10, color: Colors.grey[600]),
+                          _formatNumber(
+                            _columnsModule.getColumnViewCount(column.id),
+                          ),
+                          style: TextStyle(
+                            fontSize: 10,
+                            color: Colors.grey[600],
+                          ),
                         ),
                       ],
                     ),
@@ -1486,9 +1488,17 @@ class _ColumnsScreenState extends State<ColumnsScreen>
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         if (isFavorite)
-                          const Icon(Icons.favorite, size: 14, color: Colors.red),
+                          const Icon(
+                            Icons.favorite,
+                            size: 14,
+                            color: Colors.red,
+                          ),
                         if (isBookmarked)
-                          const Icon(Icons.bookmark, size: 14, color: AppTheme.primaryColor),
+                          const Icon(
+                            Icons.bookmark,
+                            size: 14,
+                            color: AppTheme.primaryColor,
+                          ),
                       ],
                     ),
                   ],
@@ -1506,7 +1516,7 @@ class _ColumnsScreenState extends State<ColumnsScreen>
     final isRead = _columnsModule.isColumnRead(column.id);
     final isBookmarked = _columnsModule.isColumnBookmarked(column.id);
     final viewCount = _columnsModule.getColumnViewCount(column.id);
-    
+
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: Card(
@@ -1520,50 +1530,56 @@ class _ColumnsScreenState extends State<ColumnsScreen>
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: isRead 
-                      ? Colors.grey[50] 
+                  color: isRead
+                      ? Colors.grey[50]
                       : AppTheme.primaryColor.withOpacity(0.05),
-                  borderRadius: const BorderRadius.vertical(top: Radius.circular(8)),
+                  borderRadius: const BorderRadius.vertical(
+                    top: Radius.circular(8),
+                  ),
                 ),
                 child: Row(
                   children: [
                     // Author photo
-                    Container(
-                      width: 60,
-                      height: 60,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        border: Border.all(
-                          color: AppTheme.tertiaryColor,
-                          width: 2,
+                    GestureDetector(
+                      onTap: () =>
+                          context.push('/author/${column.columnistId}'),
+                      child: Container(
+                        width: 60,
+                        height: 60,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          border: Border.all(
+                            color: AppTheme.tertiaryColor,
+                            width: 2,
+                          ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.1),
+                              blurRadius: 8,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
                         ),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.1),
-                            blurRadius: 8,
-                            offset: const Offset(0, 2),
-                          ),
-                        ],
-                      ),
-                      child: ClipOval(
-                        child: CachedNetworkImage(
-                          imageUrl: column.columnistPhotoUrl,
-                          fit: BoxFit.cover,
-                          filterQuality: FilterQuality.high,
-                          placeholder: (context, url) => Container(
-                            color: Colors.grey[300],
-                            child: const Icon(Icons.person, size: 30),
-                          ),
-                          errorWidget: (context, url, error) => Container(
-                            color: Colors.grey[300],
-                            child: const Icon(Icons.person, size: 30),
+                        child: ClipOval(
+                          child: CachedNetworkImage(
+                            imageUrl: column.columnistPhotoUrl,
+                            fit: BoxFit.cover,
+                            filterQuality: FilterQuality.high,
+                            placeholder: (context, url) => Container(
+                              color: Colors.grey[300],
+                              child: const Icon(Icons.person, size: 30),
+                            ),
+                            errorWidget: (context, url, error) => Container(
+                              color: Colors.grey[300],
+                              child: const Icon(Icons.person, size: 30),
+                            ),
                           ),
                         ),
                       ),
                     ),
-                    
+
                     const SizedBox(width: 16),
-                    
+
                     // Column info
                     Expanded(
                       child: Column(
@@ -1575,32 +1591,42 @@ class _ColumnsScreenState extends State<ColumnsScreen>
                             style: TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.bold,
-                              color: isRead ? Colors.grey[700] : AppTheme.primaryColor,
+                              color: isRead
+                                  ? Colors.grey[700]
+                                  : AppTheme.primaryColor,
                               height: 1.3,
                             ),
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
                           ),
-                          
+
                           const SizedBox(height: 8),
-                          
+
                           // Author and date
                           Row(
                             children: [
                               Expanded(
-                                child: Text(
-                                  column.columnistArName,
-                                  style: const TextStyle(
-                                    fontSize: 13,
-                                    fontWeight: FontWeight.w500,
-                                    color: AppTheme.tertiaryColor,
+                                child: GestureDetector(
+                                  behavior: HitTestBehavior.opaque,
+                                  onTap: () => context.push(
+                                    '/author/${column.columnistId}',
                                   ),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
+                                  child: Text(
+                                    column.columnistArName,
+                                    style: const TextStyle(
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.w500,
+                                      color: AppTheme.tertiaryColor,
+                                    ),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
                                 ),
                               ),
                               Text(
-                                _formatDate(DateTime.parse(column.creationDate)),
+                                _formatDate(
+                                  DateTime.parse(column.creationDate),
+                                ),
                                 style: TextStyle(
                                   fontSize: 12,
                                   color: Colors.grey[600],
@@ -1614,10 +1640,13 @@ class _ColumnsScreenState extends State<ColumnsScreen>
                   ],
                 ),
               ),
-              
+
               // Summary
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 12,
+                ),
                 child: Text(
                   column.summary,
                   style: TextStyle(
@@ -1629,36 +1658,52 @@ class _ColumnsScreenState extends State<ColumnsScreen>
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
-              
+
               // Actions bar
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 8,
+                ),
                 decoration: BoxDecoration(
                   color: Colors.grey[100],
-                  borderRadius: const BorderRadius.vertical(bottom: Radius.circular(8)),
+                  borderRadius: const BorderRadius.vertical(
+                    bottom: Radius.circular(8),
+                  ),
                 ),
                 child: Row(
                   children: [
                     // Stats
                     Row(
                       children: [
-                        _buildStatChip(Icons.visibility, _formatNumber(viewCount)),
+                        _buildStatChip(
+                          Icons.visibility,
+                          _formatNumber(viewCount),
+                        ),
                         const SizedBox(width: 12),
                         if (isRead)
-                          _buildStatChip(Icons.done_all, 'مقروء', color: AppTheme.tertiaryColor),
+                          _buildStatChip(
+                            Icons.done_all,
+                            'مقروء',
+                            color: AppTheme.tertiaryColor,
+                          ),
                       ],
                     ),
-                    
+
                     const Spacer(),
-                    
+
                     // Actions
                     Row(
                       children: [
                         IconButton(
                           icon: Icon(
-                            isBookmarked ? Icons.bookmark : Icons.bookmark_border,
+                            isBookmarked
+                                ? Icons.bookmark
+                                : Icons.bookmark_border,
                             size: 22,
-                            color: isBookmarked ? AppTheme.primaryColor : Colors.grey[600],
+                            color: isBookmarked
+                                ? AppTheme.primaryColor
+                                : Colors.grey[600],
                           ),
                           onPressed: () => _toggleBookmark(column),
                           padding: const EdgeInsets.all(8),
@@ -1706,10 +1751,7 @@ class _ColumnsScreenState extends State<ColumnsScreen>
         const SizedBox(width: 4),
         Text(
           label,
-          style: TextStyle(
-            fontSize: 12,
-            color: color ?? Colors.grey[600],
-          ),
+          style: TextStyle(fontSize: 12, color: color ?? Colors.grey[600]),
         ),
       ],
     );
@@ -1723,13 +1765,15 @@ class _ColumnsScreenState extends State<ColumnsScreen>
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(
-              _searchQuery.isNotEmpty ? Icons.search_off : Icons.article_outlined,
+              _searchQuery.isNotEmpty
+                  ? Icons.search_off
+                  : Icons.article_outlined,
               size: 80,
               color: Colors.grey[400],
             ),
             const SizedBox(height: 16),
             Text(
-              _searchQuery.isNotEmpty 
+              _searchQuery.isNotEmpty
                   ? 'لا توجد نتائج للبحث'
                   : 'لا توجد مقالات',
               style: TextStyle(
@@ -1740,13 +1784,10 @@ class _ColumnsScreenState extends State<ColumnsScreen>
             ),
             const SizedBox(height: 8),
             Text(
-              _searchQuery.isNotEmpty 
+              _searchQuery.isNotEmpty
                   ? 'جرب البحث باستخدام كلمات أخرى'
                   : 'سيتم عرض المقالات هنا',
-              style: TextStyle(
-                fontSize: 14,
-                color: Colors.grey[500],
-              ),
+              style: TextStyle(fontSize: 14, color: Colors.grey[500]),
               textAlign: TextAlign.center,
             ),
             if (_searchQuery.isNotEmpty) ...[
@@ -1788,9 +1829,9 @@ class _ColumnsScreenState extends State<ColumnsScreen>
 
   Future<void> _toggleFavorite(ColumnModel column) async {
     HapticFeedback.lightImpact();
-    
+
     final isFavorite = _columnsModule.isColumnFavorite(column.id);
-    
+
     if (isFavorite) {
       await _columnsModule.removeColumnFromFavorites(column.id);
       _showMessage('تم إزالة المقال من المفضلة');
@@ -1798,16 +1839,16 @@ class _ColumnsScreenState extends State<ColumnsScreen>
       await _columnsModule.addColumnToFavorites(column);
       _showMessage('تم إضافة المقال إلى المفضلة');
     }
-    
+
     await _loadFavoriteColumns();
     setState(() {});
   }
 
   Future<void> _toggleBookmark(ColumnModel column) async {
     HapticFeedback.lightImpact();
-    
+
     final isBookmarked = _columnsModule.isColumnBookmarked(column.id);
-    
+
     if (isBookmarked) {
       await _columnsModule.removeColumnFromBookmarks(column.id);
       _showMessage('تم إزالة الإشارة المرجعية');
@@ -1815,14 +1856,15 @@ class _ColumnsScreenState extends State<ColumnsScreen>
       await _columnsModule.addColumnToBookmarks(column);
       _showMessage('تم إضافة إشارة مرجعية');
     }
-    
+
     setState(() {});
   }
 
   Future<void> _shareColumn(ColumnModel column) async {
     final shareLink = _columnsModule.generateShareLink(column);
-    final shareText = 'اقرأ مقال "${column.title}" بقلم ${column.columnistArName}';
-    
+    final shareText =
+        'اقرأ مقال "${column.title}" بقلم ${column.columnistArName}';
+
     try {
       await Share.share('$shareText\n\n$shareLink');
       _columnsModule.logColumnEngagement(column.id, 'share');
@@ -1846,7 +1888,4 @@ class _ColumnsScreenState extends State<ColumnsScreen>
 }
 
 // Enums
-enum ColumnViewMode {
-  list,
-  grid,
-}
+enum ColumnViewMode { list, grid }
