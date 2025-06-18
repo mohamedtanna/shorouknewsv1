@@ -422,8 +422,8 @@ class _ColumnDetailScreenState extends State<ColumnDetailScreen> {
           child: SectionHeader(
             title: 'المزيد من مقالات الكاتب',
             icon: Icons.article_outlined,
-            onMorePressed: () => context
-                .go('/columns?columnistId=${_columnDetail!.columnistId}'),
+            onMorePressed: () =>
+                context.go('/columns?authorId=${_columnDetail!.columnistId}'),
           ),
         ),
       ),
