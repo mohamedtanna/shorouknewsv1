@@ -646,12 +646,14 @@ class _AuthorScreenState extends State<AuthorScreen>
                 children: [
                   CircleAvatar(
                     radius: 40,
-                    backgroundImage: _author!.photoUrl.isNotEmpty 
-                        ? CachedNetworkImageProvider(_author!.photoUrl) 
+                    backgroundImage: _author!.photoUrl.isNotEmpty
+                        ? CachedNetworkImageProvider(_author!.photoUrl)
                         : null,
-                    onBackgroundImageError: (_,__){}, 
-                    child: _author!.photoUrl.isEmpty 
-                        ? const Icon(Icons.person_outline, size: 40) 
+                    onBackgroundImageError: _author!.photoUrl.isNotEmpty
+                        ? (_, __) {}
+                        : null,
+                    child: _author!.photoUrl.isEmpty
+                        ? const Icon(Icons.person_outline, size: 40)
                         : null,
                   ),
                   const SizedBox(width: 16),
@@ -890,7 +892,9 @@ class _AuthorScreenState extends State<AuthorScreen>
                               backgroundImage: _author?.photoUrl != null && _author!.photoUrl.isNotEmpty
                                   ? CachedNetworkImageProvider(_author!.photoUrl)
                                   : null,
-                              onBackgroundImageError: (_,__){},
+                              onBackgroundImageError: (_author?.photoUrl != null && _author!.photoUrl.isNotEmpty)
+                                  ? (_, __) {}
+                                  : null,
                               child: (_author?.photoUrl == null || _author!.photoUrl.isEmpty)
                                   ? const Icon(Icons.person_outline, size: 20)
                                   : null,
