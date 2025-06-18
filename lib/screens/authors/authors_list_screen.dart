@@ -113,9 +113,12 @@ class _AuthorsListScreenState extends State<AuthorsListScreen>
         _errorMessage = null;
       });
 
-      // In a real app, this would be an API call to get all authors
-      // For now, we'll simulate loading authors from cache or create mock data
-      await _loadMockAuthors();
+      try {
+        _allAuthors = await _authorModule.getAllAuthors();
+      } catch (_) {
+        // Fallback to mock data if API fails
+        await _loadMockAuthors();
+      }
       
       // Load favorites and recent authors
       await _loadFavoriteAuthors();
