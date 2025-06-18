@@ -12,7 +12,6 @@ import '../../widgets/section_app_bar.dart';
 import '../../models/additional_models.dart'; // Contains AuthorModel and other models
 import '../../models/column_model.dart';
 // import '../../widgets/ad_banner.dart';
-import '../../widgets/section_header.dart';
 import '../../core/theme.dart';
 import 'author_module.dart'; // Contains AuthorModule and its models like AuthorStats etc.
 import 'package:intl/intl.dart';
@@ -40,7 +39,6 @@ class _AuthorScreenState extends State<AuthorScreen>
   AuthorModel? _author;
   List<ColumnModel> _columns = [];
   AuthorStats? _authorStats;
-  AuthorSocialLinks? _socialLinks;
 
   // State
   bool _isLoading = true;
@@ -89,13 +87,15 @@ class _AuthorScreenState extends State<AuthorScreen>
       vsync: this,
     );
     _slideController = AnimationController(
-      duration: const Duration(milliseconds: 300), // Faster for search/filter panel
+      duration:
+          const Duration(milliseconds: 300), // Faster for search/filter panel
       vsync: this,
     );
     _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
         CurvedAnimation(parent: _fadeController, curve: Curves.easeInOut));
-    _slideAnimation = Tween<Offset>(begin: const Offset(0, -1), end: Offset.zero)
-        .animate(CurvedAnimation(parent: _slideController, curve: Curves.easeOut));
+    _slideAnimation =
+        Tween<Offset>(begin: const Offset(0, -1), end: Offset.zero).animate(
+            CurvedAnimation(parent: _slideController, curve: Curves.easeOut));
   }
 
   Future<void> _initializeModuleAndLoadData() async {
@@ -103,15 +103,17 @@ class _AuthorScreenState extends State<AuthorScreen>
     await _loadData(isInitialLoad: true); // Then load data
   }
 
-  Future<void> _loadData({bool refresh = false, bool isInitialLoad = false}) async {
+  Future<void> _loadData(
+      {bool refresh = false, bool isInitialLoad = false}) async {
     if (!mounted) return;
     setState(() {
-      _isLoading = isInitialLoad || refresh; // Show main loader only on initial or refresh
+      _isLoading = isInitialLoad ||
+          refresh; // Show main loader only on initial or refresh
       _errorMessage = null;
       if (refresh) {
-         _currentPage = 1;
-         _columns.clear();
-         _hasMoreData = true;
+        _currentPage = 1;
+        _columns.clear();
+        _hasMoreData = true;
       }
     });
 
@@ -135,7 +137,6 @@ class _AuthorScreenState extends State<AuthorScreen>
           _author = results[0] as AuthorModel?;
           _columns = results[1] as List<ColumnModel>;
           _authorStats = results[2] as AuthorStats?;
-          _socialLinks = results[3] as AuthorSocialLinks?;
           _currentPage = 1; // Reset current page after initial load/refresh
           _hasMoreData = _columns.length >= _pageSize;
           _isLoading = false; // Stop main loader
@@ -157,7 +158,7 @@ class _AuthorScreenState extends State<AuthorScreen>
     if (_isLoadingMore || !_hasMoreData || !mounted) return;
 
     setState(() => _isLoadingMore = true);
-    
+
     try {
       final newColumns = await _authorModule.getAuthorColumns(
         widget.authorId,
@@ -185,14 +186,18 @@ class _AuthorScreenState extends State<AuthorScreen>
 
   void _onScroll() {
     if (_scrollController.position.pixels >=
-            _scrollController.position.maxScrollExtent * 0.8 && // Trigger a bit earlier
-        !_isLoading && !_isLoadingMore && _hasMoreData) {
+            _scrollController.position.maxScrollExtent *
+                0.8 && // Trigger a bit earlier
+        !_isLoading &&
+        !_isLoadingMore &&
+        _hasMoreData) {
       _loadMoreData();
     }
   }
 
   Future<void> _onRefresh() async {
-    _authorModule.clearCache(); // Clear module specific cache on pull-to-refresh
+    _authorModule
+        .clearCache(); // Clear module specific cache on pull-to-refresh
     await _loadData(refresh: true);
     if (mounted) _refreshController.refreshCompleted();
   }
@@ -214,8 +219,10 @@ class _AuthorScreenState extends State<AuthorScreen>
       await HapticFeedback.lightImpact();
       await _authorModule.toggleFavoriteAuthor(widget.authorId);
       if (mounted) {
-         final isFavorite = _authorModule.isAuthorFavorite(widget.authorId);
-        _showMessage(isFavorite ? 'تم إضافة الكاتب للمفضلة' : 'تم إزالة الكاتب من المفضلة');
+        final isFavorite = _authorModule.isAuthorFavorite(widget.authorId);
+        _showMessage(isFavorite
+            ? 'تم إضافة الكاتب للمفضلة'
+            : 'تم إزالة الكاتب من المفضلة');
         setState(() {}); // Rebuild to update favorite icon
       }
     } catch (e) {
@@ -232,25 +239,24 @@ class _AuthorScreenState extends State<AuthorScreen>
     }
   }
 
-  void _applyFiltersAndSearch() { 
+  void _applyFiltersAndSearch() {
     if (mounted) {
       setState(() {
-        _showFilters = false; 
-        _isSearchExpanded = false; 
+        _showFilters = false;
+        _isSearchExpanded = false;
         _currentPage = 1;
         _columns.clear();
       });
     }
-    _loadData(refresh: true); 
+    _loadData(refresh: true);
   }
-
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: _buildAppBar(),
-      body: _isLoading && _columns.isEmpty && _author == null 
-          ? _buildLoadingWidget() 
+      body: _isLoading && _columns.isEmpty && _author == null
+          ? _buildLoadingWidget()
           : _buildContent(),
       floatingActionButton: _buildFloatingActionButton(),
     );
@@ -265,7 +271,7 @@ class _AuthorScreenState extends State<AuthorScreen>
           IconButton(
             icon: Icon(
               _authorModule.isAuthorFavorite(widget.authorId)
-                  ? Icons.favorite_rounded 
+                  ? Icons.favorite_rounded
                   : Icons.favorite_border_outlined,
               color: _authorModule.isAuthorFavorite(widget.authorId)
                   ? Colors.redAccent
@@ -292,16 +298,16 @@ class _AuthorScreenState extends State<AuthorScreen>
                       } else {
                         _slideController.reverse();
                       }
-                      _showFilters = false; 
+                      _showFilters = false;
                       break;
                     case 'filters':
                       _showFilters = !_showFilters;
-                       if (_showFilters) {
-                         _slideController.forward();
-                       } else {
-                         _slideController.reverse();
-                       }
-                      _isSearchExpanded = false; 
+                      if (_showFilters) {
+                        _slideController.forward();
+                      } else {
+                        _slideController.reverse();
+                      }
+                      _isSearchExpanded = false;
                       break;
                     case 'stats':
                       _showStats = !_showStats;
@@ -313,70 +319,96 @@ class _AuthorScreenState extends State<AuthorScreen>
             itemBuilder: (context) => [
               const PopupMenuItem(
                 value: 'search',
-                child: Row(children: [ Icon(Icons.search_outlined), SizedBox(width: 8), Text('البحث في المقالات')]),
+                child: Row(children: [
+                  Icon(Icons.search_outlined),
+                  SizedBox(width: 8),
+                  Text('البحث في المقالات')
+                ]),
               ),
               const PopupMenuItem(
                 value: 'filters',
-                child: Row(children: [ Icon(Icons.filter_alt_outlined), SizedBox(width: 8), Text('فرز وتصفية')]),
+                child: Row(children: [
+                  Icon(Icons.filter_alt_outlined),
+                  SizedBox(width: 8),
+                  Text('فرز وتصفية')
+                ]),
               ),
               PopupMenuItem(
                 value: 'stats',
-                child: Row(children: [ Icon(_showStats ? Icons.analytics_rounded : Icons.analytics_outlined), const SizedBox(width: 8), Text(_showStats ? 'إخفاء الإحصائيات' : 'عرض الإحصائيات')]),
+                child: Row(children: [
+                  Icon(_showStats
+                      ? Icons.analytics_rounded
+                      : Icons.analytics_outlined),
+                  const SizedBox(width: 8),
+                  Text(_showStats ? 'إخفاء الإحصائيات' : 'عرض الإحصائيات')
+                ]),
               ),
             ],
           ),
         ],
       ],
-      bottom: (_isSearchExpanded || _showFilters) ? _buildSearchOrFilterBar() : null,
+      bottom: (_isSearchExpanded || _showFilters)
+          ? _buildSearchOrFilterBar()
+          : null,
     );
   }
-  
+
   PreferredSizeWidget _buildSearchOrFilterBar() {
     return PreferredSize(
-      preferredSize: const Size.fromHeight(60), 
+      preferredSize: const Size.fromHeight(60),
       child: SlideTransition(
         position: _slideAnimation,
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 6.0),
-          color: Theme.of(context).appBarTheme.backgroundColor?.withAlpha(25), // Corrected: withOpacity to withAlpha
-          child: _isSearchExpanded ? _buildColumnSearchBar() : (_showFilters ? _buildFilterChipsBar() : const SizedBox.shrink()),
+          color: Theme.of(context)
+              .appBarTheme
+              .backgroundColor
+              ?.withAlpha(25), // Corrected: withOpacity to withAlpha
+          child: _isSearchExpanded
+              ? _buildColumnSearchBar()
+              : (_showFilters
+                  ? _buildFilterChipsBar()
+                  : const SizedBox.shrink()),
         ),
       ),
     );
   }
 
-
-  Widget _buildColumnSearchBar() { 
+  Widget _buildColumnSearchBar() {
     return TextField(
       controller: _searchController,
       autofocus: true,
       decoration: InputDecoration(
         hintText: 'البحث في مقالات ${_author?.arName ?? "الكاتب"}...',
         prefixIcon: const Icon(Icons.search, size: 20),
-        suffixIcon: _searchController.text.isNotEmpty ? IconButton(
-          icon: const Icon(Icons.clear, size: 20),
-          onPressed: () {
-            _searchController.clear();
-            _filters = _filters.copyWith(searchQuery: ''); 
-            _applyFiltersAndSearch();
-          },
-        ) : null,
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(30), borderSide: BorderSide.none),
+        suffixIcon: _searchController.text.isNotEmpty
+            ? IconButton(
+                icon: const Icon(Icons.clear, size: 20),
+                onPressed: () {
+                  _searchController.clear();
+                  _filters = _filters.copyWith(searchQuery: '');
+                  _applyFiltersAndSearch();
+                },
+              )
+            : null,
+        border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(30),
+            borderSide: BorderSide.none),
         filled: true,
         fillColor: Theme.of(context).scaffoldBackgroundColor,
-        contentPadding: const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
+        contentPadding:
+            const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
       ),
-      onChanged: (query) {
-      },
+      onChanged: (query) {},
       onSubmitted: (query) {
         _filters = _filters.copyWith(searchQuery: query);
         _applyFiltersAndSearch();
       },
     );
   }
-  
-  Widget _buildFilterChipsBar() { 
-     return ListView(
+
+  Widget _buildFilterChipsBar() {
+    return ListView(
       scrollDirection: Axis.horizontal,
       padding: const EdgeInsets.symmetric(vertical: 8.0), // Added padding
       children: AuthorColumnSortBy.values.map((sortBy) {
@@ -390,26 +422,36 @@ class _AuthorScreenState extends State<AuthorScreen>
               if (selected) {
                 if (mounted) {
                   setState(() {
-                    if (_filters.sortBy == sortBy) { 
-                      _filters = _filters.copyWith(sortBy: sortBy, ascending: !_filters.ascending);
+                    if (_filters.sortBy == sortBy) {
+                      _filters = _filters.copyWith(
+                          sortBy: sortBy, ascending: !_filters.ascending);
                     } else {
-                      _filters = _filters.copyWith(sortBy: sortBy, ascending: false); 
+                      _filters =
+                          _filters.copyWith(sortBy: sortBy, ascending: false);
                     }
                   });
                 }
                 _applyFiltersAndSearch();
               }
             },
-            avatar: isSelected ? Icon(_filters.ascending ? Icons.arrow_upward : Icons.arrow_downward, size: 16) : null,
-            selectedColor: AppTheme.tertiaryColor.withAlpha(50), // Corrected: withOpacity to withAlpha
+            avatar: isSelected
+                ? Icon(
+                    _filters.ascending
+                        ? Icons.arrow_upward
+                        : Icons.arrow_downward,
+                    size: 16)
+                : null,
+            selectedColor: AppTheme.tertiaryColor
+                .withAlpha(50), // Corrected: withOpacity to withAlpha
             backgroundColor: Theme.of(context).chipTheme.backgroundColor,
-            labelStyle: TextStyle(fontSize: 13, color: isSelected ? AppTheme.tertiaryColor : null),
+            labelStyle: TextStyle(
+                fontSize: 13,
+                color: isSelected ? AppTheme.tertiaryColor : null),
           ),
         );
       }).toList(),
     );
   }
-
 
   Widget _buildLoadingWidget() {
     return Shimmer.fromColors(
@@ -424,25 +466,28 @@ class _AuthorScreenState extends State<AuthorScreen>
             Row(children: [
               const CircleAvatar(radius: 40, backgroundColor: Colors.white),
               const SizedBox(width: 16),
-              Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                Container(
-                  height: 20,
-                  width: 150,
-                  margin: const EdgeInsets.only(bottom: 8),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(4),
-                  ),
-                ),
-                Container(
-                  height: 14,
-                  width: 100,
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(4),
-                  ),
-                ),
-              ])),
+              Expanded(
+                  child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                    Container(
+                      height: 20,
+                      width: 150,
+                      margin: const EdgeInsets.only(bottom: 8),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                    ),
+                    Container(
+                      height: 14,
+                      width: 100,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                    ),
+                  ])),
             ]),
             const SizedBox(height: 16),
             Container(
@@ -463,10 +508,17 @@ class _AuthorScreenState extends State<AuthorScreen>
                 borderRadius: BorderRadius.circular(4),
               ),
             ),
-            ...List.generate(3, (index) => Padding(
-              padding: const EdgeInsets.only(bottom: 12.0),
-              child: Container(height: 120, width: double.infinity, decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(8))),
-            )),
+            ...List.generate(
+                3,
+                (index) => Padding(
+                      padding: const EdgeInsets.only(bottom: 12.0),
+                      child: Container(
+                          height: 120,
+                          width: double.infinity,
+                          decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(8))),
+                    )),
           ],
         ),
       ),
@@ -474,10 +526,10 @@ class _AuthorScreenState extends State<AuthorScreen>
   }
 
   Widget _buildContent() {
-    if (_errorMessage != null && _author == null) { 
+    if (_errorMessage != null && _author == null) {
       return _buildErrorWidget();
     }
-    if (_author == null) return const SizedBox.shrink(); 
+    if (_author == null) return const SizedBox.shrink();
 
     return FadeTransition(
       opacity: _fadeAnimation,
@@ -486,63 +538,60 @@ class _AuthorScreenState extends State<AuthorScreen>
         // The search/filter bar uses _slideAnimation. For general content, it's usually not slid.
         // If you intend to slide the whole content, keep it. Otherwise, remove.
         // For now, assuming the slide is for the search/filter bar, not the main content.
-        position: Tween<Offset>(begin: Offset.zero, end: Offset.zero).animate(_slideController), // No slide for main content
+        position: Tween<Offset>(begin: Offset.zero, end: Offset.zero)
+            .animate(_slideController), // No slide for main content
         child: SmartRefresher(
           controller: _refreshController,
           enablePullDown: true,
-          enablePullUp: _hasMoreData && !_isLoadingMore, 
-          header: const WaterDropHeader(waterDropColor: AppTheme.primaryColor), 
+          enablePullUp: _hasMoreData && !_isLoadingMore,
+          header: const WaterDropHeader(waterDropColor: AppTheme.primaryColor),
           footer: CustomFooter(
             builder: (BuildContext context, LoadStatus? mode) {
               Widget body;
               if (mode == LoadStatus.idle) {
                 body = const Text("اسحب للأعلى لتحميل المزيد");
               } else if (mode == LoadStatus.loading) {
-                body = const CircularProgressIndicator(strokeWidth: 2.0, color: AppTheme.primaryColor);
+                body = const CircularProgressIndicator(
+                    strokeWidth: 2.0, color: AppTheme.primaryColor);
               } else if (mode == LoadStatus.failed) {
                 body = const Text("فشل التحميل! انقر لإعادة المحاولة");
               } else if (mode == LoadStatus.canLoading) {
                 body = const Text("اترك للتحميل");
-              } else { 
+              } else {
                 body = const Text("لا يوجد المزيد من المقالات");
               }
               return SizedBox(height: 55.0, child: Center(child: body));
             },
           ),
           onRefresh: _onRefresh,
-          onLoading: _loadMoreData, 
+          onLoading: _loadMoreData,
           child: CustomScrollView(
             controller: _scrollController,
-              slivers: [
-                // const SliverToBoxAdapter(
-                //   child: AdBanner(adUnit: '/21765378867/ShorouknewsApp_LeaderBoard2'),
-                // ),
+            slivers: [
+              // const SliverToBoxAdapter(
+              //   child: AdBanner(adUnit: '/21765378867/ShorouknewsApp_LeaderBoard2'),
+              // ),
               SliverToBoxAdapter(child: _buildBreadcrumb()),
-              SliverToBoxAdapter(child: _buildAuthorInfo()),
               if (_showStats && _authorStats != null)
                 SliverToBoxAdapter(child: _buildStatsPanel()),
-              SliverToBoxAdapter(
-                child: SectionHeader(
-                  title: 'مقالات الكاتب',
-                  icon: Icons.article_outlined,
-                  subtitle: '${_authorStats?.totalColumns ?? _columns.length} مقال',
-                ),
-              ),
-              if (_columns.isEmpty && !_isLoadingMore) 
-                 SliverFillRemaining( 
+              if (_columns.isEmpty && !_isLoadingMore)
+                SliverFillRemaining(
                   child: Center(
                     child: Padding(
                       padding: const EdgeInsets.all(32),
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Icon(Icons.article_outlined, size: 64, color: Colors.grey[400]),
+                          Icon(Icons.article_outlined,
+                              size: 64, color: Colors.grey[400]),
                           const SizedBox(height: 16),
                           Text(
-                             _filters.searchQuery != null && _filters.searchQuery!.isNotEmpty ?
-                             'لا توجد مقالات تطابق بحثك' :
-                            'لا توجد مقالات لهذا الكاتب حالياً',
-                            style: TextStyle(fontSize: 16, color: Colors.grey[600]),
+                            _filters.searchQuery != null &&
+                                    _filters.searchQuery!.isNotEmpty
+                                ? 'لا توجد مقالات تطابق بحثك'
+                                : 'لا توجد مقالات لهذا الكاتب حالياً',
+                            style: TextStyle(
+                                fontSize: 16, color: Colors.grey[600]),
                             textAlign: TextAlign.center,
                           ),
                         ],
@@ -559,7 +608,7 @@ class _AuthorScreenState extends State<AuthorScreen>
                     childCount: _columns.length,
                   ),
                 ),
-              const SliverToBoxAdapter(child: SizedBox(height: 80)), 
+              const SliverToBoxAdapter(child: SizedBox(height: 80)),
             ],
           ),
         ),
@@ -578,7 +627,10 @@ class _AuthorScreenState extends State<AuthorScreen>
             const SizedBox(height: 20),
             Text(
               _errorMessage ?? 'حدث خطأ غير متوقع.',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(color: Colors.black87),
+              style: Theme.of(context)
+                  .textTheme
+                  .titleMedium
+                  ?.copyWith(color: Colors.black87),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 20),
@@ -586,7 +638,9 @@ class _AuthorScreenState extends State<AuthorScreen>
               icon: const Icon(Icons.refresh),
               label: const Text('إعادة المحاولة'),
               onPressed: () => _loadData(refresh: true),
-               style: ElevatedButton.styleFrom(backgroundColor: AppTheme.primaryColor, foregroundColor: Colors.white),
+              style: ElevatedButton.styleFrom(
+                  backgroundColor: AppTheme.primaryColor,
+                  foregroundColor: Colors.white),
             ),
           ],
         ),
@@ -599,127 +653,46 @@ class _AuthorScreenState extends State<AuthorScreen>
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Theme.of(context).canvasColor,
-        border: const Border(bottom: BorderSide(color: AppTheme.tertiaryColor, width: 4)),
+        border: const Border(
+            bottom: BorderSide(color: AppTheme.tertiaryColor, width: 4)),
       ),
       child: Row(
         children: [
           GestureDetector(
             onTap: () => context.pop(),
-            child: const Text('الرئيسية', style: TextStyle(fontWeight: FontWeight.bold, color: AppTheme.primaryColor)),
+            child: const Text('الرئيسية',
+                style: TextStyle(
+                    fontWeight: FontWeight.bold, color: AppTheme.primaryColor)),
           ),
           const Text(' > ', style: TextStyle(fontWeight: FontWeight.bold)),
           GestureDetector(
-            onTap: () => context.push('/authors'), 
-            child: const Text('الكتّاب', style: TextStyle(fontWeight: FontWeight.bold, color: AppTheme.primaryColor)),
+            onTap: () => context.push('/authors'),
+            child: const Text('الكتّاب',
+                style: TextStyle(
+                    fontWeight: FontWeight.bold, color: AppTheme.primaryColor)),
           ),
           if (_author != null) ...[
             const Text(' > ', style: TextStyle(fontWeight: FontWeight.bold)),
-            Expanded(child: Text(_author!.arName, style: const TextStyle(fontWeight: FontWeight.bold), overflow: TextOverflow.ellipsis)),
+            Expanded(
+                child: Text(_author!.arName,
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                    overflow: TextOverflow.ellipsis)),
           ],
         ],
       ),
     );
   }
-  
+
   String _getSortByLabel(AuthorColumnSortBy sortBy) {
     switch (sortBy) {
-      case AuthorColumnSortBy.date: return 'الأحدث';
-      case AuthorColumnSortBy.title: return 'العنوان';
-      case AuthorColumnSortBy.views: return 'الأكثر قراءة';
-      case AuthorColumnSortBy.rating: return 'التقييم الأعلى';
-    }
-  }
-
-  Widget _buildAuthorInfo() {
-    if (_author == null) return const SizedBox.shrink();
-    return Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: Card(
-        elevation: 3,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            children: [
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  CircleAvatar(
-                    radius: 40,
-                    backgroundImage: _author!.photoUrl.isNotEmpty
-                        ? CachedNetworkImageProvider(_author!.photoUrl)
-                        : null,
-                    onBackgroundImageError: _author!.photoUrl.isNotEmpty
-                        ? (_, __) {}
-                        : null,
-                    child: _author!.photoUrl.isEmpty
-                        ? const Icon(Icons.person_outline, size: 40)
-                        : null,
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          _author!.arName,
-                          style: Theme.of(context).textTheme.headlineSmall?.copyWith(color: AppTheme.primaryColor),
-                        ),
-                        if (_authorStats != null)
-                          Padding(
-                            padding: const EdgeInsets.only(top: 4.0),
-                            child: Text(
-                              '${_authorStats!.totalColumns} مقال  •  ${_formatNumber(_authorStats!.totalViews)} مشاهدة',
-                              style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Colors.grey[700]),
-                            ),
-                          ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-              if (_author!.description.isNotEmpty) ...[
-                const SizedBox(height: 12),
-                Text(
-                  _author!.description,
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(height: 1.5, color: Colors.grey[800]),
-                  maxLines: 3, 
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ],
-              if (_socialLinks?.hasAnyLink == true) ...[
-                const Divider(height: 24, thickness: 0.8),
-                Wrap(
-                  spacing: 8,
-                  runSpacing: 4,
-                  alignment: WrapAlignment.center,
-                  children: _socialLinks!.availableLinks.map((link) {
-                    return ActionChip(
-                      avatar: Icon(_getSocialIcon(link['type'] as String), size: 18, color: AppTheme.tertiaryColor),
-                      label: Text(link['label'] as String, style: const TextStyle(fontSize: 12)),
-                      onPressed: () => _authorModule.openExternalLink(link['url'] as String),
-                      backgroundColor: AppTheme.tertiaryColor.withAlpha(30), 
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-                    );
-                  }).toList(),
-                ),
-              ],
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  IconData _getSocialIcon(String type) {
-    switch (type.toLowerCase()) {
-      case 'facebook': return Icons.facebook_rounded;
-      case 'twitter': return Icons.flutter_dash_rounded; 
-      case 'instagram': return Icons.camera_alt_outlined;
-      case 'linkedin': return Icons.work_outline_rounded;
-      case 'website': return Icons.language_rounded;
-      case 'email': return Icons.email_outlined;
-      default: return Icons.link_rounded;
+      case AuthorColumnSortBy.date:
+        return 'الأحدث';
+      case AuthorColumnSortBy.title:
+        return 'العنوان';
+      case AuthorColumnSortBy.views:
+        return 'الأكثر قراءة';
+      case AuthorColumnSortBy.rating:
+        return 'التقييم الأعلى';
     }
   }
 
@@ -729,7 +702,7 @@ class _AuthorScreenState extends State<AuthorScreen>
       padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
       child: Card(
         elevation: 2,
-        color: AppTheme.primaryColor.withAlpha(20), 
+        color: AppTheme.primaryColor.withAlpha(20),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
         child: Padding(
           padding: const EdgeInsets.all(16.0),
@@ -738,35 +711,58 @@ class _AuthorScreenState extends State<AuthorScreen>
             children: [
               Text(
                 'إحصائيات الكاتب',
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(color: AppTheme.primaryColor, fontWeight: FontWeight.bold),
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    color: AppTheme.primaryColor, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 12),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
-                  _buildStatItem('المقالات', _authorStats!.totalColumns.toString(), Icons.article_outlined),
-                  _buildStatItem('المشاهدات', _formatNumber(_authorStats!.totalViews), Icons.visibility_outlined),
+                  _buildStatItem(
+                      'المقالات',
+                      _authorStats!.totalColumns.toString(),
+                      Icons.article_outlined),
+                  _buildStatItem(
+                      'المشاهدات',
+                      _formatNumber(_authorStats!.totalViews),
+                      Icons.visibility_outlined),
                 ],
               ),
               const SizedBox(height: 12),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
-                  _buildStatItem('متوسط التقييم', '${_authorStats!.averageRating.toStringAsFixed(1)} ⭐', Icons.star_border_outlined),
-                  _buildStatItem('آخر نشر', _formatDate(_authorStats!.lastPublished), Icons.schedule_outlined),
+                  _buildStatItem(
+                      'متوسط التقييم',
+                      '${_authorStats!.averageRating.toStringAsFixed(1)} ⭐',
+                      Icons.star_border_outlined),
+                  _buildStatItem(
+                      'آخر نشر',
+                      _formatDate(_authorStats!.lastPublished),
+                      Icons.schedule_outlined),
                 ],
               ),
               if (_authorStats!.topTopics.isNotEmpty) ...[
                 const SizedBox(height: 16),
-                Text('أبرز المواضيع:', style: Theme.of(context).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600)),
+                Text('أبرز المواضيع:',
+                    style: Theme.of(context)
+                        .textTheme
+                        .titleSmall
+                        ?.copyWith(fontWeight: FontWeight.w600)),
                 const SizedBox(height: 8),
                 Wrap(
-                  spacing: 6, runSpacing: 6,
-                  children: _authorStats!.topTopics.map((topic) => Chip(
-                      label: Text(topic, style: const TextStyle(fontSize: 11)), 
-                      backgroundColor: AppTheme.tertiaryColor.withAlpha(50), 
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                  )).toList(),
+                  spacing: 6,
+                  runSpacing: 6,
+                  children: _authorStats!.topTopics
+                      .map((topic) => Chip(
+                            label: Text(topic,
+                                style: const TextStyle(fontSize: 11)),
+                            backgroundColor:
+                                AppTheme.tertiaryColor.withAlpha(50),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 8, vertical: 2),
+                          ))
+                      .toList(),
                 ),
               ],
             ],
@@ -783,9 +779,15 @@ class _AuthorScreenState extends State<AuthorScreen>
         children: [
           Icon(icon, color: AppTheme.primaryColor, size: 26),
           const SizedBox(height: 6),
-          Text(value, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppTheme.secondaryColor)),
+          Text(value,
+              style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: AppTheme.secondaryColor)),
           const SizedBox(height: 2),
-          Text(label, style: TextStyle(fontSize: 11, color: Colors.grey[700]), textAlign: TextAlign.center),
+          Text(label,
+              style: TextStyle(fontSize: 11, color: Colors.grey[700]),
+              textAlign: TextAlign.center),
         ],
       ),
     );
@@ -797,11 +799,11 @@ class _AuthorScreenState extends State<AuthorScreen>
       cDate: column.cDate,
       title: column.title,
       summary: column.summary,
-      body: '', 
-      photoUrl: column.columnistPhotoUrl, 
+      body: '',
+      photoUrl: column.columnistPhotoUrl,
       thumbnailPhotoUrl: column.columnistPhotoUrl,
-      sectionId: '', 
-      sectionArName: column.columnistArName, 
+      sectionId: '',
+      sectionArName: column.columnistArName,
       publishDate: column.creationDate,
       publishDateFormatted: column.creationDateFormattedDateTime,
       publishTimeFormatted: '',
@@ -822,15 +824,15 @@ class _AuthorScreenState extends State<AuthorScreen>
     );
   }
 
-
   Widget? _buildFloatingActionButton() {
-    if (_columns.isEmpty && !_isLoading) return null; 
-    bool showFab = _scrollController.hasClients && _scrollController.offset > 300;
+    if (_columns.isEmpty && !_isLoading) return null;
+    bool showFab =
+        _scrollController.hasClients && _scrollController.offset > 300;
 
     return AnimatedOpacity(
       opacity: showFab ? 1.0 : 0.0,
       duration: const Duration(milliseconds: 300),
-      child: FloatingActionButton.small( 
+      child: FloatingActionButton.small(
         onPressed: () {
           _scrollController.animateTo(
             0,
@@ -844,7 +846,7 @@ class _AuthorScreenState extends State<AuthorScreen>
       ),
     );
   }
-  
+
   void _showColumnPreview(ColumnModel column) {
     showModalBottomSheet(
       context: context,
@@ -854,12 +856,12 @@ class _AuthorScreenState extends State<AuthorScreen>
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       builder: (context) => DraggableScrollableSheet(
-        initialChildSize: 0.6, 
+        initialChildSize: 0.6,
         minChildSize: 0.4,
         maxChildSize: 0.9,
         expand: false,
         builder: (context, scrollController) => ClipRRect(
-           borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
           child: Container(
             color: Theme.of(context).scaffoldBackgroundColor,
             child: Column(
@@ -882,20 +884,28 @@ class _AuthorScreenState extends State<AuthorScreen>
                       children: [
                         Text(
                           column.title,
-                          style: Theme.of(context).textTheme.headlineSmall?.copyWith(color: AppTheme.primaryColor),
+                          style: Theme.of(context)
+                              .textTheme
+                              .headlineSmall
+                              ?.copyWith(color: AppTheme.primaryColor),
                         ),
                         const SizedBox(height: 12),
                         Row(
                           children: [
                             CircleAvatar(
                               radius: 20,
-                              backgroundImage: _author?.photoUrl != null && _author!.photoUrl.isNotEmpty
-                                  ? CachedNetworkImageProvider(_author!.photoUrl)
+                              backgroundImage: _author?.photoUrl != null &&
+                                      _author!.photoUrl.isNotEmpty
+                                  ? CachedNetworkImageProvider(
+                                      _author!.photoUrl)
                                   : null,
-                              onBackgroundImageError: (_author?.photoUrl != null && _author!.photoUrl.isNotEmpty)
-                                  ? (_, __) {}
-                                  : null,
-                              child: (_author?.photoUrl == null || _author!.photoUrl.isEmpty)
+                              onBackgroundImageError:
+                                  (_author?.photoUrl != null &&
+                                          _author!.photoUrl.isNotEmpty)
+                                      ? (_, __) {}
+                                      : null,
+                              child: (_author?.photoUrl == null ||
+                                      _author!.photoUrl.isEmpty)
                                   ? const Icon(Icons.person_outline, size: 20)
                                   : null,
                             ),
@@ -905,12 +915,16 @@ class _AuthorScreenState extends State<AuthorScreen>
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    _author?.arName ?? column.columnistArName, 
-                                    style: Theme.of(context).textTheme.titleMedium,
+                                    _author?.arName ?? column.columnistArName,
+                                    style:
+                                        Theme.of(context).textTheme.titleMedium,
                                   ),
                                   Text(
                                     column.creationDateFormattedDateTime,
-                                    style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Colors.grey[600]),
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .bodySmall
+                                        ?.copyWith(color: Colors.grey[600]),
                                   ),
                                 ],
                               ),
@@ -919,8 +933,13 @@ class _AuthorScreenState extends State<AuthorScreen>
                         ),
                         const Divider(height: 24),
                         Text(
-                          column.summary.isNotEmpty ? column.summary : "لا يتوفر ملخص لهذا المقال.",
-                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(height: 1.6),
+                          column.summary.isNotEmpty
+                              ? column.summary
+                              : "لا يتوفر ملخص لهذا المقال.",
+                          style: Theme.of(context)
+                              .textTheme
+                              .bodyMedium
+                              ?.copyWith(height: 1.6),
                         ),
                         const SizedBox(height: 24),
                         SizedBox(
@@ -929,12 +948,13 @@ class _AuthorScreenState extends State<AuthorScreen>
                             icon: const Icon(Icons.read_more_outlined),
                             label: const Text('قراءة المقال كاملاً'),
                             onPressed: () {
-                              Navigator.pop(context); 
-                              context.push('/column/${column.cDate}/${column.id}');
+                              Navigator.pop(context);
+                              context
+                                  .push('/column/${column.cDate}/${column.id}');
                             },
                             style: ElevatedButton.styleFrom(
-                              padding: const EdgeInsets.symmetric(vertical: 12)
-                            ),
+                                padding:
+                                    const EdgeInsets.symmetric(vertical: 12)),
                           ),
                         ),
                       ],
@@ -950,8 +970,12 @@ class _AuthorScreenState extends State<AuthorScreen>
   }
 
   String _formatNumber(int number) {
-    if (number >= 1000000) return '${(number / 1000000).toStringAsFixed(1)} مليون';
-    if (number >= 1000) return '${(number / 1000).toStringAsFixed(number % 1000 == 0 ? 0 : 1)} ألف';
+    if (number >= 1000000) {
+      return '${(number / 1000000).toStringAsFixed(1)} مليون';
+    }
+    if (number >= 1000) {
+      return '${(number / 1000).toStringAsFixed(number % 1000 == 0 ? 0 : 1)} ألف';
+    }
     return number.toString();
   }
 
