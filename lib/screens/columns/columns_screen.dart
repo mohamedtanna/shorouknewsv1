@@ -1341,176 +1341,175 @@ class _ColumnsScreenState extends State<ColumnsScreen>
     );
   }
 
-  Widget _buildColumnGridCard(ColumnModel column) {
-    final isFavorite = _columnsModule.isColumnFavorite(column.id);
-    final isRead = _columnsModule.isColumnRead(column.id);
-    final isBookmarked = _columnsModule.isColumnBookmarked(column.id);
+Widget _buildColumnGridCard(ColumnModel column) {
+  final isFavorite = _columnsModule.isColumnFavorite(column.id);
+  final isRead = _columnsModule.isColumnRead(column.id);
+  final isBookmarked = _columnsModule.isColumnBookmarked(column.id);
 
-    return Container(
-      margin: const EdgeInsets.all(8),
-      child: Card(
-        elevation: 2,
-        child: InkWell(
-          onTap: () => context.push('/column/${column.cDate}/${column.id}'),
-          borderRadius: BorderRadius.circular(8),
-          child: Padding(
-            padding: const EdgeInsets.all(12),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Author info
-                Row(
-                  children: [
-                    GestureDetector(
+  return Container(
+    margin: const EdgeInsets.all(8),
+    child: Card(
+      elevation: 2,
+      child: InkWell(
+        onTap: () => context.push('/column/${column.cDate}/${column.id}'),
+        borderRadius: BorderRadius.circular(8),
+        child: Padding(
+          padding: const EdgeInsets.all(12),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Author info
+              Row(
+                children: [
+                  GestureDetector(
+                    onTap: () =>
+                        context.push('/author/${column.columnistId}'),
+                    child: Container(
+                      width: 36,
+                      height: 36,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        border: Border.all(color: AppTheme.tertiaryColor),
+                      ),
+                      child: ClipOval(
+                        child: CachedNetworkImage(
+                          imageUrl: column.columnistPhotoUrl,
+                          fit: BoxFit.cover,
+                          filterQuality: FilterQuality.high,
+                          placeholder: (context, url) => Container(
+                            color: Colors.grey[300],
+                            child: const Icon(Icons.person, size: 18),
+                          ),
+                          errorWidget: (context, url, error) => Container(
+                            color: Colors.grey[300],
+                            child: const Icon(Icons.person, size: 18),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: GestureDetector(
+                      behavior: HitTestBehavior.opaque,
                       onTap: () =>
                           context.push('/author/${column.columnistId}'),
-                      child: Container(
-                        width: 36,
-                        height: 36,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          border: Border.all(color: AppTheme.tertiaryColor),
-                        ),
-                        child: ClipOval(
-                          child: CachedNetworkImage(
-                            imageUrl: column.columnistPhotoUrl,
-                            fit: BoxFit.cover,
-                            filterQuality: FilterQuality.high,
-                            placeholder: (context, url) => Container(
-                              color: Colors.grey[300],
-                              child: const Icon(Icons.person, size: 18),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            column.columnistArName,
+                            style: const TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.bold,
+                              color: AppTheme.primaryColor,
                             ),
-                            errorWidget: (context, url, error) => Container(
-                              color: Colors.grey[300],
-                              child: const Icon(Icons.person, size: 18),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ), // Fixed: Added missing closing parenthesis and comma
+                          Text(
+                            _formatDate(DateTime.parse(column.creationDate)),
+                            style: TextStyle(
+                              fontSize: 9,
+                              color: Colors.grey[600],
                             ),
-                          ),
-                        ),
+                          ), // Fixed: Added missing closing parenthesis and comma
+                        ], // Fixed: Added missing closing bracket
                       ),
                     ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: GestureDetector(
-                        behavior: HitTestBehavior.opaque,
-                        onTap: () =>
-                            context.push('/author/${column.columnistId}'),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              column.columnistArName,
-                              style: const TextStyle(
-                                fontSize: 11,
-                                fontWeight: FontWeight.bold,
-                                color: AppTheme.primaryColor,
-                              ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-
-                            Text(
-                              _formatDate(DateTime.parse(column.creationDate)),
-                              style: TextStyle(
-                                fontSize: 9,
-                                color: Colors.grey[600],
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                    if (isRead)
-                      const Icon(
-                        Icons.done_all,
-                        size: 14,
-                        color: AppTheme.tertiaryColor,
-                      ),
-                  ],
-                ),
-
-                const SizedBox(height: 8),
-
-                // Title
-                Text(
-                  column.title,
-                  style: const TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.bold,
-                    height: 1.2,
                   ),
-                  maxLines: 2,
+                  if (isRead)
+                    const Icon(
+                      Icons.done_all,
+                      size: 14,
+                      color: AppTheme.tertiaryColor,
+                    ),
+                ],
+              ),
+
+              const SizedBox(height: 8),
+
+              // Title
+              Text(
+                column.title,
+                style: const TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.bold,
+                  height: 1.2,
+                ),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+
+              const SizedBox(height: 8),
+
+              // Summary
+              Expanded(
+                child: Text(
+                  column.summary,
+                  style: TextStyle(
+                    fontSize: 11,
+                    color: Colors.grey[700],
+                    height: 1.3,
+                  ),
+                  maxLines: 4,
                   overflow: TextOverflow.ellipsis,
                 ),
+              ),
 
-                const SizedBox(height: 8),
+              const SizedBox(height: 8),
 
-                // Summary
-                Expanded(
-                  child: Text(
-                    column.summary,
-                    style: TextStyle(
-                      fontSize: 11,
-                      color: Colors.grey[700],
-                      height: 1.3,
-                    ),
-                    maxLines: 4,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-
-                const SizedBox(height: 8),
-
-                // Bottom row
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    // Views
-                    Row(
-                      children: [
-                        Icon(
-                          Icons.visibility,
-                          size: 12,
+              // Bottom row
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  // Views
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.visibility,
+                        size: 12,
+                        color: Colors.grey[600],
+                      ),
+                      const SizedBox(width: 2),
+                      Text(
+                        _formatNumber(
+                          _columnsModule.getColumnViewCount(column.id),
+                        ),
+                        style: TextStyle(
+                          fontSize: 10,
                           color: Colors.grey[600],
                         ),
-                        const SizedBox(width: 2),
-                        Text(
-                          _formatNumber(
-                            _columnsModule.getColumnViewCount(column.id),
-                          ),
-                          style: TextStyle(
-                            fontSize: 10,
-                            color: Colors.grey[600],
-                          ),
+                      ),
+                    ],
+                  ),
+                  // Icons
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      if (isFavorite)
+                        const Icon(
+                          Icons.favorite,
+                          size: 14,
+                          color: Colors.red,
                         ),
-                      ],
-                    ),
-                    // Icons
-                    Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        if (isFavorite)
-                          const Icon(
-                            Icons.favorite,
-                            size: 14,
-                            color: Colors.red,
-                          ),
-                        if (isBookmarked)
-                          const Icon(
-                            Icons.bookmark,
-                            size: 14,
-                            color: AppTheme.primaryColor,
-                          ),
-                      ],
-                    ),
-                  ],
-                ),
-              ],
-            ),
+                      if (isBookmarked)
+                        const Icon(
+                          Icons.bookmark,
+                          size: 14,
+                          color: AppTheme.primaryColor,
+                        ),
+                    ],
+                  ),
+                ],
+              ),
+            ],
           ),
         ),
       ),
-    );
-  }
-
+    ),
+  );
+}
   Widget _buildColumnListCard(ColumnModel column) {
     final isFavorite = _columnsModule.isColumnFavorite(column.id);
     final isRead = _columnsModule.isColumnRead(column.id);
