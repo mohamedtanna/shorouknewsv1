@@ -157,7 +157,7 @@ class _SplashScreenState extends State<SplashScreen>
                     child: Column(
                       children: [
                         const Text(
-                          'Getting the latest news...',
+                          'جاري تحميل آخر الأخبار...',
                           style: TextStyle(
                             color: Colors.white,
                             fontSize: 18,
@@ -223,7 +223,7 @@ class _SplashScreenState extends State<SplashScreen>
                   return FadeTransition(
                     opacity: _textFadeAnimation,
                     child: const Text(
-                      'Stay Updated, Stay Informed',
+                      ' ابق على اطلاع واحصل على آخر مستجدات في مصر والعالم',
                       style: TextStyle(
                         color: Colors.white70,
                         fontSize: 14,
