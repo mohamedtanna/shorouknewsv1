@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:shorouk_news/models/new_model.dart'; // For NewsArticle
-import 'package:shorouk_news/models/column_model.dart'; // For ColumnModel - ensure this path is correct
+// For ColumnModel - ensure this path is correct
 import '../../../core/theme.dart';
 import '../../../providers/news_provider.dart';
 import './horizontal_news_card.dart'; // Import the HorizontalNewsCard

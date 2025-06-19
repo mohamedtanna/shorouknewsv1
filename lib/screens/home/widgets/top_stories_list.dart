@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
-import 'package:shorouk_news/models/new_model.dart';
 import '../../../core/theme.dart';
 import '../../../providers/news_provider.dart';
 import './horizontal_news_card.dart'; // Import the HorizontalNewsCard
