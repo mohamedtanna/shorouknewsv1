@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
+import 'package:shorouk_news/models/new_model.dart';
 import '../../../core/theme.dart';
 import '../../../providers/news_provider.dart';
-import './horizontal_news_card.dart'; // Import the HorizontalNewsCard
+import './horizontal_news_card.dart';
 
 class TopStoriesList extends StatelessWidget {
   final NewsProvider newsProvider;
@@ -40,13 +41,12 @@ class TopStoriesList extends StatelessWidget {
       itemCount: newsProvider.topStories.length.clamp(0, 5),
       itemBuilder: (context, index) {
         final story = newsProvider.topStories[index];
-        // Use HorizontalNewsCard here
         return HorizontalNewsCard(article: story, showDate: true);
       },
     );
   }
 
-  Widget _buildShimmerVerticalList({int itemCount = 3}) { // Defaulted to 3 as per original usage
+  Widget _buildShimmerVerticalList({int itemCount = 3}) {
     return ListView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
@@ -62,7 +62,7 @@ class TopStoriesList extends StatelessWidget {
               borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
             ),
             child: Container(
-              height: 100, // Standard height for these shimmer cards
+              height: 100,
               color: AppTheme.backgroundColor,
             ),
           ),
