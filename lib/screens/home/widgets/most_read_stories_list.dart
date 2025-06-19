@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
+import 'package:shorouk_news/models/new_model.dart';
 import '../../../core/theme.dart';
 import '../../../providers/news_provider.dart';
-import './horizontal_news_card.dart'; // Import the HorizontalNewsCard
+import './horizontal_news_card.dart';
 
 class MostReadStoriesList extends StatelessWidget {
   final NewsProvider newsProvider;
@@ -16,7 +17,7 @@ class MostReadStoriesList extends StatelessWidget {
   Widget build(BuildContext context) {
     if (newsProvider.isLoadingMostRead &&
         newsProvider.mostReadStories.isEmpty) {
-      return _buildShimmerVerticalList(itemCount: 3); // As per original usage
+      return _buildShimmerVerticalList(itemCount: 3);
     }
     if (newsProvider.mostReadStories.isEmpty) {
       return const Padding(
@@ -38,16 +39,15 @@ class MostReadStoriesList extends StatelessWidget {
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
       padding: const EdgeInsets.symmetric(horizontal: 8),
-      itemCount: newsProvider.mostReadStories.length.clamp(0, 5), // As per original logic
+      itemCount: newsProvider.mostReadStories.length.clamp(0, 5),
       itemBuilder: (context, index) {
         final story = newsProvider.mostReadStories[index];
-        // Use HorizontalNewsCard here
-        return HorizontalNewsCard(article: story, showDate: false); // showDate is false for most read
+        return HorizontalNewsCard(article: story, showDate: false);
       },
     );
   }
 
-  Widget _buildShimmerVerticalList({int itemCount = 3}) { // Defaulted to 3
+  Widget _buildShimmerVerticalList({int itemCount = 3}) {
     return ListView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
