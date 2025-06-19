@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shimmer/shimmer.dart';
-import 'package:shorouk_news/models/new_model.dart'; // Assuming NewSArticle is NewArticle
+// Assuming NewSArticle is NewArticle
 import '../../../core/theme.dart';
 import '../../../providers/news_provider.dart'; // Required for NewsProvider type
 
